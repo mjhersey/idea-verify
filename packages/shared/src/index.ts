@@ -4,6 +4,7 @@
 
 export * from './types/credentials.js';
 export * from './types/database.js';
+export * from './types/businessIdea.js';
 export * from './secrets/secrets-manager.js';
 export * from './config/environment.js';
 export * from './utils/credential-validator.js';
