@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # LocalStack for AWS services mocking
+  localstack:
+    container_name: ai-validation-localstack
+    image: localstack/localstack:3.0
+    ports:
+      - "4566:4566"  # LocalStack Gateway
+      - "4510-4559:4510-4559"  # External services port range
+    environment:
+      - SERVICES=s3,secretsmanager,iam,sts
+      - DEBUG=1
+      - DATA_DIR=/var/lib/localstack/data
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - HOST_TMP_FOLDER=${TMPDIR:-/tmp}/localstack
+    volumes:
+      - "${TMPDIR:-/tmp}/localstack:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./tools/localstack-init:/docker-entrypoint-initaws.d"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Mock OpenAI API
+  mock-openai:
+    container_name: ai-validation-mock-openai
+    build:
+      context: .
+      dockerfile: packages/shared/src/mocks/openai/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=development
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/v1/models"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Mock Anthropic API  
+  mock-anthropic:
+    container_name: ai-validation-mock-anthropic
+    build:
+      context: .
+      dockerfile: packages/shared/src/mocks/anthropic/Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+      - NODE_ENV=development
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  default:
+    name: ai-validation-network
+
+volumes:
+  localstack_data:
+    driver: local

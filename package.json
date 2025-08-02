@@ -1,0 +1,33 @@
+{
+  "name": "ai-validation-platform",
+  "version": "1.0.0",
+  "description": "AI-Powered Business Idea Validation Platform",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "validate:accounts": "node tools/validate-user-accounts.js",
+    "validate:credentials": "node tools/validate-credentials.js",
+    "setup:dev": "node tools/setup-dev-environment.js",
+    "mock:start": "node tools/mock-services.js start",
+    "mock:stop": "node tools/mock-services.js stop",
+    "mock:status": "node tools/mock-services.js status",
+    "mock:validate": "node tools/mock-services.js validate",
+    "mock:restart": "node tools/mock-services.js restart",
+    "dev:offline": "npm run mock:start",
+    "test:offline": "node tools/test-offline-mode.js",
+    "test:integration": "node tools/run-integration-tests.js",
+    "test:integration:full": "node tools/test-with-services.js",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "build": "npm run build --workspaces"
+  },
+  "devDependencies": {
+    "vitest": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

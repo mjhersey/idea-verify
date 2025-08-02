@@ -1,0 +1,110 @@
+{
+  "colors": {
+    "primary": "#4F46E5", // Blue-violet
+    "success": "#22C55E", // Green (Completed)
+    "warning": "#FACC15", // Yellow (Cancelled)
+    "danger": "#EF4444", // Red (Pending)
+    "info": "#3B82F6", // Blue (In Progress)
+    "sidebarBg": "#0F172A", // Dark blue-gray
+    "sidebarHighlight": "#F97316", // Orange
+    "surface": "#FFFFFF", // Main panel background
+    "background": "#F8FAFC", // Page background
+    "textPrimary": "#0F172A", // Dark text
+    "textSecondary": "#64748B", // Muted text
+    "muted": "#E2E8F0", // Border/line accents
+    "accent": "#818CF8", // Hover/focus
+    "highlight": "#A5B4FC", // Light blue highlight
+    "chartBar": "#6366F1", // Bar color
+    "chartLine": "#E0E7FF" // Line overlay
+  },
+  "typography": {
+    "fontFamily": "'Inter', sans-serif",
+    "fontSizes": {
+      "xs": "12px",
+      "sm": "14px",
+      "base": "16px",
+      "lg": "18px",
+      "xl": "20px",
+      "2xl": "24px",
+      "3xl": "30px"
+    },
+    "fontWeights": {
+      "normal": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700
+    }
+  },
+  "spacing": {
+    "none": "0px",
+    "xs": "4px",
+    "sm": "8px",
+    "md": "16px",
+    "lg": "24px",
+    "xl": "32px",
+    "2xl": "40px"
+  },
+  "radii": {
+    "sm": "4px",
+    "md": "8px",
+    "lg": "12px",
+    "xl": "16px",
+    "pill": "9999px"
+  },
+  "shadows": {
+    "sm": "0 1px 2px rgba(0, 0, 0, 0.05)",
+    "md": "0 4px 6px rgba(0, 0, 0, 0.1)",
+    "lg": "0 10px 15px rgba(0, 0, 0, 0.1)"
+  },
+  "components": {
+    "Card": {
+      "padding": "md",
+      "radius": "md",
+      "shadow": "md",
+      "backgroundColor": "surface",
+      "border": "1px solid #E2E8F0"
+    },
+    "Sidebar": {
+      "backgroundColor": "sidebarBg",
+      "highlightColor": "sidebarHighlight",
+      "textColor": "white",
+      "activeIndicator": {
+        "borderLeft": "4px solid #F97316",
+        "backgroundColor": "#1E293B"
+      }
+    },
+    "Button": {
+      "default": {
+        "padding": "sm md",
+        "radius": "md",
+        "fontWeight": "medium",
+        "shadow": "sm"
+      },
+      "variants": {
+        "primary": {
+          "backgroundColor": "primary",
+          "textColor": "white"
+        },
+        "success": {
+          "backgroundColor": "success",
+          "textColor": "white"
+        },
+        "danger": {
+          "backgroundColor": "danger",
+          "textColor": "white"
+        }
+      }
+    },
+    "Badge": {
+      "padding": "xs sm",
+      "radius": "pill",
+      "fontSize": "xs",
+      "fontWeight": "bold"
+    },
+    "Chart": {
+      "barColor": "chartBar",
+      "lineOverlayColor": "chartLine",
+      "radius": "md"
+    }
+  }
+}
