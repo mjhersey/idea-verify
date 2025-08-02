@@ -184,19 +184,14 @@ class MockOpenAIService {
         });
     }
     /**
-     * Generate mock completion response
+     * Generate mock completion response with diverse patterns
      */
     generateMockCompletion(request) {
         const messages = request.messages || [];
         const lastMessage = messages[messages.length - 1];
-        // Generate contextual response based on request
-        let mockContent = "This is a mock response from the OpenAI API service.";
-        if (lastMessage?.content?.toLowerCase().includes('business idea')) {
-            mockContent = "Based on my analysis, this business idea shows strong potential in the current market. Key strengths include: clear value proposition, addressable market size, and competitive differentiation. Recommended next steps: validate assumptions through customer interviews and develop a minimum viable product.";
-        }
-        else if (lastMessage?.content?.toLowerCase().includes('evaluate')) {
-            mockContent = "Evaluation complete. Score: 7.5/10. Strengths: Strong market demand, scalable business model. Areas for improvement: Competitive analysis, revenue projections, risk assessment.";
-        }
+        const content = lastMessage?.content?.toLowerCase() || '';
+        // Generate contextual response based on business idea type and request
+        let mockContent = this.generateContextualResponse(content);
         const promptTokens = this.estimateTokens(messages.map((m) => m.content).join(' '));
         const completionTokens = this.estimateTokens(mockContent);
         return {
@@ -220,6 +215,95 @@ class MockOpenAIService {
             },
             system_fingerprint: 'fp_mock_system'
         };
+    }
+    /**
+     * Generate contextual responses based on business idea types
+     */
+    generateContextualResponse(content) {
+        // SaaS/Software business ideas
+        if (content.includes('saas') || content.includes('software') || content.includes('app') || content.includes('platform')) {
+            return this.generateSaaSResponse(content);
+        }
+        // E-commerce business ideas
+        if (content.includes('ecommerce') || content.includes('e-commerce') || content.includes('marketplace') || content.includes('store') || content.includes('retail')) {
+            return this.generateEcommerceResponse(content);
+        }
+        // Service business ideas
+        if (content.includes('service') || content.includes('consulting') || content.includes('agency') || content.includes('freelance')) {
+            return this.generateServiceResponse(content);
+        }
+        // Physical product ideas
+        if (content.includes('product') || content.includes('manufacturing') || content.includes('invention') || content.includes('gadget')) {
+            return this.generateProductResponse(content);
+        }
+        // Food & Restaurant ideas
+        if (content.includes('restaurant') || content.includes('food') || content.includes('cafe') || content.includes('catering')) {
+            return this.generateFoodResponse(content);
+        }
+        // Generic business evaluation
+        if (content.includes('evaluate') || content.includes('analysis') || content.includes('assess')) {
+            return this.generateEvaluationResponse();
+        }
+        // Default response for general business ideas
+        return this.generateGeneralBusinessResponse();
+    }
+    generateSaaSResponse(content) {
+        const responses = [
+            "SaaS Analysis: This software solution addresses a clear market need with strong recurring revenue potential. Key considerations: Customer acquisition cost, churn rate, and scalability. Recommended MVP approach: Focus on core features, implement robust user authentication, and establish pricing tiers. Market validation through beta testing is crucial.",
+            "Software Platform Evaluation: Strong technical feasibility with growing market demand. Key strengths: Subscription model, low marginal costs, global reach. Challenges: Competitive landscape, customer retention, technical support. Next steps: Validate target audience, develop prototype, establish go-to-market strategy.",
+            "App Development Assessment: Mobile-first approach shows promise in current market. Consider cross-platform development, user experience optimization, and app store visibility. Revenue models: Freemium, subscription, or in-app purchases. Focus on user engagement metrics and retention strategies."
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+    generateEcommerceResponse(content) {
+        const responses = [
+            "E-commerce Opportunity: Market analysis shows strong demand in this sector. Key factors: Supply chain management, customer acquisition, inventory optimization. Consider starting with niche market before scaling. Essential elements: User-friendly website, payment processing, logistics partners, customer service excellence.",
+            "Marketplace Assessment: Strong potential for platform-based business model. Revenue streams: Commission fees, subscription plans, premium listings. Critical success factors: Two-sided market growth, trust mechanisms, quality control. Focus on solving specific pain points for both buyers and sellers.",
+            "Retail Business Evaluation: Solid foundation with clear value proposition. Consider omnichannel approach combining online and offline presence. Key metrics: Customer lifetime value, conversion rates, average order value. Invest in brand building and customer experience differentiation."
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+    generateServiceResponse(content) {
+        const responses = [
+            "Service Business Analysis: High-margin opportunity with scalable potential. Strengths: Low startup costs, flexible operations, direct client relationships. Key considerations: Service standardization, quality control, team scaling. Focus on building strong reputation and referral systems.",
+            "Consulting Opportunity: Expertise-based model with strong earning potential. Critical factors: Market positioning, thought leadership, client acquisition. Develop proprietary methodologies and case studies. Consider productizing services through courses or software tools.",
+            "Agency Model Assessment: Strong demand for specialized services. Revenue optimization through retainer models and long-term contracts. Key challenges: Talent acquisition, client retention, service delivery consistency. Build scalable processes and systems early."
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+    generateProductResponse(content) {
+        const responses = [
+            "Physical Product Assessment: Manufacturing business with tangible value proposition. Key considerations: Production costs, supply chain complexity, inventory management. Market entry strategy: Consider direct-to-consumer before retail partnerships. Focus on product-market fit and quality control.",
+            "Product Innovation Analysis: Strong potential for market disruption. Critical factors: Patent protection, manufacturing partnerships, distribution channels. Validate demand through pre-orders or crowdfunding. Develop comprehensive business plan including regulatory compliance.",
+            "Manufacturing Opportunity: Product shows promise in target market. Key challenges: Capital requirements, quality assurance, scaling production. Consider lean manufacturing principles and just-in-time inventory. Build strong supplier relationships and quality control systems."
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+    generateFoodResponse(content) {
+        const responses = [
+            "Food Service Analysis: Restaurant industry opportunity with local market focus. Key factors: Location analysis, menu optimization, cost control. Critical success elements: Customer experience, food quality consistency, efficient operations. Consider starting with limited menu and expanding based on customer feedback.",
+            "Food Business Assessment: Strong potential in growing food service market. Considerations: Health regulations, supply chain management, seasonal variations. Revenue optimization through catering services and delivery partnerships. Focus on brand building and customer loyalty programs.",
+            "Culinary Venture Evaluation: Market shows demand for innovative food concepts. Key strategies: Unique value proposition, efficient kitchen operations, staff training. Consider multiple revenue streams: dine-in, takeout, catering, retail products. Build strong local community presence."
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
+    }
+    generateEvaluationResponse() {
+        const scores = [6.5, 7.0, 7.5, 8.0, 8.5];
+        const score = scores[Math.floor(Math.random() * scores.length)];
+        const evaluations = [
+            `Business Idea Evaluation: Overall Score: ${score}/10. Strengths: Clear market opportunity, feasible execution plan, strong value proposition. Areas for improvement: Competitive analysis, financial projections, risk mitigation strategies. Recommended next steps: Market validation, customer interviews, prototype development.`,
+            `Comprehensive Assessment: Score: ${score}/10. Positive indicators: Growing market demand, differentiated offering, experienced team potential. Development areas: Revenue model optimization, customer acquisition strategy, scalability planning. Priority actions: Validate assumptions, build MVP, establish partnerships.`,
+            `Business Viability Analysis: Rating: ${score}/10. Key strengths: Solving real problem, addressable market size, sustainable competitive advantage. Enhancement opportunities: Marketing strategy, operational efficiency, technology integration. Next phase: Customer discovery, financial modeling, go-to-market planning.`
+        ];
+        return evaluations[Math.floor(Math.random() * evaluations.length)];
+    }
+    generateGeneralBusinessResponse() {
+        const responses = [
+            "Based on my analysis, this business idea shows strong potential in the current market. Key strengths include: clear value proposition, addressable market size, and competitive differentiation. Recommended next steps: validate assumptions through customer interviews and develop a minimum viable product.",
+            "Business concept evaluation reveals promising opportunities with several growth vectors. Primary advantages: market timing, scalable model, customer pain point resolution. Strategic priorities: market research, financial planning, team building. Consider starting with focused market segment.",
+            "Initial assessment indicates viable business opportunity with solid fundamentals. Core strengths: market demand validation, feasible business model, clear target audience. Development focus: competitive positioning, revenue optimization, operational excellence. Build strong foundation before scaling."
+        ];
+        return responses[Math.floor(Math.random() * responses.length)];
     }
     /**
      * Estimate token count (rough approximation)

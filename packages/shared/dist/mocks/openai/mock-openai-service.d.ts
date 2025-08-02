@@ -66,9 +66,20 @@ export declare class MockOpenAIService {
      */
     private handleChatCompletion;
     /**
-     * Generate mock completion response
+     * Generate mock completion response with diverse patterns
      */
     private generateMockCompletion;
+    /**
+     * Generate contextual responses based on business idea types
+     */
+    private generateContextualResponse;
+    private generateSaaSResponse;
+    private generateEcommerceResponse;
+    private generateServiceResponse;
+    private generateProductResponse;
+    private generateFoodResponse;
+    private generateEvaluationResponse;
+    private generateGeneralBusinessResponse;
     /**
      * Estimate token count (rough approximation)
      */

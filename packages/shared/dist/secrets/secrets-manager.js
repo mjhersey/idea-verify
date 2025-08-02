@@ -81,9 +81,9 @@ class SecretsManager {
             this.getCredentials('aws')
         ]);
         return {
-            openai,
-            anthropic,
-            aws
+            openai: openai,
+            anthropic: anthropic,
+            aws: aws
         };
     }
 }

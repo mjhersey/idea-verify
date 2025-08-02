@@ -18,11 +18,25 @@ export interface RateLimitStatus {
     remaining: number;
     resetTime: Date;
     retryAfter?: number;
+    hourly?: {
+        remaining: number;
+        resetTime: Date;
+    };
+    daily?: {
+        remaining: number;
+        resetTime: Date;
+    };
 }
 export declare class RateLimiter {
     private requestCounts;
     private tokenCounts;
     private resetTimes;
+    private hourlyRequestCounts;
+    private hourlyTokenCounts;
+    private hourlyResetTimes;
+    private dailyRequestCounts;
+    private dailyTokenCounts;
+    private dailyResetTimes;
     private config;
     constructor(config: RateLimitConfig);
     /**
@@ -38,9 +52,9 @@ export declare class RateLimiter {
      */
     getRateLimitStatus(service: string): RateLimitStatus;
     /**
-     * Reset counters for a service
+     * Reset expired counters for a service
      */
-    private resetCounters;
+    private resetExpiredCounters;
     /**
      * Execute request with exponential backoff retry logic
      */

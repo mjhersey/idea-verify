@@ -131,7 +131,7 @@ class HealthMonitor {
         const config = this.configs.get(serviceName);
         const currentStatus = this.statuses.get(serviceName);
         const startTime = Date.now();
-        let newStatus = { ...currentStatus };
+        const newStatus = { ...currentStatus };
         newStatus.lastCheck = new Date();
         try {
             // Execute health check with timeout
@@ -225,7 +225,7 @@ class ServiceHealthMonitors {
             return await response.json();
         }, config, {
             onUnhealthy: (status) => console.warn(`🚨 OpenAI service unhealthy: ${status.details?.error}`),
-            onRecovered: (status) => console.log(`✅ OpenAI service recovered`)
+            onRecovered: (_status) => console.log(`✅ OpenAI service recovered`)
         });
     }
     /**
@@ -250,7 +250,7 @@ class ServiceHealthMonitors {
             }
         }, config, {
             onUnhealthy: (status) => console.warn(`🚨 Anthropic service unhealthy: ${status.details?.error}`),
-            onRecovered: (status) => console.log(`✅ Anthropic service recovered`)
+            onRecovered: (_status) => console.log(`✅ Anthropic service recovered`)
         });
     }
     /**
@@ -265,7 +265,7 @@ class ServiceHealthMonitors {
             return await response.json();
         }, config, {
             onUnhealthy: (status) => console.warn(`🚨 LocalStack service unhealthy: ${status.details?.error}`),
-            onRecovered: (status) => console.log(`✅ LocalStack service recovered`)
+            onRecovered: (_status) => console.log(`✅ LocalStack service recovered`)
         });
     }
     /**

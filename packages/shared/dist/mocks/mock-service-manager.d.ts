@@ -41,7 +41,22 @@ export declare class MockServiceManager {
      */
     getStatus(): {
         isRunning: boolean;
-        services: any;
+        services: {
+            openai: {
+                port: number;
+                url: string;
+                healthCheck: string;
+            };
+            anthropic: {
+                port: number;
+                url: string;
+                healthCheck: string;
+            };
+            localstack: {
+                endpoint: string;
+                services: string[];
+            };
+        };
     };
     /**
      * Validate all mock services are responding

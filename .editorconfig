@@ -1,0 +1,45 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+
+# 2 space indentation for most files
+[*.{js,jsx,ts,tsx,vue,json,yml,yaml,md}]
+indent_style = space
+indent_size = 2
+
+# 4 space indentation for Python
+[*.py]
+indent_style = space
+indent_size = 4
+
+# Tab indentation for specific files
+[{Makefile,*.mk}]
+indent_style = tab
+
+# Specific settings for package.json
+[package.json]
+indent_style = space
+indent_size = 2
+
+# Docker files
+[{Dockerfile,docker-compose*.yml}]
+indent_style = space
+indent_size = 2
+
+# SQL files
+[*.sql]
+indent_style = space
+indent_size = 2
+
+# Config files
+[*.{toml,ini}]
+indent_style = space
+indent_size = 2

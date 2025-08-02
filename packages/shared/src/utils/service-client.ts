@@ -70,7 +70,7 @@ export class ServiceClient {
       this.quotaMonitor.recordUsage(this.serviceName, 0, 0, true);
       
       // Check if we should attempt fallback
-      if (this.config.fallbackEnabled && this.shouldUseFallback(error)) {
+      if (this.config.fallbackEnabled && this.shouldUseFallback(error as Error & { status?: number; code?: string })) {
         const fallback = this.getFallbackService();
         if (fallback) {
           console.warn(`Service ${this.serviceName} failed, attempting fallback to ${fallback}`);
@@ -127,7 +127,7 @@ export class ServiceClient {
     }
     
     // Use fallback for persistent service errors
-    if (error.status >= 500) {
+    if (error.status && error.status >= 500) {
       return true;
     }
     

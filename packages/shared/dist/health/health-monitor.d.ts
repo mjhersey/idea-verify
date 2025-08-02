@@ -9,7 +9,7 @@ export interface HealthStatus {
     responseTime: number;
     uptime: number;
     consecutiveFailures: number;
-    details?: any;
+    details?: Record<string, unknown>;
 }
 export interface HealthCheckConfig {
     interval: number;
@@ -32,7 +32,7 @@ export declare class HealthMonitor {
     /**
      * Register a service for health monitoring
      */
-    registerService(serviceName: string, healthCheckFn: () => Promise<any>, config?: Partial<HealthCheckConfig>, alertConfig?: AlertConfig): void;
+    registerService(serviceName: string, healthCheckFn: () => Promise<Record<string, unknown>>, config?: Partial<HealthCheckConfig>, alertConfig?: AlertConfig): void;
     /**
      * Unregister a service from monitoring
      */

@@ -3,7 +3,7 @@
  */
 
 import { SecretsManagerClient, GetSecretValueCommand, PutSecretValueCommand, CreateSecretCommand } from '@aws-sdk/client-secrets-manager';
-import { ExternalServiceCredentials, SecretsManagerConfig } from '../types/credentials.js';
+import { ExternalServiceCredentials, SecretsManagerConfig, OpenAICredentials, AnthropicCredentials, AWSCredentials } from '../types/credentials.js';
 
 export class SecretsManager {
   private client: SecretsManagerClient;
@@ -89,9 +89,9 @@ export class SecretsManager {
     ]);
 
     return {
-      openai,
-      anthropic,
-      aws
+      openai: openai as OpenAICredentials,
+      anthropic: anthropic as AnthropicCredentials,
+      aws: aws as AWSCredentials
     };
   }
 }

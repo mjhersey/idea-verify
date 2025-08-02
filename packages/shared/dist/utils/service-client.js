@@ -90,7 +90,7 @@ class ServiceClient {
             return true;
         }
         // Use fallback for persistent service errors
-        if (error.status >= 500) {
+        if (error.status && error.status >= 500) {
             return true;
         }
         return false;

@@ -4,7 +4,8 @@
   "description": "AI-Powered Business Idea Validation Platform",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "packages/agents/*"
   ],
   "scripts": {
     "validate:accounts": "node tools/validate-user-accounts.js",
@@ -21,13 +22,42 @@
     "test:integration:full": "node tools/test-with-services.js",
     "test": "npm run test --workspaces",
     "lint": "npm run lint --workspaces",
-    "build": "npm run build --workspaces"
+    "build": "npm run build --workspaces",
+    "clean": "npm run clean --workspaces",
+    "dev:web": "npm run dev --workspace=packages/web",
+    "dev:api": "npm run dev --workspace=packages/api",
+    "dev:orchestrator": "npm run dev --workspace=packages/orchestrator",
+    "dev:services": "docker-compose up -d postgres redis localstack",
+    "dev:mocks": "docker-compose up -d mock-openai mock-anthropic",
+    "dev:all": "docker-compose up -d",
+    "dev:down": "docker-compose down",
+    "dev:logs": "docker-compose logs -f",
+    "test:db": "node tools/test-database-connectivity.js",
+    "test:env": "node tools/validate-environment-setup.js",
+    "install:all": "npm install && npm install --workspaces",
+    "prepare": "husky install",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "vitest": "^1.0.0"
+    "vitest": "^1.0.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^15.2.0",
+    "prettier": "^3.1.0",
+    "@commitlint/cli": "^18.4.0",
+    "@commitlint/config-conventional": "^18.4.0"
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
+  },
+  "lint-staged": {
+    "*.{js,ts,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }

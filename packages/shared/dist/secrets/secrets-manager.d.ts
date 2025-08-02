@@ -9,15 +9,15 @@ export declare class SecretsManager {
     /**
      * Retrieve credentials from AWS Secrets Manager
      */
-    getCredentials(service: keyof ExternalServiceCredentials): Promise<any>;
+    getCredentials(service: keyof ExternalServiceCredentials): Promise<ExternalServiceCredentials[typeof service]>;
     /**
      * Store credentials in AWS Secrets Manager
      */
-    putCredentials(service: keyof ExternalServiceCredentials, credentials: any): Promise<void>;
+    putCredentials(service: keyof ExternalServiceCredentials, credentials: ExternalServiceCredentials[typeof service]): Promise<void>;
     /**
      * Create a new secret in AWS Secrets Manager
      */
-    createSecret(service: keyof ExternalServiceCredentials, credentials: any, description?: string): Promise<void>;
+    createSecret(service: keyof ExternalServiceCredentials, credentials: ExternalServiceCredentials[typeof service], description?: string): Promise<void>;
     /**
      * Get all credentials at once
      */

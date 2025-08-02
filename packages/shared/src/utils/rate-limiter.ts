@@ -240,8 +240,8 @@ export class RateLimiter {
         attempt++;
 
         // Check if it's a rate limit error
-        if (this.isRateLimitError(error)) {
-          const retryAfter = this.extractRetryAfter(error);
+        if (this.isRateLimitError(error as HttpError)) {
+          const retryAfter = this.extractRetryAfter(error as HttpError);
           if (retryAfter) {
             await this.delay(retryAfter * 1000);
             continue;
@@ -249,7 +249,7 @@ export class RateLimiter {
         }
 
         // Don't retry on non-retryable errors
-        if (!this.isRetryableError(error)) {
+        if (!this.isRetryableError(error as HttpError)) {
           throw error;
         }
 
@@ -305,7 +305,7 @@ export class RateLimiter {
     if (error.message?.toLowerCase().includes('persistent')) return true;
     
     // 5xx server errors are retryable
-    if (error.status >= 500 && error.status < 600) return true;
+    if (error.status && error.status >= 500 && error.status < 600) return true;
     
     // 408 Request Timeout is retryable
     if (error.status === 408) return true;

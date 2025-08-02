@@ -120,13 +120,13 @@ export class IntegrationTestSuite {
         let validationResult;
         switch (service) {
           case 'openai':
-            validationResult = await this.validator.validateOpenAI(credentials);
+            validationResult = await this.validator.validateOpenAI(credentials as OpenAICredentials);
             break;
           case 'anthropic':
-            validationResult = await this.validator.validateAnthropic(credentials);
+            validationResult = await this.validator.validateAnthropic(credentials as AnthropicCredentials);
             break;
           case 'aws':
-            validationResult = await this.validator.validateAWS(credentials);
+            validationResult = await this.validator.validateAWS(credentials as AWSCredentials);
             break;
         }
 
@@ -328,7 +328,7 @@ export class IntegrationTestSuite {
         test: 'invalid-credentials',
         passed: !invalidResult.valid, // Should fail validation
         duration: Date.now() - startTime,
-        details: invalidResult
+        details: invalidResult as unknown as Record<string, unknown>
       });
 
     } catch (error) {

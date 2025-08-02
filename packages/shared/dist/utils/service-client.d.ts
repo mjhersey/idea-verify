@@ -2,8 +2,8 @@
  * Service Client with Rate Limiting and Quota Management
  * Integrates rate limiting, quota monitoring, and fallback strategies
  */
-import { RateLimitConfig } from './rate-limiter.js';
-import { QuotaConfig } from './quota-monitor.js';
+import { RateLimitConfig, RateLimitStatus } from './rate-limiter.js';
+import { QuotaConfig, QuotaStatus } from './quota-monitor.js';
 export interface ServiceClientConfig {
     rateLimiting: RateLimitConfig;
     quotaMonitoring: QuotaConfig;
@@ -30,9 +30,17 @@ export declare class ServiceClient {
      * Get current service status
      */
     getStatus(): {
-        rateLimitStatus: any;
-        quotaStatus: any;
-        fallbackRecommendations: any;
+        rateLimitStatus: RateLimitStatus | null;
+        quotaStatus: {
+            requests: QuotaStatus;
+            tokens: QuotaStatus;
+            cost: QuotaStatus;
+        } | null;
+        fallbackRecommendations: {
+            canSwitch: boolean;
+            alternatives: string[];
+            recommendations: string[];
+        };
     };
     /**
      * Handle quota alerts

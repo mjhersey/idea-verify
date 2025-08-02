@@ -25,7 +25,7 @@ export interface CredentialValidationResult {
     valid: boolean;
     error?: string;
     details?: {
-        accountInfo?: any;
+        accountInfo?: Record<string, unknown>;
         rateLimit?: {
             remaining: number;
             resetTime: Date;
