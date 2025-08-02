@@ -14,14 +14,14 @@ interface Evaluation {
   status: 'pending' | 'analyzing' | 'completed' | 'failed'
   createdAt: Date
   updatedAt: Date
-  results?: any
+  results?: Record<string, unknown>
 }
 
 // In-memory storage for now (will be replaced with database in future story)
 const evaluations: Evaluation[] = []
 
 export const createEvaluation = async (
-  req: Request<{}, {}, EvaluationRequest>,
+  req: Request<Record<string, never>, Record<string, never>, EvaluationRequest>,
   res: Response,
   next: NextFunction
 ) => {
@@ -35,10 +35,11 @@ export const createEvaluation = async (
       })
     }
 
-    const { description, urgency, industry, targetMarket } = req.body
+    const { description } = req.body
+    // Future implementation will use: urgency, industry, targetMarket
 
     const evaluation: Evaluation = {
-      id: crypto.randomUUID(),
+      id: globalThis.crypto.randomUUID(),
       description,
       status: 'pending',
       createdAt: new Date(),

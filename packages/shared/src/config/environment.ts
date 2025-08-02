@@ -16,6 +16,12 @@ export interface EnvironmentConfig {
     profile?: string;
   };
   secretsManager: SecretsManagerConfig;
+  database?: {
+    url: string;
+    maxConnections?: number;
+    connectionTimeoutMs?: number;
+    poolTimeoutMs?: number;
+  };
   development: {
     useMockServices: boolean;
     mockDataPath?: string;
@@ -55,6 +61,12 @@ export function getEnvironmentConfig(): EnvironmentConfig {
         aws: process.env.SECRETS_AWS_NAME!
       }
     },
+    database: process.env.DATABASE_URL ? {
+      url: process.env.DATABASE_URL,
+      maxConnections: process.env.DATABASE_MAX_CONNECTIONS ? parseInt(process.env.DATABASE_MAX_CONNECTIONS, 10) : 20,
+      connectionTimeoutMs: process.env.DATABASE_CONNECTION_TIMEOUT_MS ? parseInt(process.env.DATABASE_CONNECTION_TIMEOUT_MS, 10) : 30000,
+      poolTimeoutMs: process.env.DATABASE_POOL_TIMEOUT_MS ? parseInt(process.env.DATABASE_POOL_TIMEOUT_MS, 10) : 30000
+    } : undefined,
     development: {
       useMockServices: process.env.USE_MOCK_SERVICES === 'true',
       mockDataPath: process.env.MOCK_DATA_PATH
@@ -80,6 +92,12 @@ AWS_PROFILE=default
 SECRETS_OPENAI_NAME=ai-validation-platform/openai
 SECRETS_ANTHROPIC_NAME=ai-validation-platform/anthropic
 SECRETS_AWS_NAME=ai-validation-platform/aws
+
+# Database Configuration
+DATABASE_URL=postgresql://dev_user:dev_password@localhost:5432/ai_validation_platform?schema=public&connect_timeout=30&pool_timeout=30
+DATABASE_MAX_CONNECTIONS=20
+DATABASE_CONNECTION_TIMEOUT_MS=30000
+DATABASE_POOL_TIMEOUT_MS=30000
 
 # Development Configuration
 USE_MOCK_SERVICES=true

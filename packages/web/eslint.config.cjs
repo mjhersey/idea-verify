@@ -55,4 +55,45 @@ module.exports = [
       },
     },
   },
+  {
+    files: ['*.config.{ts,js}', 'vite.config.{ts,js}', 'vitest.config.{ts,js}', 'cypress.config.{ts,js}'],
+    languageOptions: {
+      globals: {
+        // Node.js globals for config files
+        process: 'readonly',
+        console: 'readonly',
+        setTimeout: 'readonly',
+        setInterval: 'readonly',
+        clearTimeout: 'readonly',
+        clearInterval: 'readonly',
+        fetch: 'readonly',
+        global: 'readonly',
+        Buffer: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+        exports: 'writable',
+        module: 'writable',
+        require: 'readonly',
+        URL: 'readonly',
+      },
+    },
+  },
+  {
+    files: ['cypress/e2e/**/*.{ts,js}'],
+    languageOptions: {
+      globals: {
+        // Cypress globals
+        cy: 'readonly',
+        Cypress: 'readonly',
+        describe: 'readonly',
+        it: 'readonly',
+        before: 'readonly',
+        beforeEach: 'readonly',
+        after: 'readonly',
+        afterEach: 'readonly',
+        expect: 'readonly',
+        context: 'readonly',
+      },
+    },
+  },
 ];

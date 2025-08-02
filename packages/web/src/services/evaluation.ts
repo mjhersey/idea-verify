@@ -1,5 +1,4 @@
 import apiClient from './api'
-import type { BusinessIdea } from '../stores/evaluation'
 
 export interface EvaluationRequest {
   description: string
@@ -12,11 +11,11 @@ export interface EvaluationResponse {
   id: string
   status: 'pending' | 'analyzing' | 'completed' | 'failed'
   results?: {
-    marketResearch?: any
-    competitiveAnalysis?: any
-    customerResearch?: any
-    technicalFeasibility?: any
-    financialAnalysis?: any
+    marketResearch?: Record<string, unknown>
+    competitiveAnalysis?: Record<string, unknown>
+    customerResearch?: Record<string, unknown>
+    technicalFeasibility?: Record<string, unknown>
+    financialAnalysis?: Record<string, unknown>
     overallScore?: number
   }
 }

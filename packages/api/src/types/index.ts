@@ -1,4 +1,4 @@
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: string
@@ -26,11 +26,11 @@ export interface Evaluation {
   createdAt: Date
   updatedAt: Date
   results?: {
-    marketResearch?: any
-    competitiveAnalysis?: any
-    customerResearch?: any
-    technicalFeasibility?: any
-    financialAnalysis?: any
+    marketResearch?: Record<string, unknown>
+    competitiveAnalysis?: Record<string, unknown>
+    customerResearch?: Record<string, unknown>
+    technicalFeasibility?: Record<string, unknown>
+    financialAnalysis?: Record<string, unknown>
     overallScore?: number
   }
 }

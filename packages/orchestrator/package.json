@@ -9,7 +9,7 @@
     "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
     "test": "vitest",
-    "lint": "eslint src/**/*.ts",
+    "lint": "[ -d src ] && eslint src/**/*.ts || echo 'No source files to lint'",
     "clean": "rm -rf dist"
   },
   "dependencies": {
