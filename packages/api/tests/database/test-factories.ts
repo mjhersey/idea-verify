@@ -27,13 +27,14 @@ export class UserFactory {
   }
 
   static createMany(count: number, overrides: Partial<CreateUserInput> = {}): CreateUserInput[] {
-    return Array.from({ length: count }, (_, index) => 
-      this.create({ 
+    return Array.from({ length: count }, (_, index) => {
+      const timestamp = Date.now() + index; // Ensure unique timestamps
+      return this.create({ 
         ...overrides,
-        email: overrides.email ? `${index}.${overrides.email}` : undefined,
-        name: overrides.name ? `${overrides.name} ${index}` : undefined
-      })
-    );
+        email: overrides.email ? `${index}.${overrides.email}` : `test.user.${timestamp}.${index}@example.com`,
+        name: overrides.name ? `${overrides.name} ${index}` : `Test User ${timestamp} ${index}`
+      });
+    });
   }
 }
 
@@ -79,12 +80,13 @@ export class BusinessIdeaFactory {
   }
 
   static createMany(count: number, overrides: Partial<CreateBusinessIdeaInput> = {}): CreateBusinessIdeaInput[] {
-    return Array.from({ length: count }, (_, index) => 
-      this.create({ 
+    return Array.from({ length: count }, (_, index) => {
+      const timestamp = Date.now() + index; // Ensure unique timestamps
+      return this.create({ 
         ...overrides,
-        title: overrides.title ? `${overrides.title} ${index}` : undefined
-      })
-    );
+        title: overrides.title ? `${overrides.title} ${index}` : `Business Idea ${timestamp} ${index}`
+      });
+    });
   }
 }
 
@@ -229,46 +231,52 @@ export class DatabaseTestUtils {
     try {
       // Clean agent results first (foreign key constraints)
       if (patterns.businessIdeaTitles) {
-        await prisma.agentResult.deleteMany({
-          where: {
-            evaluation: {
-              business_idea: {
-                title: {
-                  in: patterns.businessIdeaTitles
+        const validTitles = patterns.businessIdeaTitles.filter(title => title !== undefined);
+        if (validTitles.length > 0) {
+          await prisma.agentResult.deleteMany({
+            where: {
+              evaluation: {
+                business_idea: {
+                  title: {
+                    in: validTitles
+                  }
                 }
               }
             }
-          }
-        });
+          });
 
-        await prisma.evaluation.deleteMany({
-          where: {
-            business_idea: {
-              title: {
-                in: patterns.businessIdeaTitles
+          await prisma.evaluation.deleteMany({
+            where: {
+              business_idea: {
+                title: {
+                  in: validTitles
+                }
               }
             }
-          }
-        });
+          });
 
-        await prisma.businessIdea.deleteMany({
-          where: {
-            title: {
-              in: patterns.businessIdeaTitles
+          await prisma.businessIdea.deleteMany({
+            where: {
+              title: {
+                in: validTitles
+              }
             }
-          }
-        });
+          });
+        }
       }
 
       // Clean users
       if (patterns.userEmails) {
-        await prisma.user.deleteMany({
-          where: {
-            email: {
-              in: patterns.userEmails
+        const validEmails = patterns.userEmails.filter(email => email !== undefined);
+        if (validEmails.length > 0) {
+          await prisma.user.deleteMany({
+            where: {
+              email: {
+                in: validEmails
+              }
             }
-          }
-        });
+          });
+        }
       }
     } catch (error) {
       console.warn('Cleanup failed:', error);

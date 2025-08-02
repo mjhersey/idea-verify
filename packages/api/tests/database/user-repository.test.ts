@@ -24,9 +24,11 @@ describe('UserRepository Integration Tests', () => {
     // Clean up test data before each test
     await prisma.user.deleteMany({
       where: {
-        email: {
-          contains: 'test'
-        }
+        OR: [
+          { email: { contains: 'test' } },
+          { email: { contains: 'duplicate' } },
+          { email: { contains: 'example.com' } }
+        ]
       }
     });
   });

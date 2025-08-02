@@ -139,7 +139,11 @@ describe('Database Performance Tests', () => {
         
       } finally {
         // Cleanup
-        await prisma.user.delete({ where: { id: testUser.id } });
+        try {
+          await prisma.user.deleteMany({ where: { id: testUser.id } });
+        } catch (error) {
+          console.warn('Cleanup failed:', error);
+        }
       }
     });
   });
@@ -290,7 +294,11 @@ describe('Database Performance Tests', () => {
         
       } finally {
         // Cleanup
-        await prisma.user.delete({ where: { id: testUser.id } });
+        try {
+          await prisma.user.deleteMany({ where: { id: testUser.id } });
+        } catch (error) {
+          console.warn('Cleanup failed:', error);
+        }
       }
     });
   });

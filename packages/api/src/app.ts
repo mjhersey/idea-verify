@@ -7,7 +7,7 @@ import rateLimit from 'express-rate-limit'
 
 // Import shared utilities
 import { RateLimiter } from '@ai-validation/shared'
-import { loadEnvironmentConfig } from '@ai-validation/shared'
+import { getEnvironmentConfig } from '@ai-validation/shared'
 
 import { errorHandler } from './middleware/errorHandler.js'
 import { notFoundHandler } from './middleware/notFoundHandler.js'
@@ -17,7 +17,7 @@ import evaluationRoutes from './routes/evaluations.js'
 const app = express()
 
 // Load environment configuration
-const envConfig = loadEnvironmentConfig()
+const envConfig = getEnvironmentConfig()
 
 // Basic middleware
 app.use(helmet())
