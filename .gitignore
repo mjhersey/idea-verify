@@ -1,13 +1,165 @@
 
-# Environment files
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+.nyc_output
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Distribution directories
+dist/
+build/
+out/
+
+# Environment variables and secrets
 .env
-.env.local
-.env.development
-.env.production
+.env.*
+!.env.template
+!.env.example
 
-# AWS credentials
-.aws/credentials
-.aws/config
+# AWS credentials and config
+.aws/
+aws-exports.js
 
-# Mock data
+# API keys and secrets (additional safety)
+**/secrets.json
+**/credentials.json
+**/.credentials
+**/api-keys.txt
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+*.pid
+*.seed
+*.pid.lock
+
+# AWS CDK
+cdk.out/
+.cdk.staging/
+
+# LocalStack data
+.localstack/
+localstack-data/
+
+# Docker
+.docker/
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Package manager lock files (keep one, ignore others based on team preference)
+# Uncomment the ones you want to ignore
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Vitest
+.vitest/
+
+# Mock service data
+mock-data/
+test-data/
 data/mock/*.json
+
+# Generated documentation
+docs/generated/
+
+# Cache directories
+.cache/
+.parcel-cache/
+
+# Certificates and keys
+*.pem
+*.key
+*.crt
+*.cert
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Python (if any Python tools are used)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Terraform (if used for infrastructure)
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Editor directories and files
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local development overrides
+docker-compose.override.yml
+.dev-environment/
+
+# Application specific
+# Add any project-specific files or directories that should be ignored
