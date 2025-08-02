@@ -23,6 +23,7 @@ module.exports = [
         Event: 'readonly',
         EventTarget: 'readonly',
         crypto: 'readonly',
+        console: 'readonly',
       },
     },
     plugins: {
@@ -52,6 +53,7 @@ module.exports = [
         Event: 'readonly',
         EventTarget: 'readonly',
         crypto: 'readonly',
+        console: 'readonly',
       },
     },
   },

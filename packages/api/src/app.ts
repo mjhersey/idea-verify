@@ -13,6 +13,7 @@ import { errorHandler } from './middleware/errorHandler.js'
 import { notFoundHandler } from './middleware/notFoundHandler.js'
 import healthRoutes from './routes/health.js'
 import evaluationRoutes from './routes/evaluations.js'
+import authRoutes from './routes/auth.js'
 
 const app = express()
 
@@ -40,6 +41,7 @@ app.use('/api', limiter)
 
 // Routes
 app.use('/health', healthRoutes)
+app.use('/api/auth', authRoutes)
 app.use('/api/evaluations', evaluationRoutes)
 
 // Error handling
