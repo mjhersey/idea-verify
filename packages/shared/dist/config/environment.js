@@ -27,6 +27,7 @@ function getEnvironmentConfig() {
     return {
         nodeEnv: process.env.NODE_ENV || 'development',
         port: parseInt(process.env.PORT || '3000', 10),
+        frontendUrl: process.env.FRONTEND_URL,
         aws: {
             region: process.env.AWS_REGION,
             profile: process.env.AWS_PROFILE
@@ -48,6 +49,17 @@ function getEnvironmentConfig() {
         development: {
             useMockServices: process.env.USE_MOCK_SERVICES === 'true',
             mockDataPath: process.env.MOCK_DATA_PATH
+        },
+        redis: process.env.REDIS_HOST ? {
+            host: process.env.REDIS_HOST,
+            port: parseInt(process.env.REDIS_PORT || '6379', 10),
+            password: process.env.REDIS_PASSWORD,
+            maxRetriesPerRequest: process.env.REDIS_MAX_RETRIES ? parseInt(process.env.REDIS_MAX_RETRIES, 10) : 3
+        } : undefined,
+        orchestrator: {
+            maxConcurrentEvaluations: parseInt(process.env.ORCHESTRATOR_MAX_CONCURRENT || '10', 10),
+            defaultTimeout: parseInt(process.env.ORCHESTRATOR_TIMEOUT || '300000', 10), // 5 minutes
+            retryAttempts: parseInt(process.env.ORCHESTRATOR_RETRIES || '3', 10)
         }
     };
 }
@@ -60,6 +72,9 @@ function generateEnvTemplate() {
 # Node Environment
 NODE_ENV=development
 PORT=3000
+
+# Frontend Configuration
+FRONTEND_URL=http://localhost:5173
 
 # AWS Configuration
 AWS_REGION=us-east-1
@@ -75,6 +90,17 @@ DATABASE_URL=postgresql://dev_user:dev_password@localhost:5432/ai_validation_pla
 DATABASE_MAX_CONNECTIONS=20
 DATABASE_CONNECTION_TIMEOUT_MS=30000
 DATABASE_POOL_TIMEOUT_MS=30000
+
+# Redis Configuration (for BullMQ)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+REDIS_MAX_RETRIES=3
+
+# Orchestrator Configuration
+ORCHESTRATOR_MAX_CONCURRENT=10
+ORCHESTRATOR_TIMEOUT=300000
+ORCHESTRATOR_RETRIES=3
 
 # Development Configuration
 USE_MOCK_SERVICES=true

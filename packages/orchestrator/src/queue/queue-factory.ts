@@ -21,10 +21,9 @@ export class QueueFactory {
     const useMockServices = envConfig.development.useMockServices;
 
     const queueConfig: QueueConfig = {
-      redis: {
-        host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379'),
-        password: process.env.REDIS_PASSWORD,
+      redis: envConfig.redis || {
+        host: 'localhost',
+        port: 6379,
         maxRetriesPerRequest: 3
       },
       defaultJobOptions: {

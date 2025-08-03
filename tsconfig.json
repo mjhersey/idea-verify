@@ -1,0 +1,15 @@
+{
+  "files": [],
+  "compilerOptions": {
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "skipLibCheck": true
+  },
+  "references": [
+    { "path": "./packages/shared" },
+    { "path": "./packages/orchestrator" },
+    { "path": "./packages/api" },
+    { "path": "./packages/web" }
+  ]
+}

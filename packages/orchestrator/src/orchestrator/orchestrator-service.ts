@@ -24,7 +24,8 @@ import {
 import { 
   AgentType, 
   EvaluationStatus, 
-  EvaluationPriority 
+  EvaluationPriority,
+  getEnvironmentConfig
 } from '@ai-validation/shared';
 import { AgentService, AgentRequest, AgentExecutionContext } from '../agents/index.js';
 import { MessageBus } from '../communication/message-bus.js';
@@ -51,12 +52,14 @@ export class OrchestratorService extends EventEmitter implements MessageHandler 
 
   private constructor(config: Partial<OrchestratorConfig> = {}) {
     super();
+    const envConfig = getEnvironmentConfig();
+    
     this.queueManager = QueueManager.getInstance();
     this.messageBus = MessageBus.getInstance();
     this.agentCoordinator = new AgentCoordinator();
     this.config = {
-      maxConcurrentEvaluations: 10,
-      defaultTimeout: 300000, // 5 minutes
+      maxConcurrentEvaluations: envConfig.orchestrator?.maxConcurrentEvaluations || 10,
+      defaultTimeout: envConfig.orchestrator?.defaultTimeout || 300000, // 5 minutes
       defaultAgentTypes: ['market-research'],
       enableProgressTracking: true,
       autoRetryFailedAgents: true,

@@ -5,6 +5,7 @@ import { SecretsManagerConfig } from '../types/credentials.js';
 export interface EnvironmentConfig {
     nodeEnv: string;
     port: number;
+    frontendUrl?: string;
     aws: {
         region: string;
         profile?: string;
@@ -19,6 +20,17 @@ export interface EnvironmentConfig {
     development: {
         useMockServices: boolean;
         mockDataPath?: string;
+    };
+    redis?: {
+        host: string;
+        port: number;
+        password?: string;
+        maxRetriesPerRequest?: number;
+    };
+    orchestrator?: {
+        maxConcurrentEvaluations: number;
+        defaultTimeout: number;
+        retryAttempts: number;
     };
 }
 /**

@@ -18,5 +18,8 @@
     "strict": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false
-  }
+  },
+  "references": [
+    { "path": "../shared" }
+  ]
 }

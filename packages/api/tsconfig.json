@@ -17,6 +17,7 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
+    "composite": true,
     "types": ["node", "vitest"]
   },
   "include": [
@@ -26,5 +27,9 @@
     "node_modules",
     "dist",
     "tests"
+  ],
+  "references": [
+    { "path": "../shared" },
+    { "path": "../orchestrator" }
   ]
 }
