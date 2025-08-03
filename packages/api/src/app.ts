@@ -6,7 +6,6 @@ import morgan from 'morgan'
 import rateLimit from 'express-rate-limit'
 
 // Import shared utilities
-import { RateLimiter } from '@ai-validation/shared'
 import { getEnvironmentConfig } from '@ai-validation/shared'
 
 import { errorHandler } from './middleware/errorHandler.js'

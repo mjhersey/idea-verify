@@ -22,7 +22,7 @@ export class APIError extends Error {
 }
 
 export class ErrorHandler {
-  handle(error: Error, req: Request, res: Response, next: NextFunction): void {
+  handle(error: Error, req: Request, res: Response, _next: NextFunction): void {
     console.error('[APIError]', {
       error: error.message,
       stack: error.stack,

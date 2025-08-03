@@ -17,7 +17,7 @@ export class MarketResearchAgent extends BaseAgent {
 
   async execute(
     request: AgentRequest,
-    context: AgentExecutionContext
+    _context: AgentExecutionContext
   ): Promise<AgentResponse> {
     const startTime = Date.now();
     this.validateRequest(request);
