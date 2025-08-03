@@ -10,6 +10,12 @@ export interface EnvironmentConfig {
         profile?: string;
     };
     secretsManager: SecretsManagerConfig;
+    database?: {
+        url: string;
+        maxConnections?: number;
+        connectionTimeoutMs?: number;
+        poolTimeoutMs?: number;
+    };
     development: {
         useMockServices: boolean;
         mockDataPath?: string;

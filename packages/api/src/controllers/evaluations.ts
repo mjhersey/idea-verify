@@ -1,11 +1,13 @@
 import { Request, Response, NextFunction } from 'express'
 import { validationResult } from 'express-validator'
+import { OrchestratorService } from '@ai-validation/orchestrator'
 
 interface EvaluationRequest {
-  description: string
-  urgency?: 'low' | 'medium' | 'high'
-  industry?: string
-  targetMarket?: string
+  businessIdeaId: string
+  businessIdeaTitle: string
+  businessIdeaDescription: string
+  agentTypes?: string[]
+  priority?: 'low' | 'normal' | 'high'
 }
 
 interface Evaluation {
@@ -35,24 +37,48 @@ export const createEvaluation = async (
       })
     }
 
-    const { description } = req.body
-    // Future implementation will use: urgency, industry, targetMarket
+    const { 
+      businessIdeaId, 
+      businessIdeaTitle, 
+      businessIdeaDescription, 
+      agentTypes = ['market-research'], // Default to market research agent
+      priority = 'normal' 
+    } = req.body
+
+    // Get orchestrator service instance
+    const orchestrator = OrchestratorService.getInstance()
+
+    // Submit evaluation request to orchestrator
+    const evaluationId = await orchestrator.submitEvaluationRequest({
+      businessIdeaId,
+      businessIdeaTitle,
+      businessIdeaDescription,
+      agentTypes: agentTypes as any[], // Cast to AgentType[]
+      priority: priority as any // Cast to EvaluationPriority
+    })
+
+    // Get current progress
+    const progress = orchestrator.getEvaluationProgress(evaluationId)
 
     const evaluation: Evaluation = {
-      id: globalThis.crypto.randomUUID(),
-      description,
-      status: 'pending',
+      id: evaluationId,
+      description: businessIdeaDescription,
+      status: progress?.status || 'pending',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      results: progress?.results || undefined
     }
 
+    // Store in memory for API compatibility (will be replaced with database lookup)
     evaluations.push(evaluation)
 
     res.status(201).json({
       success: true,
-      data: evaluation
+      data: evaluation,
+      progress: progress
     })
   } catch (error) {
+    console.error('Error creating evaluation:', error)
     next(error)
   }
 }
@@ -79,18 +105,44 @@ export const getEvaluation = async (
 ) => {
   try {
     const { id } = req.params
-    const evaluation = evaluations.find(e => e.id === id)
-
-    if (!evaluation) {
+    
+    // Get orchestrator service instance
+    const orchestrator = OrchestratorService.getInstance()
+    
+    // Get current progress from orchestrator
+    const progress = orchestrator.getEvaluationProgress(id)
+    
+    if (!progress) {
       return res.status(404).json({
         success: false,
         error: 'Evaluation not found'
       })
     }
 
+    // Try to find in memory first (for API compatibility)
+    let evaluation = evaluations.find(e => e.id === id)
+    
+    if (!evaluation) {
+      // Create evaluation object from orchestrator progress
+      evaluation = {
+        id: progress.evaluationId,
+        description: `Business idea evaluation: ${id}`,
+        status: progress.status,
+        createdAt: new Date(), // This would come from database in real implementation
+        updatedAt: new Date(),
+        results: progress.results
+      }
+    } else {
+      // Update status from orchestrator
+      evaluation.status = progress.status
+      evaluation.results = progress.results
+      evaluation.updatedAt = new Date()
+    }
+
     res.json({
       success: true,
-      data: evaluation
+      data: evaluation,
+      progress: progress
     })
   } catch (error) {
     next(error)
