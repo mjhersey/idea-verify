@@ -1,0 +1,583 @@
+name: Integration Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment for testing'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      test_suite:
+        description: 'Test suite to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - e2e
+          - api
+          - database
+          - auth
+          - evaluation
+          - performance
+      skip_setup:
+        description: 'Skip environment setup (if already deployed)'
+        required: false
+        default: false
+        type: boolean
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/api/**'
+      - 'packages/orchestrator/**'
+      - 'packages/web/**'
+      - 'tests/integration/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'packages/api/**'
+      - 'packages/orchestrator/**'
+      - 'packages/web/**'
+      - 'tests/integration/**'
+
+env:
+  AWS_REGION: us-east-1
+  NODE_VERSION: '20'
+
+jobs:
+  determine-environment:
+    name: Determine Test Environment
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
+      base_url: ${{ steps.env.outputs.base_url }}
+      run_tests: ${{ steps.env.outputs.run_tests }}
+    steps:
+      - name: Determine environment and settings
+        id: env
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            ENV="${{ github.event.inputs.environment }}"
+            RUN_TESTS="true"
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            ENV="dev"
+            RUN_TESTS="true"
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            ENV="dev"
+            RUN_TESTS="true"
+          else
+            ENV="dev"
+            RUN_TESTS="false"
+          fi
+          
+          echo "environment=$ENV" >> $GITHUB_OUTPUT
+          echo "run_tests=$RUN_TESTS" >> $GITHUB_OUTPUT
+          
+          # Set base URL based on environment
+          case $ENV in
+            prod)
+              echo "base_url=https://aivalidation.com" >> $GITHUB_OUTPUT
+              ;;
+            staging)
+              echo "base_url=https://staging.aivalidation.com" >> $GITHUB_OUTPUT
+              ;;
+            dev|*)
+              echo "base_url=http://localhost:3000" >> $GITHUB_OUTPUT
+              ;;
+          esac
+          
+          echo "🎯 Test Environment: $ENV"
+          echo "🔗 Base URL: $(cat $GITHUB_OUTPUT | grep base_url | cut -d= -f2)"
+          echo "🧪 Run Tests: $RUN_TESTS"
+
+  setup-environment:
+    name: Setup Test Environment
+    runs-on: ubuntu-latest
+    needs: determine-environment
+    if: needs.determine-environment.outputs.run_tests == 'true' && !github.event.inputs.skip_setup
+    environment: ${{ needs.determine-environment.outputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Deploy infrastructure if needed
+        if: needs.determine-environment.outputs.environment != 'prod'
+        working-directory: packages/infrastructure
+        run: |
+          npm ci
+          
+          # Deploy parameter store
+          npx cdk deploy AiValidationParameters${{ needs.determine-environment.outputs.environment == 'staging' && 'Staging' || 'Dev' }} \
+            --context environment=${{ needs.determine-environment.outputs.environment }} \
+            --require-approval never
+          
+          # Deploy infrastructure
+          npx cdk deploy AiValidationPlatform${{ needs.determine-environment.outputs.environment == 'staging' && 'Staging' || 'Dev' }} \
+            --context environment=${{ needs.determine-environment.outputs.environment }} \
+            --require-approval never
+          
+          # Deploy ECS services
+          npx cdk deploy AiValidationEcs${{ needs.determine-environment.outputs.environment == 'staging' && 'Staging' || 'Dev' }} \
+            --context environment=${{ needs.determine-environment.outputs.environment }} \
+            --require-approval never
+
+      - name: Wait for services to be ready
+        run: |
+          echo "⏳ Waiting for services to be ready..."
+          
+          # Wait for load balancer to be healthy
+          MAX_ATTEMPTS=30
+          ATTEMPT=0
+          
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            if curl -f "${{ needs.determine-environment.outputs.base_url }}/health" > /dev/null 2>&1; then
+              echo "✅ Services are ready!"
+              break
+            fi
+            
+            ATTEMPT=$((ATTEMPT + 1))
+            echo "Attempt $ATTEMPT/$MAX_ATTEMPTS failed, waiting 30 seconds..."
+            sleep 30
+          done
+          
+          if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+            echo "❌ Services did not become ready within timeout"
+            exit 1
+          fi
+
+  validate-environment:
+    name: Validate Environment
+    runs-on: ubuntu-latest
+    needs: [determine-environment, setup-environment]
+    if: always() && needs.determine-environment.outputs.run_tests == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run environment validation
+        env:
+          TEST_ENVIRONMENT: ${{ needs.determine-environment.outputs.environment }}
+          TEST_BASE_URL: ${{ needs.determine-environment.outputs.base_url }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          OUTPUT_FORMAT: json
+        run: |
+          node scripts/validate-environment.js \
+            ${{ needs.determine-environment.outputs.environment }} \
+            ${{ needs.determine-environment.outputs.base_url }}
+
+  run-unit-tests:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    needs: determine-environment
+    if: needs.determine-environment.outputs.run_tests == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Upload unit test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-results
+          path: |
+            coverage/
+            test-results.xml
+
+  run-e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    needs: [determine-environment, setup-environment, validate-environment]
+    if: always() && needs.determine-environment.outputs.run_tests == 'true' && (github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'e2e' || github.event.inputs.test_suite == '')
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run E2E tests
+        env:
+          TEST_ENVIRONMENT: ${{ needs.determine-environment.outputs.environment }}
+          TEST_BASE_URL: ${{ needs.determine-environment.outputs.base_url }}
+        run: |
+          npx vitest run tests/integration/e2e-test-suite.ts \
+            --reporter=verbose \
+            --reporter=junit \
+            --outputFile.junit=e2e-test-results.xml
+
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-results
+          path: e2e-test-results.xml
+
+  run-api-tests:
+    name: API Integration Tests
+    runs-on: ubuntu-latest
+    needs: [determine-environment, setup-environment, validate-environment]
+    if: always() && needs.determine-environment.outputs.run_tests == 'true' && (github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'api' || github.event.inputs.test_suite == '')
+    timeout-minutes: 20
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run API integration tests
+        env:
+          TEST_ENVIRONMENT: ${{ needs.determine-environment.outputs.environment }}
+          TEST_BASE_URL: ${{ needs.determine-environment.outputs.base_url }}
+        run: |
+          npx vitest run tests/integration/api-integration.test.ts \
+            --reporter=verbose \
+            --reporter=junit \
+            --outputFile.junit=api-test-results.xml
+
+      - name: Upload API test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: api-test-results
+          path: api-test-results.xml
+
+  run-database-tests:
+    name: Database Integration Tests
+    runs-on: ubuntu-latest
+    needs: [determine-environment, setup-environment, validate-environment]
+    if: always() && needs.determine-environment.outputs.run_tests == 'true' && (github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'database' || github.event.inputs.test_suite == '')
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run database integration tests
+        env:
+          TEST_ENVIRONMENT: ${{ needs.determine-environment.outputs.environment }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          TEST_DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+        run: |
+          npx vitest run tests/integration/database-integration.test.ts \
+            --reporter=verbose \
+            --reporter=junit \
+            --outputFile.junit=database-test-results.xml
+
+      - name: Upload database test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: database-test-results
+          path: database-test-results.xml
+
+  run-auth-tests:
+    name: Authentication Flow Tests
+    runs-on: ubuntu-latest
+    needs: [determine-environment, setup-environment, validate-environment]
+    if: always() && needs.determine-environment.outputs.run_tests == 'true' && (github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'auth' || github.event.inputs.test_suite == '')
+    timeout-minutes: 15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run authentication flow tests
+        env:
+          TEST_ENVIRONMENT: ${{ needs.determine-environment.outputs.environment }}
+          TEST_BASE_URL: ${{ needs.determine-environment.outputs.base_url }}
+        run: |
+          npx vitest run tests/integration/auth-flow.test.ts \
+            --reporter=verbose \
+            --reporter=junit \
+            --outputFile.junit=auth-test-results.xml
+
+      - name: Upload auth test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: auth-test-results
+          path: auth-test-results.xml
+
+  run-evaluation-tests:
+    name: Evaluation Pipeline Tests
+    runs-on: ubuntu-latest
+    needs: [determine-environment, setup-environment, validate-environment]
+    if: always() && needs.determine-environment.outputs.run_tests == 'true' && (github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'evaluation' || github.event.inputs.test_suite == '')
+    timeout-minutes: 45
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run evaluation pipeline tests
+        env:
+          TEST_ENVIRONMENT: ${{ needs.determine-environment.outputs.environment }}
+          TEST_BASE_URL: ${{ needs.determine-environment.outputs.base_url }}
+        run: |
+          npx vitest run tests/integration/evaluation-pipeline.test.ts \
+            --reporter=verbose \
+            --reporter=junit \
+            --outputFile.junit=evaluation-test-results.xml
+
+      - name: Upload evaluation test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: evaluation-test-results
+          path: evaluation-test-results.xml
+
+  run-performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: [determine-environment, setup-environment, validate-environment]
+    if: always() && needs.determine-environment.outputs.run_tests == 'true' && (github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'performance' || github.event.inputs.test_suite == '')
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run performance tests
+        env:
+          TEST_ENVIRONMENT: ${{ needs.determine-environment.outputs.environment }}
+          TEST_BASE_URL: ${{ needs.determine-environment.outputs.base_url }}
+          PERF_CONCURRENT_USERS: ${{ needs.determine-environment.outputs.environment == 'prod' && '5' || '10' }}
+          PERF_TEST_DURATION: ${{ needs.determine-environment.outputs.environment == 'prod' && '10000' || '15000' }}
+        run: |
+          npx vitest run tests/integration/performance.test.ts \
+            --reporter=verbose \
+            --reporter=junit \
+            --outputFile.junit=performance-test-results.xml
+
+      - name: Upload performance test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-test-results
+          path: performance-test-results.xml
+
+  generate-test-report:
+    name: Generate Test Report
+    runs-on: ubuntu-latest
+    needs: [
+      determine-environment,
+      run-unit-tests,
+      run-e2e-tests,
+      run-api-tests,
+      run-database-tests,
+      run-auth-tests,
+      run-evaluation-tests,
+      run-performance-tests
+    ]
+    if: always() && needs.determine-environment.outputs.run_tests == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all test artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: test-results
+
+      - name: Generate consolidated test report
+        run: |
+          echo "# Integration Test Report" > test-report.md
+          echo "" >> test-report.md
+          echo "**Environment:** ${{ needs.determine-environment.outputs.environment }}" >> test-report.md
+          echo "**Base URL:** ${{ needs.determine-environment.outputs.base_url }}" >> test-report.md
+          echo "**Timestamp:** $(date -u)" >> test-report.md
+          echo "" >> test-report.md
+          
+          # Test Status Summary
+          echo "## Test Status Summary" >> test-report.md
+          echo "" >> test-report.md
+          echo "| Test Suite | Status |" >> test-report.md
+          echo "|------------|--------|" >> test-report.md
+          echo "| Unit Tests | ${{ needs.run-unit-tests.result == 'success' && '✅ PASSED' || '❌ FAILED' }} |" >> test-report.md
+          echo "| E2E Tests | ${{ needs.run-e2e-tests.result == 'success' && '✅ PASSED' || (needs.run-e2e-tests.result == 'skipped' && '⏭️ SKIPPED' || '❌ FAILED') }} |" >> test-report.md
+          echo "| API Tests | ${{ needs.run-api-tests.result == 'success' && '✅ PASSED' || (needs.run-api-tests.result == 'skipped' && '⏭️ SKIPPED' || '❌ FAILED') }} |" >> test-report.md
+          echo "| Database Tests | ${{ needs.run-database-tests.result == 'success' && '✅ PASSED' || (needs.run-database-tests.result == 'skipped' && '⏭️ SKIPPED' || '❌ FAILED') }} |" >> test-report.md
+          echo "| Auth Tests | ${{ needs.run-auth-tests.result == 'success' && '✅ PASSED' || (needs.run-auth-tests.result == 'skipped' && '⏭️ SKIPPED' || '❌ FAILED') }} |" >> test-report.md
+          echo "| Evaluation Tests | ${{ needs.run-evaluation-tests.result == 'success' && '✅ PASSED' || (needs.run-evaluation-tests.result == 'skipped' && '⏭️ SKIPPED' || '❌ FAILED') }} |" >> test-report.md
+          echo "| Performance Tests | ${{ needs.run-performance-tests.result == 'success' && '✅ PASSED' || (needs.run-performance-tests.result == 'skipped' && '⏭️ SKIPPED' || '❌ FAILED') }} |" >> test-report.md
+          echo "" >> test-report.md
+          
+          # Overall Status
+          FAILED_TESTS=0
+          if [[ "${{ needs.run-unit-tests.result }}" == "failure" ]]; then FAILED_TESTS=$((FAILED_TESTS + 1)); fi
+          if [[ "${{ needs.run-e2e-tests.result }}" == "failure" ]]; then FAILED_TESTS=$((FAILED_TESTS + 1)); fi
+          if [[ "${{ needs.run-api-tests.result }}" == "failure" ]]; then FAILED_TESTS=$((FAILED_TESTS + 1)); fi
+          if [[ "${{ needs.run-database-tests.result }}" == "failure" ]]; then FAILED_TESTS=$((FAILED_TESTS + 1)); fi
+          if [[ "${{ needs.run-auth-tests.result }}" == "failure" ]]; then FAILED_TESTS=$((FAILED_TESTS + 1)); fi
+          if [[ "${{ needs.run-evaluation-tests.result }}" == "failure" ]]; then FAILED_TESTS=$((FAILED_TESTS + 1)); fi
+          if [[ "${{ needs.run-performance-tests.result }}" == "failure" ]]; then FAILED_TESTS=$((FAILED_TESTS + 1)); fi
+          
+          if [[ $FAILED_TESTS -eq 0 ]]; then
+            echo "## 🎉 Overall Status: SUCCESS" >> test-report.md
+            echo "All integration tests passed successfully!" >> test-report.md
+          else
+            echo "## ❌ Overall Status: FAILURE" >> test-report.md
+            echo "$FAILED_TESTS test suite(s) failed. Please review the individual test results." >> test-report.md
+          fi
+          
+          echo "" >> test-report.md
+          echo "---" >> test-report.md
+          echo "*Generated by GitHub Actions Integration Test Workflow*" >> test-report.md
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-report
+          path: test-report.md
+
+      - name: Comment PR with test results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('test-report.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+
+  cleanup-test-environment:
+    name: Cleanup Test Environment
+    runs-on: ubuntu-latest
+    needs: [
+      determine-environment,
+      generate-test-report
+    ]
+    if: always() && needs.determine-environment.outputs.environment == 'dev' && !github.event.inputs.skip_setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cleanup dev environment resources
+        working-directory: packages/infrastructure
+        run: |
+          npm ci
+          
+          # Only cleanup if this was a temporary deployment for testing
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "🧹 Cleaning up temporary test environment..."
+            
+            # Destroy stacks in reverse order
+            npx cdk destroy AiValidationMonitoringDev --force || true
+            npx cdk destroy AiValidationEcsDev --force || true
+            npx cdk destroy AiValidationPlatformDev --force || true
+            npx cdk destroy AiValidationParametersDev --force || true
+            
+            echo "✅ Cleanup completed"
+          else
+            echo "ℹ️ Skipping cleanup for non-PR deployment"
+          fi

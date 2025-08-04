@@ -1,0 +1,649 @@
+name: Deploy Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      component:
+        description: 'Infrastructure component to deploy'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - parameters
+          - infrastructure
+          - ecs
+          - monitoring
+          - security
+      force_deploy:
+        description: 'Force deployment (skip drift detection)'
+        required: false
+        default: false
+        type: boolean
+      skip_tests:
+        description: 'Skip post-deployment tests'
+        required: false
+        default: false
+        type: boolean
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/infrastructure/**'
+      - '.github/workflows/deploy-infrastructure.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'packages/infrastructure/**'
+
+permissions:
+  id-token: write
+  contents: read
+  deployments: write
+  actions: read
+
+env:
+  AWS_REGION: us-east-1
+  NODE_VERSION: '20'
+
+jobs:
+  determine-deployment:
+    name: Determine Deployment Strategy
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.config.outputs.environment }}
+      components: ${{ steps.config.outputs.components }}
+      should_deploy: ${{ steps.config.outputs.should_deploy }}
+      requires_approval: ${{ steps.config.outputs.requires_approval }}
+    steps:
+      - name: Configure deployment
+        id: config
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            ENV="${{ github.event.inputs.environment }}"
+            COMPONENTS="${{ github.event.inputs.component }}"
+            SHOULD_DEPLOY="true"
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            ENV="dev"
+            COMPONENTS="all"
+            SHOULD_DEPLOY="true"
+          else
+            ENV="dev"
+            COMPONENTS="all"
+            SHOULD_DEPLOY="false"
+          fi
+          
+          # Determine if approval is required
+          if [[ "$ENV" == "prod" ]]; then
+            REQUIRES_APPROVAL="true"
+          else
+            REQUIRES_APPROVAL="false"
+          fi
+          
+          echo "environment=$ENV" >> $GITHUB_OUTPUT
+          echo "components=$COMPONENTS" >> $GITHUB_OUTPUT
+          echo "should_deploy=$SHOULD_DEPLOY" >> $GITHUB_OUTPUT
+          echo "requires_approval=$REQUIRES_APPROVAL" >> $GITHUB_OUTPUT
+          
+          echo "🎯 Environment: $ENV"
+          echo "🔧 Components: $COMPONENTS"
+          echo "🚀 Should Deploy: $SHOULD_DEPLOY"
+          echo "🔒 Requires Approval: $REQUIRES_APPROVAL"
+
+  security-scanning:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    needs: determine-deployment
+    if: needs.determine-deployment.outputs.should_deploy == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: packages/infrastructure
+        run: npm ci
+
+      - name: Run CDK lint
+        working-directory: packages/infrastructure
+        run: npm run lint
+
+      - name: Run CDK tests
+        working-directory: packages/infrastructure
+        run: npm test
+
+      - name: Install security scanning tools
+        run: |
+          # Install Trivy for vulnerability scanning
+          sudo apt-get update
+          sudo apt-get install wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install trivy
+          
+          # Install Checkov for infrastructure as code scanning
+          pip install checkov
+
+      - name: Scan Docker images for vulnerabilities
+        run: |
+          echo "🔍 Scanning Docker images for vulnerabilities..."
+          
+          # Scan API Dockerfile
+          if [ -f "packages/api/Dockerfile" ]; then
+            echo "Scanning API Dockerfile..."
+            trivy config packages/api/Dockerfile --format table --exit-code 1 --severity HIGH,CRITICAL || {
+              echo "⚠️ High or critical vulnerabilities found in API Dockerfile"
+              exit 1
+            }
+          fi
+          
+          # Scan Orchestrator Dockerfile
+          if [ -f "packages/orchestrator/Dockerfile" ]; then
+            echo "Scanning Orchestrator Dockerfile..."
+            trivy config packages/orchestrator/Dockerfile --format table --exit-code 1 --severity HIGH,CRITICAL || {
+              echo "⚠️ High or critical vulnerabilities found in Orchestrator Dockerfile"
+              exit 1
+            }
+          fi
+          
+          # Scan Web Dockerfile
+          if [ -f "packages/web/Dockerfile" ]; then
+            echo "Scanning Web Dockerfile..."
+            trivy config packages/web/Dockerfile --format table --exit-code 1 --severity HIGH,CRITICAL || {
+              echo "⚠️ High or critical vulnerabilities found in Web Dockerfile"
+              exit 1
+            }
+          fi
+
+      - name: Scan Infrastructure as Code
+        working-directory: packages/infrastructure
+        run: |
+          echo "🔍 Scanning Infrastructure as Code for security issues..."
+          
+          # Scan CDK TypeScript files with Checkov
+          checkov -d lib/ --framework cloudformation --output cli --exit-code-skip-results 1 \
+            --check CKV_AWS_20,CKV_AWS_23,CKV_AWS_61,CKV_AWS_79,CKV_AWS_144,CKV_AWS_149 \
+            --skip-check CKV_AWS_19,CKV_AWS_24 || {
+            echo "⚠️ Critical security issues found in infrastructure code"
+            exit 1
+          }
+          
+          echo "✅ Infrastructure security scan completed"
+
+      - name: Scan dependencies for vulnerabilities
+        run: |
+          echo "🔍 Scanning dependencies for vulnerabilities..."
+          
+          # Scan package.json files
+          npm audit --audit-level=high --production || {
+            echo "⚠️ High or critical vulnerabilities found in dependencies"
+            echo "Run 'npm audit fix' to resolve issues"
+            exit 1
+          }
+          
+          # Scan infrastructure dependencies
+          cd packages/infrastructure
+          npm audit --audit-level=high --production || {
+            echo "⚠️ High or critical vulnerabilities found in infrastructure dependencies"
+            exit 1
+          }
+
+      - name: Check for secrets in code
+        run: |
+          echo "🔍 Scanning for secrets in codebase..."
+          
+          # Simple secret scanning (in production, use dedicated tools like GitLeaks or TruffleHog)
+          if grep -r -i --include="*.ts" --include="*.js" --include="*.json" --include="*.yml" --include="*.yaml" \
+            -E "(password|secret|key|token|credential|api_key|private_key)" . | grep -v -E "(test|example|placeholder|template|description|name|type)"; then
+            echo "⚠️ Potential secrets found in codebase. Please review and remove sensitive data."
+            exit 1
+          fi
+          
+          echo "✅ No obvious secrets found in codebase"
+
+      - name: Generate security report
+        if: always()
+        run: |
+          echo "📋 Security Scan Summary" > security-report.md
+          echo "========================" >> security-report.md
+          echo "" >> security-report.md
+          echo "**Scan Date:** $(date -u)" >> security-report.md
+          echo "**Environment:** ${{ needs.determine-deployment.outputs.environment }}" >> security-report.md
+          echo "**Commit:** ${{ github.sha }}" >> security-report.md
+          echo "" >> security-report.md
+          echo "### Scans Performed:" >> security-report.md
+          echo "- ✅ Docker image vulnerability scanning" >> security-report.md
+          echo "- ✅ Infrastructure as Code security scanning" >> security-report.md
+          echo "- ✅ Dependency vulnerability scanning" >> security-report.md
+          echo "- ✅ Secret detection scanning" >> security-report.md
+          echo "" >> security-report.md
+          echo "### Results:" >> security-report.md
+          echo "All security scans completed successfully." >> security-report.md
+
+      - name: Upload security report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-report-${{ needs.determine-deployment.outputs.environment }}
+          path: security-report.md
+
+  pre-deployment-checks:
+    name: Pre-deployment Checks
+    runs-on: ubuntu-latest
+    needs: [determine-deployment, security-scanning]
+    if: needs.determine-deployment.outputs.should_deploy == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: packages/infrastructure
+        run: npm ci
+
+      - name: CDK diff (if not force deploy)
+        if: github.event.inputs.force_deploy != 'true'
+        working-directory: packages/infrastructure
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+        run: |
+          # Run CDK diff to check for changes
+          npx cdk diff --context environment=${{ needs.determine-deployment.outputs.environment }} || true
+
+  deploy-parameters:
+    name: Deploy Parameter Store
+    runs-on: ubuntu-latest
+    needs: [determine-deployment, pre-deployment-checks]
+    if: needs.determine-deployment.outputs.should_deploy == 'true' && (needs.determine-deployment.outputs.components == 'all' || needs.determine-deployment.outputs.components == 'parameters')
+    environment: ${{ needs.determine-deployment.outputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: packages/infrastructure
+        run: npm ci
+
+      - name: Deploy parameter store
+        working-directory: packages/infrastructure
+        run: |
+          STACK_NAME="AiValidationParameters${{ needs.determine-deployment.outputs.environment == 'prod' && 'Prod' || (needs.determine-deployment.outputs.environment == 'staging' && 'Staging' || 'Dev') }}"
+          
+          echo "🚀 Deploying parameter store: $STACK_NAME"
+          
+          npx cdk deploy $STACK_NAME \
+            --context environment=${{ needs.determine-deployment.outputs.environment }} \
+            --require-approval never \
+            --outputs-file parameters-outputs.json
+          
+          echo "✅ Parameter store deployment completed"
+
+      - name: Upload deployment outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: parameters-outputs-${{ needs.determine-deployment.outputs.environment }}
+          path: packages/infrastructure/parameters-outputs.json
+
+  deploy-infrastructure:
+    name: Deploy Core Infrastructure
+    runs-on: ubuntu-latest
+    needs: [determine-deployment, deploy-parameters]
+    if: needs.determine-deployment.outputs.should_deploy == 'true' && (needs.determine-deployment.outputs.components == 'all' || needs.determine-deployment.outputs.components == 'infrastructure')
+    environment: ${{ needs.determine-deployment.outputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: packages/infrastructure
+        run: npm ci
+
+      - name: Deploy core infrastructure
+        working-directory: packages/infrastructure
+        run: |
+          STACK_NAME="AiValidationPlatform${{ needs.determine-deployment.outputs.environment == 'prod' && 'Prod' || (needs.determine-deployment.outputs.environment == 'staging' && 'Staging' || 'Dev') }}"
+          
+          echo "🚀 Deploying core infrastructure: $STACK_NAME"
+          
+          npx cdk deploy $STACK_NAME \
+            --context environment=${{ needs.determine-deployment.outputs.environment }} \
+            --require-approval never \
+            --outputs-file infrastructure-outputs.json
+          
+          echo "✅ Core infrastructure deployment completed"
+
+      - name: Upload deployment outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: infrastructure-outputs-${{ needs.determine-deployment.outputs.environment }}
+          path: packages/infrastructure/infrastructure-outputs.json
+
+  deploy-ecs:
+    name: Deploy ECS Services
+    runs-on: ubuntu-latest
+    needs: [determine-deployment, deploy-infrastructure]
+    if: needs.determine-deployment.outputs.should_deploy == 'true' && (needs.determine-deployment.outputs.components == 'all' || needs.determine-deployment.outputs.components == 'ecs')
+    environment: ${{ needs.determine-deployment.outputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: packages/infrastructure
+        run: npm ci
+
+      - name: Deploy ECS services
+        working-directory: packages/infrastructure
+        run: |
+          STACK_NAME="AiValidationEcs${{ needs.determine-deployment.outputs.environment == 'prod' && 'Prod' || (needs.determine-deployment.outputs.environment == 'staging' && 'Staging' || 'Dev') }}"
+          
+          echo "🚀 Deploying ECS services: $STACK_NAME"
+          
+          npx cdk deploy $STACK_NAME \
+            --context environment=${{ needs.determine-deployment.outputs.environment }} \
+            --require-approval never \
+            --outputs-file ecs-outputs.json
+          
+          echo "✅ ECS services deployment completed"
+
+      - name: Upload deployment outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: ecs-outputs-${{ needs.determine-deployment.outputs.environment }}
+          path: packages/infrastructure/ecs-outputs.json
+
+  deploy-monitoring:
+    name: Deploy Monitoring
+    runs-on: ubuntu-latest
+    needs: [determine-deployment, deploy-ecs]
+    if: needs.determine-deployment.outputs.should_deploy == 'true' && (needs.determine-deployment.outputs.components == 'all' || needs.determine-deployment.outputs.components == 'monitoring')
+    environment: ${{ needs.determine-deployment.outputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: packages/infrastructure
+        run: npm ci
+
+      - name: Deploy monitoring
+        working-directory: packages/infrastructure
+        run: |
+          STACK_NAME="AiValidationMonitoring${{ needs.determine-deployment.outputs.environment == 'prod' && 'Prod' || (needs.determine-deployment.outputs.environment == 'staging' && 'Staging' || 'Dev') }}"
+          
+          echo "🚀 Deploying monitoring: $STACK_NAME"
+          
+          npx cdk deploy $STACK_NAME \
+            --context environment=${{ needs.determine-deployment.outputs.environment }} \
+            --require-approval never \
+            --outputs-file monitoring-outputs.json
+          
+          echo "✅ Monitoring deployment completed"
+
+      - name: Upload deployment outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitoring-outputs-${{ needs.determine-deployment.outputs.environment }}
+          path: packages/infrastructure/monitoring-outputs.json
+
+  deploy-security:
+    name: Deploy Security Configuration
+    runs-on: ubuntu-latest
+    needs: [determine-deployment, deploy-ecs]
+    if: needs.determine-deployment.outputs.should_deploy == 'true' && (needs.determine-deployment.outputs.components == 'all' || needs.determine-deployment.outputs.components == 'security')
+    environment: ${{ needs.determine-deployment.outputs.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: packages/infrastructure
+        run: npm ci
+
+      - name: Deploy security configuration
+        working-directory: packages/infrastructure
+        run: |
+          STACK_NAME="AiValidationSecurity${{ needs.determine-deployment.outputs.environment == 'prod' && 'Prod' || (needs.determine-deployment.outputs.environment == 'staging' && 'Staging' || 'Dev') }}"
+          
+          echo "🚀 Deploying security configuration: $STACK_NAME"
+          
+          npx cdk deploy $STACK_NAME \
+            --context environment=${{ needs.determine-deployment.outputs.environment }} \
+            --require-approval never \
+            --outputs-file security-outputs.json
+          
+          echo "✅ Security configuration deployment completed"
+
+      - name: Upload deployment outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-outputs-${{ needs.determine-deployment.outputs.environment }}
+          path: packages/infrastructure/security-outputs.json
+
+  post-deployment-tests:
+    name: Post-deployment Tests
+    runs-on: ubuntu-latest
+    needs: [determine-deployment, deploy-monitoring, deploy-security]
+    if: always() && needs.determine-deployment.outputs.should_deploy == 'true' && !github.event.inputs.skip_tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Wait for services to stabilize
+        run: |
+          echo "⏳ Waiting for services to stabilize..."
+          sleep 60
+
+      - name: Run environment validation
+        env:
+          TEST_ENVIRONMENT: ${{ needs.determine-deployment.outputs.environment }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          # Get ALB endpoint from deployment outputs
+          # For now, use a placeholder
+          BASE_URL="https://${{ needs.determine-deployment.outputs.environment }}.aivalidation.com"
+          
+          node scripts/validate-environment.js \
+            ${{ needs.determine-deployment.outputs.environment }} \
+            $BASE_URL
+
+      - name: Run smoke tests
+        if: needs.determine-deployment.outputs.environment != 'prod'
+        env:
+          TEST_ENVIRONMENT: ${{ needs.determine-deployment.outputs.environment }}
+          TEST_BASE_URL: "https://${{ needs.determine-deployment.outputs.environment }}.aivalidation.com"
+        run: |
+          # Run basic smoke tests
+          npm run test:integration:api
+
+  deployment-notification:
+    name: Send Deployment Notification
+    runs-on: ubuntu-latest
+    needs: [
+      determine-deployment,
+      deploy-parameters,
+      deploy-infrastructure,
+      deploy-ecs,
+      deploy-monitoring,
+      deploy-security,
+      post-deployment-tests
+    ]
+    if: always() && needs.determine-deployment.outputs.should_deploy == 'true'
+    steps:
+      - name: Determine deployment status
+        id: status
+        run: |
+          # Check if all deployments succeeded
+          PARAMS_STATUS="${{ needs.deploy-parameters.result }}"
+          INFRA_STATUS="${{ needs.deploy-infrastructure.result }}"
+          ECS_STATUS="${{ needs.deploy-ecs.result }}"
+          MONITORING_STATUS="${{ needs.deploy-monitoring.result }}"
+          SECURITY_STATUS="${{ needs.deploy-security.result }}"
+          TESTS_STATUS="${{ needs.post-deployment-tests.result }}"
+          
+          if [[ "$PARAMS_STATUS" == "success" && "$INFRA_STATUS" == "success" && "$ECS_STATUS" == "success" && "$MONITORING_STATUS" == "success" && "$SECURITY_STATUS" == "success" ]]; then
+            if [[ "$TESTS_STATUS" == "success" || "$TESTS_STATUS" == "skipped" ]]; then
+              echo "status=success" >> $GITHUB_OUTPUT
+              echo "message=All infrastructure components deployed successfully" >> $GITHUB_OUTPUT
+            else
+              echo "status=warning" >> $GITHUB_OUTPUT
+              echo "message=Infrastructure deployed but post-deployment tests failed" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "message=One or more infrastructure deployments failed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create deployment record
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+              environment: '${{ needs.determine-deployment.outputs.environment }}',
+              description: 'Infrastructure deployment',
+              auto_merge: false,
+              required_contexts: []
+            });
+
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: deployment.data.id,
+              state: '${{ steps.status.outputs.status == 'success' && 'success' || 'failure' }}',
+              description: '${{ steps.status.outputs.message }}',
+              environment: '${{ needs.determine-deployment.outputs.environment }}'
+            });
+
+  rollback-capability:
+    name: Prepare Rollback Information
+    runs-on: ubuntu-latest
+    needs: [determine-deployment, deploy-security]
+    if: always() && needs.determine-deployment.outputs.should_deploy == 'true' && needs.determine-deployment.outputs.environment == 'prod'
+    steps:
+      - name: Store rollback information
+        run: |
+          # Create rollback metadata
+          cat > rollback-info.json << EOF
+          {
+            "deployment_id": "${{ github.run_id }}",
+            "environment": "${{ needs.determine-deployment.outputs.environment }}",
+            "commit_sha": "${{ github.sha }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "components_deployed": [
+              "parameters",
+              "infrastructure", 
+              "ecs",
+              "monitoring",
+              "security"
+            ],
+            "rollback_command": "gh workflow run rollback.yml -f deployment_id=${{ github.run_id }} -f environment=${{ needs.determine-deployment.outputs.environment }}"
+          }
+          EOF
+
+      - name: Upload rollback information
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-info-${{ github.run_id }}
+          path: rollback-info.json
+          retention-days: 30

@@ -19,7 +19,6 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./types/credentials.js"), exports);
 __exportStar(require("./types/database.js"), exports);
-__exportStar(require("./types/businessIdea.js"), exports);
 __exportStar(require("./secrets/secrets-manager.js"), exports);
 __exportStar(require("./config/environment.js"), exports);
 __exportStar(require("./utils/credential-validator.js"), exports);
@@ -29,6 +28,7 @@ __exportStar(require("./utils/service-client.js"), exports);
 __exportStar(require("./config/rate-limit-configs.js"), exports);
 __exportStar(require("./testing/integration-test-suite.js"), exports);
 __exportStar(require("./health/health-monitor.js"), exports);
+__exportStar(require("./health/service-registry.js"), exports);
 __exportStar(require("./mocks/mock-service-manager.js"), exports);
 __exportStar(require("./mocks/openai/mock-openai-service.js"), exports);
 __exportStar(require("./mocks/anthropic/mock-anthropic-service.js"), exports);
