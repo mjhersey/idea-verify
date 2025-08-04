@@ -63,7 +63,7 @@ export class AgentCoordinator implements MessageHandler {
     await this.messageBus.subscribe(MessageType.AGENT_DATA_REQUEST, this);
   }
 
-  canHandle(message: Message): boolean {
+  canHandle(message: Message): message is Message {
     return [
       MessageType.AGENT_COMPLETE,
       MessageType.AGENT_ERROR,
@@ -238,7 +238,7 @@ export class AgentCoordinator implements MessageHandler {
     const dependencyData = this.gatherDependencyData(evaluationId, agentType);
 
     // Create and publish agent start message
-    const message = this.messageBus.createMessage<AgentStartMessage>(
+    const message = this.messageBus.createMessage(
       MessageType.AGENT_START,
       {
         evaluationId,
@@ -405,7 +405,7 @@ export class AgentCoordinator implements MessageHandler {
     success: boolean,
     error?: string
   ): Promise<void> {
-    const response = this.messageBus.createMessage<AgentDataResponseMessage>(
+    const response = this.messageBus.createMessage(
       MessageType.AGENT_DATA_RESPONSE,
       {
         evaluationId: originalMessage.payload.evaluationId,
@@ -438,7 +438,7 @@ export class AgentCoordinator implements MessageHandler {
     const dependentAgents = completedState.dependents;
 
     if (dependentAgents.length > 0) {
-      const message = this.messageBus.createMessage<AgentDependencyCompleteMessage>(
+      const message = this.messageBus.createMessage(
         MessageType.AGENT_DEPENDENCY_COMPLETE,
         {
           evaluationId,

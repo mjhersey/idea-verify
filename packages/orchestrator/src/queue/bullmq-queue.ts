@@ -56,35 +56,40 @@ export class BullMQQueue extends BaseQueue {
       this.emit('waiting', job.id);
     });
 
-    this.queue.on('active', (job: any) => {
+    this.queue.on('active' as any, (job: any) => {
       this.updateMetrics(this.convertBullJobToJob(job), JobStatus.ACTIVE);
       this.emit('active', job.id);
     });
 
-    this.queue.on('completed', (job: any) => {
+    this.queue.on('completed' as any, (job: any) => {
       this.updateMetrics(this.convertBullJobToJob(job), JobStatus.COMPLETED);
       this.emit('completed', job.id, job.returnvalue);
     });
 
-    this.queue.on('failed', (job: any, err: any) => {
+    this.queue.on('failed' as any, (job: any, err: any) => {
       if (job) {
         this.updateMetrics(this.convertBullJobToJob(job), JobStatus.FAILED);
         this.emit('failed', job.id, err);
       }
     });
 
-    this.queue.on('stalled', (job: any) => {
+    this.queue.on('stalled' as any, (job: any) => {
       console.warn(`Job ${job.id} stalled in queue ${this.name}`);
       this.emit('stalled', job.id);
     });
   }
 
   async add(jobType: JobType, data: JobData, opts?: JobOptions): Promise<Job> {
-    const jobOptions = {
+    const backoffOptions = opts?.backoff ? {
+      type: opts.backoff.type,
+      delay: opts.backoff.delay
+    } : this.config.defaultJobOptions?.backoff;
+
+    const jobOptions: any = {
       priority: opts?.priority ?? this.config.defaultJobOptions?.priority,
       delay: opts?.delay ?? this.config.defaultJobOptions?.delay,
       attempts: opts?.attempts ?? this.config.defaultJobOptions?.attempts,
-      backoff: opts?.backoff ?? this.config.defaultJobOptions?.backoff,
+      backoff: backoffOptions,
       removeOnComplete: opts?.removeOnComplete ?? this.config.defaultJobOptions?.removeOnComplete,
       removeOnFail: opts?.removeOnFail ?? this.config.defaultJobOptions?.removeOnFail
     };
@@ -153,7 +158,16 @@ export class BullMQQueue extends BaseQueue {
   }
 
   async clean(grace: number, limit = 0, type?: JobStatus): Promise<string[]> {
-    return await this.queue.clean(grace, limit, type);
+    const statusMap = {
+      [JobStatus.COMPLETED]: 'completed',
+      [JobStatus.FAILED]: 'failed',
+      [JobStatus.ACTIVE]: 'active',
+      [JobStatus.DELAYED]: 'delayed',
+      [JobStatus.PAUSED]: 'paused',
+      [JobStatus.WAITING]: 'wait'
+    };
+    const bullStatus = type ? statusMap[type] as any : undefined;
+    return await this.queue.clean(grace, limit, bullStatus);
   }
 
   async obliterate(opts?: { force?: boolean }): Promise<void> {

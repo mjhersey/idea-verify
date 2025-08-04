@@ -93,6 +93,6 @@ export interface EvaluationMetrics {
   failedEvaluations: number;
   averageProcessingTime: number;
   averageScore: number;
-  agentSuccessRates: Record<AgentType, number>;
+  agentSuccessRates: Record<AgentType, { total: number; successful: number; rate: number }>;
   throughput: number; // evaluations per hour
 }

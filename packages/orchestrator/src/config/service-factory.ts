@@ -4,7 +4,7 @@
  */
 
 import { getEnvironmentConfig } from '@ai-validation/shared';
-import { LLMProviderFactory } from '../llm/llm-provider-factory.js';
+import { ProviderFactory } from '../llm/provider-factory.js';
 import { QueueManager } from '../queue/queue-manager.js';
 import { DatabaseManager } from '../database/database-manager.js';
 import { MockServiceFactory } from '../mock/index.js';
@@ -241,7 +241,7 @@ export class ServiceFactory {
     console.log('[ServiceFactory] Creating real services...');
 
     // Create real LLM provider
-    const llmProvider = LLMProviderFactory.getProvider();
+    const llmProvider = ProviderFactory.getInstance().getProvider();
 
     // Create real queue manager
     const queueManager = QueueManager.getInstance();
@@ -314,7 +314,7 @@ export class ServiceFactory {
     if (useMock) {
       return MockServiceFactory.createLLMProvider(ServiceFactory.getDevelopmentConfig().llm);
     } else {
-      return LLMProviderFactory.getProvider();
+      return ProviderFactory.getInstance().getProvider();
     }
   }
 

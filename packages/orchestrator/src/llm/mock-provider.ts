@@ -162,4 +162,9 @@ export class MockProvider extends BaseProvider {
     // Mock provider is always available
     return true;
   }
+
+  async isHealthy(): Promise<boolean> {
+    // Mock provider is always healthy
+    return true;
+  }
 }

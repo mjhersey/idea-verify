@@ -5,6 +5,10 @@
 import { AgentType } from '@ai-validation/shared';
 import { BaseAgent } from './types.js';
 import { MarketResearchAgent } from './market-research-agent.js';
+import { CompetitiveAnalysisAgent } from './competitive-analysis-agent.js';
+import { CustomerResearchAgent } from './customer-research-agent.js';
+import { TechnicalFeasibilityAgent } from './technical-feasibility-agent.js';
+import { FinancialAnalysisAgent } from './financial-analysis-agent.js';
 
 export class AgentFactory {
   private static agents: Map<AgentType, BaseAgent> = new Map();
@@ -24,11 +28,10 @@ export class AgentFactory {
   static getAvailableAgentTypes(): AgentType[] {
     return [
       'market-research',
-      // Future agents will be added here:
-      // 'competitive-analysis',
-      // 'customer-research',
-      // 'technical-feasibility',
-      // 'financial-analysis'
+      'competitive-analysis',
+      'customer-research',
+      'technical-feasibility',
+      'financial-analysis'
     ];
   }
 
@@ -53,16 +56,16 @@ export class AgentFactory {
         return new MarketResearchAgent();
       
       case 'competitive-analysis':
-        throw new Error('Competitive Analysis Agent not yet implemented');
+        return new CompetitiveAnalysisAgent();
       
       case 'customer-research':
-        throw new Error('Customer Research Agent not yet implemented');
+        return new CustomerResearchAgent();
       
       case 'technical-feasibility':
-        throw new Error('Technical Feasibility Agent not yet implemented');
+        return new TechnicalFeasibilityAgent();
       
       case 'financial-analysis':
-        throw new Error('Financial Analysis Agent not yet implemented');
+        return new FinancialAnalysisAgent();
       
       default:
         throw new Error(`Unknown agent type: ${agentType}`);

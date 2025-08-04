@@ -57,7 +57,7 @@ export interface ResultProcessingJobData extends BaseJobData {
   }>;
 }
 
-export type JobData = EvaluationRequestJobData | AgentTaskJobData | ResultProcessingJobData;
+export type JobData = EvaluationRequestJobData | AgentTaskJobData | ResultProcessingJobData | Record<string, any>;
 
 export interface JobOptions {
   priority?: JobPriority;

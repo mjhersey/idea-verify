@@ -220,18 +220,18 @@ export class MessageBus extends EventEmitter implements IMessageBus {
   }
 
   // Helper method to create standard messages
-  createMessage<T extends Partial<Message>>(
+  createMessage(
     type: MessageType,
     payload: any,
     options: Partial<BaseMessage> = {}
-  ): T {
+  ): Message {
     return {
       id: uuidv4(),
       timestamp: new Date(),
       type,
       payload,
       ...options
-    } as T;
+    } as Message;
   }
 
   private addToHistory(message: Message): void {

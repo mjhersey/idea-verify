@@ -256,7 +256,7 @@ export class WebSocketServer extends EventEmitter {
     console.log(`[WebSocketServer] Client ${clientId} connected (${this.clients.size} total)`);
 
     // Set up client event handlers
-    socket.on('message', (data) => this.handleClientMessage(clientId, data));
+    socket.on('message', (data) => this.handleClientMessage(clientId, data.toString()));
     socket.on('close', (code, reason) => this.handleClientDisconnect(clientId, code, reason));
     socket.on('error', (error) => this.handleClientError(clientId, error));
     socket.on('pong', () => this.handleClientPong(clientId));
@@ -271,12 +271,12 @@ export class WebSocketServer extends EventEmitter {
     this.emit('clientConnected', client);
   }
 
-  private handleClientMessage(clientId: string, data: Buffer | string): void {
+  private handleClientMessage(clientId: string, data: string): void {
     const client = this.clients.get(clientId);
     if (!client) return;
 
     try {
-      const message = JSON.parse(data.toString());
+      const message = JSON.parse(data);
       
       switch (message.type) {
         case 'subscribe':

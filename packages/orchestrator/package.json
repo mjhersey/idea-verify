@@ -1,6 +1,7 @@
 {
   "name": "@ai-validation/orchestrator",
   "version": "1.0.0",
+  "type": "module",
   "description": "Agent Orchestration Service for AI-Powered Business Idea Validation Platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -80,7 +80,13 @@ export class OrchestratorService extends EventEmitter implements MessageHandler 
       failedEvaluations: 0,
       averageProcessingTime: 0,
       averageScore: 0,
-      agentSuccessRates: {},
+      agentSuccessRates: {
+        'market-research': { total: 0, successful: 0, rate: 0 },
+        'competitive-analysis': { total: 0, successful: 0, rate: 0 },
+        'customer-research': { total: 0, successful: 0, rate: 0 },
+        'technical-feasibility': { total: 0, successful: 0, rate: 0 },
+        'financial-analysis': { total: 0, successful: 0, rate: 0 }
+      },
       throughput: 0
     };
   }
@@ -294,7 +300,7 @@ export class OrchestratorService extends EventEmitter implements MessageHandler 
       }
 
       // Publish evaluation start message
-      const evaluationStartMessage = this.messageBus.createMessage<EvaluationStartMessage>(
+      const evaluationStartMessage = this.messageBus.createMessage(
         MessageType.EVALUATION_START,
         {
           evaluationId,
@@ -964,7 +970,7 @@ export class OrchestratorService extends EventEmitter implements MessageHandler 
     // Update agent success rates
     for (const agentResult of result.agentResults) {
       if (!this.metrics.agentSuccessRates[agentResult.agentType]) {
-        this.metrics.agentSuccessRates[agentResult.agentType] = { total: 0, successful: 0 };
+        this.metrics.agentSuccessRates[agentResult.agentType] = { total: 0, successful: 0, rate: 0 };
       }
       
       const rates = this.metrics.agentSuccessRates[agentResult.agentType];
@@ -972,6 +978,7 @@ export class OrchestratorService extends EventEmitter implements MessageHandler 
       if (agentResult.success) {
         rates.successful++;
       }
+      rates.rate = rates.total > 0 ? rates.successful / rates.total : 0;
     }
   }
 
@@ -1007,7 +1014,13 @@ export class OrchestratorService extends EventEmitter implements MessageHandler 
       failedEvaluations: 0,
       averageProcessingTime: 0,
       averageScore: 0,
-      agentSuccessRates: {},
+      agentSuccessRates: {
+        'market-research': { total: 0, successful: 0, rate: 0 },
+        'competitive-analysis': { total: 0, successful: 0, rate: 0 },
+        'customer-research': { total: 0, successful: 0, rate: 0 },
+        'technical-feasibility': { total: 0, successful: 0, rate: 0 },
+        'financial-analysis': { total: 0, successful: 0, rate: 0 }
+      },
       throughput: 0
     };
     

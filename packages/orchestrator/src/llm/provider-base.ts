@@ -32,6 +32,7 @@ export abstract class BaseProvider implements LLMProviderInterface {
 
   abstract invoke(prompt: string, context?: Record<string, any>): Promise<LLMResponse>;
   abstract isAvailable(): Promise<boolean>;
+  abstract isHealthy(): Promise<boolean>;
   protected abstract getDefaultModel(): string;
 
   getProviderName(): LLMProvider {

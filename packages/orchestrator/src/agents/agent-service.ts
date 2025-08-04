@@ -97,7 +97,7 @@ export class AgentService implements MessageHandler {
 
       if (result.success && result.response) {
         // Publish completion message
-        const completeMessage = this.messageBus.createMessage<AgentCompleteMessage>(
+        const completeMessage = this.messageBus.createMessage(
           MessageType.AGENT_COMPLETE,
           {
             evaluationId: context.evaluationId,
@@ -115,7 +115,7 @@ export class AgentService implements MessageHandler {
         await this.messageBus.publish(completeMessage);
       } else {
         // Publish error message
-        const errorMessage = this.messageBus.createMessage<AgentErrorMessage>(
+        const errorMessage = this.messageBus.createMessage(
           MessageType.AGENT_ERROR,
           {
             evaluationId: context.evaluationId,
@@ -135,7 +135,7 @@ export class AgentService implements MessageHandler {
       console.error(`[AgentService] Agent execution failed:`, error);
       
       // Publish error message
-      const errorMessage = this.messageBus.createMessage<AgentErrorMessage>(
+      const errorMessage = this.messageBus.createMessage(
         MessageType.AGENT_ERROR,
         {
           evaluationId: context.evaluationId,
@@ -161,7 +161,7 @@ export class AgentService implements MessageHandler {
     status: string,
     currentStep?: string
   ): Promise<void> {
-    const progressMessage = this.messageBus.createMessage<AgentProgressMessage>(
+    const progressMessage = this.messageBus.createMessage(
       MessageType.AGENT_PROGRESS,
       {
         evaluationId,
@@ -446,7 +446,7 @@ export class AgentService implements MessageHandler {
       status,
       details: {
         activeExecutions,
-        supportedAgents: AgentFactory.getSupportedAgents(),
+        supportedAgents: AgentFactory.getAvailableAgentTypes(),
         messageBusStatus: messageBusHealth
       }
     };

@@ -35,7 +35,7 @@ export class ErrorHandler {
     const errorResponse = this.formatErrorResponse(error, res.locals.requestId);
     
     // Determine status code
-    let statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR;
+    let statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR;
     
     if (error instanceof APIError) {
       statusCode = error.statusCode;
@@ -51,7 +51,7 @@ export class ErrorHandler {
   }
 
   private formatErrorResponse(error: Error, requestId?: string): ErrorResponse {
-    let code = ERROR_CODES.INTERNAL_ERROR;
+    let code: string = ERROR_CODES.INTERNAL_ERROR;
     let message = 'An internal error occurred';
     let details: any = undefined;
 

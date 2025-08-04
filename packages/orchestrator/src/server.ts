@@ -159,7 +159,7 @@ async function startServer() {
 }
 
 // Start server if this file is run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (require.main === module) {
   startServer().catch(error => {
     console.error('[Orchestrator Server] Startup error:', error)
     process.exit(1)

@@ -85,9 +85,8 @@ export class APIRouter {
         businessIdeaId: validatedRequest.businessIdeaId,
         businessIdeaTitle: validatedRequest.businessIdeaTitle,
         businessIdeaDescription: validatedRequest.businessIdeaDescription,
-        agentTypes: validatedRequest.agentTypes,
-        priority: validatedRequest.priority,
-        userId: validatedRequest.userId
+        agentTypes: validatedRequest.agentTypes || [],
+        priority: validatedRequest.priority
       });
 
       const progress = this.orchestrator.getEvaluationProgress(evaluationId);

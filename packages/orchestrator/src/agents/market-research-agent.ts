@@ -2,8 +2,15 @@
  * Market Research Agent - Analyzes market size, trends, and opportunities
  */
 
-import { BaseAgent, AgentRequest, AgentResponse, AgentExecutionContext } from './types.js';
-import { LLMProviderFactory } from '../llm/index.js';
+import { 
+  BaseAgent, 
+  AgentRequest, 
+  AgentResponse, 
+  AgentExecutionContext,
+  AgentCapability,
+  AgentCommunicationContext
+} from './types.js';
+import { ProviderFactory } from '../llm/provider-factory.js';
 import { MarketResearchResult } from '../llm/types.js';
 
 export class MarketResearchAgent extends BaseAgent {
@@ -13,6 +20,72 @@ export class MarketResearchAgent extends BaseAgent {
       'Market Research Agent',
       'Analyzes market size, trends, competition, and opportunities for business ideas'
     );
+  }
+
+  protected defineCapabilities(): AgentCapability {
+    return {
+      name: 'Market Research Analysis',
+      version: '1.0.0',
+      dependencies: [], // No dependencies - can run independently
+      provides: [
+        'market-size-data',
+        'competitor-analysis',
+        'market-trends',
+        'growth-projections'
+      ],
+      requires: [
+        'business-idea-description',
+        'target-market-definition'
+      ]
+    };
+  }
+
+  protected async onInitialize(): Promise<void> {
+    console.log('[MarketResearchAgent] Initializing market research capabilities...');
+    // Initialize any market research specific resources
+  }
+
+  protected async onCleanup(): Promise<void> {
+    console.log('[MarketResearchAgent] Cleaning up market research resources...');
+    // Cleanup any resources
+  }
+
+  protected async onHealthCheck(): Promise<void> {
+    // Test LLM provider availability
+    const provider = ProviderFactory.getInstance();
+    if (!provider) {
+      throw new Error('LLM provider not available');
+    }
+  }
+
+  protected async beforeExecution(
+    request: AgentRequest,
+    context: AgentExecutionContext,
+    communicationContext: AgentCommunicationContext
+  ): Promise<void> {
+    // Store any required data in shared context
+    communicationContext.sharedData.set('market-research-started', new Date());
+    
+    // Log execution start
+    console.log(`[MarketResearchAgent] Starting market research for evaluation: ${context.evaluationId}`);
+  }
+
+  protected async afterExecution(
+    response: AgentResponse,
+    communicationContext: AgentCommunicationContext
+  ): Promise<void> {
+    // Share market data with other agents
+    communicationContext.sharedData.set('market-size-data', {
+      marketSize: response.rawData.marketResearch?.marketSize,
+      growthRate: response.rawData.marketResearch?.marketGrowthRate,
+      competitorCount: response.rawData.marketResearch?.competitors?.length || 0
+    });
+
+    communicationContext.sharedData.set('market-trends', 
+      response.rawData.marketResearch?.trends || []
+    );
+
+    console.log(`[MarketResearchAgent] Market research completed with score: ${response.score}`);
   }
 
   async execute(
@@ -26,14 +99,15 @@ export class MarketResearchAgent extends BaseAgent {
       console.log(`Market Research Agent executing for business idea: ${request.businessIdea.title}`);
 
       // Get LLM provider factory and perform analysis
-      const providerFactory = LLMProviderFactory.getProvider();
+      const providerFactory = ProviderFactory.getInstance();
 
       // Perform market research analysis using the factory method
       const marketResearch = await providerFactory.analyzeMarketResearch({
-        businessIdeaTitle: request.businessIdea.title,
-        businessIdeaDescription: request.businessIdea.description,
-        analysisType: request.analysisType,
-        additionalContext: request.context
+        businessIdea: {
+          title: request.businessIdea.title,
+          description: request.businessIdea.description
+        },
+        analysisType: request.analysisType
       });
 
       // Extract insights and calculate additional metrics

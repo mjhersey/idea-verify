@@ -73,5 +73,6 @@ export interface LLMProviderInterface {
   invoke(prompt: string, context?: Record<string, any>): Promise<LLMResponse>;
   analyzeMarketResearch(input: MarketResearchPromptInput): Promise<MarketResearchResult>;
   isAvailable(): Promise<boolean>;
+  isHealthy(): Promise<boolean>;
   getProviderName(): LLMProvider;
 }

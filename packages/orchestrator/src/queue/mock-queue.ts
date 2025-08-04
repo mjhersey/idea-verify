@@ -239,8 +239,6 @@ export class MockQueue extends BaseQueue {
   // Test utility method to reset state
   resetState(): void {
     this.jobs.clear();
-    this.failedJobs.clear();
-    this.completedJobs.clear();
     this.isProcessing = false;
     if (this.processingTimer) {
       clearInterval(this.processingTimer);

@@ -4,6 +4,10 @@
 
 export * from './types.js';
 export { MarketResearchAgent } from './market-research-agent.js';
+export { CompetitiveAnalysisAgent } from './competitive-analysis-agent.js';
+export { CustomerResearchAgent } from './customer-research-agent.js';
+export { TechnicalFeasibilityAgent } from './technical-feasibility-agent.js';
+export { FinancialAnalysisAgent } from './financial-analysis-agent.js';
 export { AgentFactory } from './agent-factory.js';
 export { AgentService } from './agent-service.js';
 export type { AgentExecutionResult } from './agent-service.js';

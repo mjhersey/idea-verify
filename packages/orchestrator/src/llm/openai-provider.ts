@@ -79,4 +79,8 @@ export class OpenAIProvider extends BaseProvider {
       return false;
     }
   }
+
+  async isHealthy(): Promise<boolean> {
+    return this.isAvailable();
+  }
 }
