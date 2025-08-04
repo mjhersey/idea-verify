@@ -11,14 +11,15 @@
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.0.0",
-    "dotenv": "^16.0.0"
+    "dotenv": "^16.0.0",
+    "vite": "7.0.6"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "vitest": "^1.0.0",
-    "eslint": "^8.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0"
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^3.2.4"
   }
 }
