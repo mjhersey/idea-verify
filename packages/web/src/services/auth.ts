@@ -126,40 +126,69 @@ export class AuthService {
   }
 
   /**
-   * Store tokens in localStorage
+   * Store tokens securely in httpOnly cookies via API
    */
-  storeTokens(tokens: TokenPair): void {
-    localStorage.setItem('accessToken', tokens.accessToken);
-    localStorage.setItem('refreshToken', tokens.refreshToken);
+  async storeTokens(tokens: TokenPair): Promise<void> {
+    try {
+      await axiosInstance.post('/api/auth/store-tokens', {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken
+      });
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } }; message?: string };
+      throw new Error(err.response?.data?.error || err.message || 'Failed to store tokens securely');
+    }
   }
 
   /**
-   * Get stored access token
+   * Get stored access token from secure storage
    */
-  getAccessToken(): string | null {
-    return localStorage.getItem('accessToken');
+  async getAccessToken(): Promise<string | null> {
+    try {
+      const response = await axiosInstance.get('/api/auth/access-token');
+      return response.data?.accessToken || null;
+    } catch {
+      return null;
+    }
   }
 
   /**
-   * Get stored refresh token
+   * Get stored refresh token from secure storage
    */
-  getRefreshToken(): string | null {
-    return localStorage.getItem('refreshToken');
+  async getRefreshToken(): Promise<string | null> {
+    try {
+      const response = await axiosInstance.get('/api/auth/refresh-token');
+      return response.data?.refreshToken || null;
+    } catch {
+      return null;
+    }
   }
 
   /**
-   * Clear stored tokens
+   * Clear stored tokens from secure storage
    */
-  clearTokens(): void {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+  async clearTokens(): Promise<void> {
+    try {
+      await axiosInstance.post('/api/auth/clear-tokens');
+    } catch (error: unknown) {
+      // Log error but don't throw - clearing should succeed even if server call fails
+      const err = error as { response?: { data?: { error?: string } }; message?: string };
+      // eslint-disable-next-line no-console
+      console.warn('Clear tokens server call failed:', err.response?.data?.error || err.message);
+    }
   }
 
   /**
    * Check if user has valid tokens
    */
-  hasTokens(): boolean {
-    return !!(this.getAccessToken() && this.getRefreshToken());
+  async hasTokens(): Promise<boolean> {
+    try {
+      const accessToken = await this.getAccessToken();
+      const refreshToken = await this.getRefreshToken();
+      return !!(accessToken && refreshToken);
+    } catch {
+      return false;
+    }
   }
 
   /**

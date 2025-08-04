@@ -14,7 +14,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Getters
   const isAuthenticated = computed(() => !!user.value);
-  const hasTokens = computed(() => authService.hasTokens());
+  const hasTokens = ref(false);
 
   // Actions
   const register = async (data: RegistrationData): Promise<void> => {
@@ -25,13 +25,14 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await authService.register(data);
       
       // Store tokens
-      authService.storeTokens(response.tokens);
+      await authService.storeTokens(response.tokens);
       
       // Set auth header
       authService.setAuthHeader(response.tokens.accessToken);
       
       // Set user
       user.value = response.user;
+      hasTokens.value = true;
       
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Registration failed';
@@ -50,13 +51,14 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await authService.login(data);
       
       // Store tokens
-      authService.storeTokens(response.tokens);
+      await authService.storeTokens(response.tokens);
       
       // Set auth header
       authService.setAuthHeader(response.tokens.accessToken);
       
       // Set user
       user.value = response.user;
+      hasTokens.value = true;
       
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed';
@@ -72,7 +74,7 @@ export const useAuthStore = defineStore('auth', () => {
     error.value = null;
 
     try {
-      const refreshToken = authService.getRefreshToken();
+      const refreshToken = await authService.getRefreshToken();
       
       // Call logout endpoint
       await authService.logout(refreshToken || undefined);
@@ -84,16 +86,17 @@ export const useAuthStore = defineStore('auth', () => {
       console.warn('Logout error:', errorMessage);
     } finally {
       // Clear local state regardless of server response
-      authService.clearTokens();
+      await authService.clearTokens();
       authService.clearAuthHeader();
       user.value = null;
       error.value = null;
       isLoading.value = false;
+      hasTokens.value = false;
     }
   };
 
   const refreshTokens = async (): Promise<boolean> => {
-    const refreshToken = authService.getRefreshToken();
+    const refreshToken = await authService.getRefreshToken();
     
     if (!refreshToken) {
       return false;
@@ -103,7 +106,7 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await authService.refreshToken(refreshToken);
       
       // Store new tokens
-      authService.storeTokens(response.tokens);
+      await authService.storeTokens(response.tokens);
       
       // Set new auth header
       authService.setAuthHeader(response.tokens.accessToken);
@@ -178,11 +181,14 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const initializeAuth = async (): Promise<void> => {
-    if (!hasTokens.value) {
+    const hasValidTokens = await authService.hasTokens();
+    if (!hasValidTokens) {
+      hasTokens.value = false;
       return;
     }
 
-    const accessToken = authService.getAccessToken();
+    hasTokens.value = true;
+    const accessToken = await authService.getAccessToken();
     if (accessToken) {
       authService.setAuthHeader(accessToken);
       

@@ -3,7 +3,7 @@
  */
 
 import { axiosInstance } from './api.js';
-import type { IdeaSubmissionRequest, IdeaSubmissionResponse, BusinessIdea } from '@ai-validation/shared';
+import type { IdeaSubmissionRequest, BusinessIdea } from '@ai-validation/shared';
 
 export class IdeasService {
   private baseUrl = '/api/ideas';
@@ -11,13 +11,24 @@ export class IdeasService {
   /**
    * Submit a new business idea
    */
-  async submitIdea(data: IdeaSubmissionRequest): Promise<IdeaSubmissionResponse> {
+  async submitIdea(data: IdeaSubmissionRequest): Promise<{
+    success: boolean;
+    message: string;
+    data?: BusinessIdea;
+  }> {
     try {
       const response = await axiosInstance.post(this.baseUrl, data);
-      return response.data;
+      return {
+        success: true,
+        message: 'Idea submitted successfully',
+        data: response.data.data
+      };
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { error?: string } } };
-      throw new Error(err.response?.data?.error || 'Failed to submit idea');
+      const err = error as { response?: { data?: { error?: string, message?: string } } };
+      return {
+        success: false,
+        message: err.response?.data?.message || err.response?.data?.error || 'Failed to submit idea'
+      };
     }
   }
 

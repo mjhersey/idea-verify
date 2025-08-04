@@ -48,6 +48,15 @@ const router = createRouter({
         requiresAuth: true,
         title: 'Evaluation'
       }
+    },
+    {
+      path: '/evaluation/:id',
+      name: 'evaluation-results',
+      component: () => import('../views/EvaluationView.vue'),
+      meta: {
+        requiresAuth: true,
+        title: 'Evaluation Results'
+      }
     }
   ]
 });

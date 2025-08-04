@@ -82,6 +82,7 @@ export const adminGuard = (
  * Route meta interface for TypeScript
  */
 declare module 'vue-router' {
+  // eslint-disable-next-line no-unused-vars
   interface RouteMeta {
     requiresAuth?: boolean;
     requiresGuest?: boolean;

@@ -5,6 +5,7 @@ import { MotionPlugin } from '@vueuse/motion';
 import App from './App.vue';
 import router from './router/index.js';
 import { useAuthStore } from './stores/auth.js';
+import { errorHandlerPlugin } from './plugins/errorHandler.js';
 
 import './assets/main.css';
 
@@ -14,6 +15,7 @@ const pinia = createPinia();
 app.use(pinia);
 app.use(router);
 app.use(MotionPlugin);
+app.use(errorHandlerPlugin);
 
 // Initialize authentication
 const authStore = useAuthStore();
