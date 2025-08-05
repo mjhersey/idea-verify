@@ -64,7 +64,11 @@ describe('IdeasService', () => {
       const result = await service.submitIdea(validIdea);
 
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/ideas', validIdea);
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual({
+        success: true,
+        message: 'Idea submitted successfully',
+        data: mockResponse.data.data
+      });
     });
 
     it('should handle API errors', async () => {
@@ -77,13 +81,23 @@ describe('IdeasService', () => {
       };
       mockAxiosInstance.post.mockRejectedValue(errorResponse);
 
-      await expect(service.submitIdea(validIdea)).rejects.toThrow('Validation failed');
+      const result = await service.submitIdea(validIdea);
+      
+      expect(result).toEqual({
+        success: false,
+        message: 'Validation failed'
+      });
     });
 
     it('should handle network errors', async () => {
       mockAxiosInstance.post.mockRejectedValue(new Error('Network error'));
 
-      await expect(service.submitIdea(validIdea)).rejects.toThrow('Failed to submit idea');
+      const result = await service.submitIdea(validIdea);
+      
+      expect(result).toEqual({
+        success: false,
+        message: 'Failed to submit idea'
+      });
     });
   });
 

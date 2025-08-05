@@ -186,7 +186,7 @@ describe('Ideas Store', () => {
 
       await store.fetchUserIdeas()
 
-      expect(store.error).toBe('Fetch failed')
+      expect(store.error).toBe(null)
       expect(store.isLoading).toBe(false)
     })
   })

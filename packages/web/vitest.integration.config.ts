@@ -9,8 +9,9 @@ export default defineConfig({
     root: fileURLToPath(new URL('./', import.meta.url)),
     globals: true,
     setupFiles: ['./tests/setup.ts'],
-    include: ['tests/unit/**/*.test.ts'],
-    exclude: ['tests/integration/**/*.test.ts']
+    include: ['tests/integration/**/*.test.ts'],
+    exclude: ['tests/unit/**/*.test.ts'],
+    testTimeout: 30000 // Longer timeout for integration tests
   },
   resolve: {
     alias: {

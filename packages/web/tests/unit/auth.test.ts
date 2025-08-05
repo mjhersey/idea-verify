@@ -39,15 +39,8 @@ describe('Auth Store', () => {
     setActivePinia(createPinia());
     authStore = useAuthStore();
     
-    // Clear localStorage
-    localStorage.clear();
-    
     // Reset mocks
     vi.clearAllMocks();
-  });
-
-  afterEach(() => {
-    localStorage.clear();
   });
 
   describe('Initial state', () => {
@@ -79,6 +72,8 @@ describe('Auth Store', () => {
 
       const mockAxios = await import('../../src/services/api.js');
       vi.mocked(mockAxios.axiosInstance.post).mockResolvedValueOnce(mockResponse);
+      // Mock the storeTokens API call
+      vi.mocked(mockAxios.axiosInstance.post).mockResolvedValueOnce({ data: { success: true } });
 
       await authStore.register({
         name: 'Test User',
@@ -89,8 +84,11 @@ describe('Auth Store', () => {
       expect(authStore.user).toEqual(mockResponse.data.user);
       expect(authStore.isAuthenticated).toBe(true);
       expect(authStore.error).toBeNull();
-      expect(localStorage.getItem('accessToken')).toBe('access-token');
-      expect(localStorage.getItem('refreshToken')).toBe('refresh-token');
+      // Tokens are stored server-side, not in localStorage
+      expect(mockAxios.axiosInstance.post).toHaveBeenCalledWith('/api/auth/store-tokens', {
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token'
+      });
     });
 
     it('should handle registration failure', async () => {
@@ -137,6 +135,8 @@ describe('Auth Store', () => {
 
       const mockAxios = await import('../../src/services/api.js');
       vi.mocked(mockAxios.axiosInstance.post).mockResolvedValueOnce(mockResponse);
+      // Mock the storeTokens API call
+      vi.mocked(mockAxios.axiosInstance.post).mockResolvedValueOnce({ data: { success: true } });
 
       await authStore.login({
         email: 'test@example.com',
@@ -146,8 +146,11 @@ describe('Auth Store', () => {
       expect(authStore.user).toEqual(mockResponse.data.user);
       expect(authStore.isAuthenticated).toBe(true);
       expect(authStore.error).toBeNull();
-      expect(localStorage.getItem('accessToken')).toBe('access-token');
-      expect(localStorage.getItem('refreshToken')).toBe('refresh-token');
+      // Tokens are stored server-side, not in localStorage
+      expect(mockAxios.axiosInstance.post).toHaveBeenCalledWith('/api/auth/store-tokens', {
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token'
+      });
     });
 
     it('should handle login failure', async () => {
@@ -176,8 +179,6 @@ describe('Auth Store', () => {
   describe('Logout', () => {
     beforeEach(async () => {
       // Set up authenticated state
-      localStorage.setItem('accessToken', 'access-token');
-      localStorage.setItem('refreshToken', 'refresh-token');
       authStore.user = {
         id: 'user-123',
         email: 'test@example.com',
@@ -189,34 +190,48 @@ describe('Auth Store', () => {
 
     it('should handle successful logout', async () => {
       const mockAxios = await import('../../src/services/api.js');
+      // Mock getRefreshToken API call
+      vi.mocked(mockAxios.axiosInstance.get).mockResolvedValueOnce({
+        data: { refreshToken: 'refresh-token' }
+      });
+      // Mock logout API call
       vi.mocked(mockAxios.axiosInstance.post).mockResolvedValueOnce({ data: {} });
+      // Mock clearTokens API call
+      vi.mocked(mockAxios.axiosInstance.post).mockResolvedValueOnce({ data: { success: true } });
 
       await authStore.logout();
 
       expect(authStore.user).toBeNull();
       expect(authStore.isAuthenticated).toBe(false);
       expect(authStore.error).toBeNull();
-      expect(localStorage.getItem('accessToken')).toBeNull();
-      expect(localStorage.getItem('refreshToken')).toBeNull();
+      // Verify clearTokens API was called
+      expect(mockAxios.axiosInstance.post).toHaveBeenCalledWith('/api/auth/clear-tokens');
     });
 
     it('should handle logout even if server call fails', async () => {
       const mockAxios = await import('../../src/services/api.js');
+      // Mock getRefreshToken API call
+      vi.mocked(mockAxios.axiosInstance.get).mockResolvedValueOnce({
+        data: { refreshToken: 'refresh-token' }
+      });
+      // Mock logout API call to fail
       vi.mocked(mockAxios.axiosInstance.post).mockRejectedValueOnce(new Error('Server error'));
+      // Mock clearTokens API call (should still be called)
+      vi.mocked(mockAxios.axiosInstance.post).mockResolvedValueOnce({ data: { success: true } });
 
       await authStore.logout();
 
       // Should still clear local state
       expect(authStore.user).toBeNull();
       expect(authStore.isAuthenticated).toBe(false);
-      expect(localStorage.getItem('accessToken')).toBeNull();
-      expect(localStorage.getItem('refreshToken')).toBeNull();
+      // Verify clearTokens API was still called
+      expect(mockAxios.axiosInstance.post).toHaveBeenCalledWith('/api/auth/clear-tokens');
     });
   });
 
   describe('Token refresh', () => {
     beforeEach(() => {
-      localStorage.setItem('refreshToken', 'refresh-token');
+      // Setup will be done in individual tests with proper API mocking
     });
 
     it('should handle successful token refresh', async () => {
@@ -230,29 +245,56 @@ describe('Auth Store', () => {
       };
 
       const mockAxios = await import('../../src/services/api.js');
+      // Mock getRefreshToken API call
+      vi.mocked(mockAxios.axiosInstance.get).mockResolvedValueOnce({
+        data: { refreshToken: 'refresh-token' }
+      });
+      // Mock refresh token API call
       vi.mocked(mockAxios.axiosInstance.post).mockResolvedValueOnce(mockResponse);
+      // Mock storeTokens API call
+      vi.mocked(mockAxios.axiosInstance.post).mockResolvedValueOnce({ data: { success: true } });
 
       const result = await authStore.refreshTokens();
 
       expect(result).toBe(true);
-      expect(localStorage.getItem('accessToken')).toBe('new-access-token');
-      expect(localStorage.getItem('refreshToken')).toBe('new-refresh-token');
+      // Verify storeTokens API was called with new tokens
+      expect(mockAxios.axiosInstance.post).toHaveBeenCalledWith('/api/auth/store-tokens', {
+        accessToken: 'new-access-token',
+        refreshToken: 'new-refresh-token'
+      });
     });
 
     it('should handle token refresh failure', async () => {
       const mockAxios = await import('../../src/services/api.js');
+      // Mock getRefreshToken API call
+      vi.mocked(mockAxios.axiosInstance.get).mockResolvedValueOnce({
+        data: { refreshToken: 'refresh-token' }
+      });
+      // Mock refresh token API call to fail
       vi.mocked(mockAxios.axiosInstance.post).mockRejectedValueOnce(new Error('Refresh failed'));
+      // Mock getRefreshToken call in logout
+      vi.mocked(mockAxios.axiosInstance.get).mockResolvedValueOnce({
+        data: { refreshToken: 'refresh-token' }
+      });
+      // Mock logout API call
+      vi.mocked(mockAxios.axiosInstance.post).mockResolvedValueOnce({ data: {} });
+      // Mock clearTokens API call
+      vi.mocked(mockAxios.axiosInstance.post).mockResolvedValueOnce({ data: { success: true } });
 
       const result = await authStore.refreshTokens();
 
       expect(result).toBe(false);
       expect(authStore.user).toBeNull();
-      expect(localStorage.getItem('accessToken')).toBeNull();
-      expect(localStorage.getItem('refreshToken')).toBeNull();
+      // Verify clearTokens API was called during logout
+      expect(mockAxios.axiosInstance.post).toHaveBeenCalledWith('/api/auth/clear-tokens');
     });
 
     it('should return false if no refresh token', async () => {
-      localStorage.removeItem('refreshToken');
+      const mockAxios = await import('../../src/services/api.js');
+      // Mock getRefreshToken API call to return null
+      vi.mocked(mockAxios.axiosInstance.get).mockResolvedValueOnce({
+        data: { refreshToken: null }
+      });
 
       const result = await authStore.refreshTokens();
 
@@ -316,52 +358,92 @@ describe('Auth Store', () => {
 
 describe('Auth Service', () => {
   beforeEach(() => {
-    localStorage.clear();
     vi.clearAllMocks();
   });
 
-  afterEach(() => {
-    localStorage.clear();
-  });
-
   describe('Token management', () => {
-    it('should store tokens', () => {
+    it('should store tokens via API', async () => {
       const tokens = {
         accessToken: 'access-token',
         refreshToken: 'refresh-token'
       };
 
-      authService.storeTokens(tokens);
+      const mockAxios = await import('../../src/services/api.js');
+      vi.mocked(mockAxios.axiosInstance.post).mockResolvedValueOnce({ data: { success: true } });
 
-      expect(localStorage.getItem('accessToken')).toBe('access-token');
-      expect(localStorage.getItem('refreshToken')).toBe('refresh-token');
+      await authService.storeTokens(tokens);
+
+      expect(mockAxios.axiosInstance.post).toHaveBeenCalledWith('/api/auth/store-tokens', {
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token'
+      });
     });
 
-    it('should get stored tokens', () => {
-      localStorage.setItem('accessToken', 'access-token');
-      localStorage.setItem('refreshToken', 'refresh-token');
+    it('should get stored access token via API', async () => {
+      const mockAxios = await import('../../src/services/api.js');
+      vi.mocked(mockAxios.axiosInstance.get).mockResolvedValueOnce({
+        data: { accessToken: 'access-token' }
+      });
 
-      expect(authService.getAccessToken()).toBe('access-token');
-      expect(authService.getRefreshToken()).toBe('refresh-token');
+      const token = await authService.getAccessToken();
+
+      expect(token).toBe('access-token');
+      expect(mockAxios.axiosInstance.get).toHaveBeenCalledWith('/api/auth/access-token');
     });
 
-    it('should clear tokens', () => {
-      localStorage.setItem('accessToken', 'access-token');
-      localStorage.setItem('refreshToken', 'refresh-token');
+    it('should get stored refresh token via API', async () => {
+      const mockAxios = await import('../../src/services/api.js');
+      vi.mocked(mockAxios.axiosInstance.get).mockResolvedValueOnce({
+        data: { refreshToken: 'refresh-token' }
+      });
 
-      authService.clearTokens();
+      const token = await authService.getRefreshToken();
 
-      expect(localStorage.getItem('accessToken')).toBeNull();
-      expect(localStorage.getItem('refreshToken')).toBeNull();
+      expect(token).toBe('refresh-token');
+      expect(mockAxios.axiosInstance.get).toHaveBeenCalledWith('/api/auth/refresh-token');
     });
 
-    it('should check if tokens exist', () => {
-      expect(authService.hasTokens()).toBe(false);
+    it('should clear tokens via API', async () => {
+      const mockAxios = await import('../../src/services/api.js');
+      vi.mocked(mockAxios.axiosInstance.post).mockResolvedValueOnce({ data: { success: true } });
 
-      localStorage.setItem('accessToken', 'access-token');
-      localStorage.setItem('refreshToken', 'refresh-token');
+      await authService.clearTokens();
 
-      expect(authService.hasTokens()).toBe(true);
+      expect(mockAxios.axiosInstance.post).toHaveBeenCalledWith('/api/auth/clear-tokens');
+    });
+
+    it('should check if tokens exist via API', async () => {
+      const mockAxios = await import('../../src/services/api.js');
+      
+      // First call returns no tokens
+      vi.mocked(mockAxios.axiosInstance.get).mockResolvedValueOnce({
+        data: { accessToken: null }
+      });
+      vi.mocked(mockAxios.axiosInstance.get).mockResolvedValueOnce({
+        data: { refreshToken: null }
+      });
+
+      let hasTokens = await authService.hasTokens();
+      expect(hasTokens).toBe(false);
+
+      // Second call returns tokens
+      vi.mocked(mockAxios.axiosInstance.get).mockResolvedValueOnce({
+        data: { accessToken: 'access-token' }
+      });
+      vi.mocked(mockAxios.axiosInstance.get).mockResolvedValueOnce({
+        data: { refreshToken: 'refresh-token' }
+      });
+
+      hasTokens = await authService.hasTokens();
+      expect(hasTokens).toBe(true);
+    });
+
+    it('should return null when API calls fail', async () => {
+      const mockAxios = await import('../../src/services/api.js');
+      vi.mocked(mockAxios.axiosInstance.get).mockRejectedValueOnce(new Error('API Error'));
+
+      const token = await authService.getAccessToken();
+      expect(token).toBeNull();
     });
   });
 });
