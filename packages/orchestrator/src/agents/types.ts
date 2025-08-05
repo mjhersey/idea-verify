@@ -197,6 +197,7 @@ export abstract class BaseAgent {
 
   protected abstract defineCapabilities(): AgentCapability;
 
+  // Getter methods
   getAgentType(): AgentType {
     return this.agentType;
   }
@@ -207,6 +208,10 @@ export abstract class BaseAgent {
 
   getDescription(): string {
     return this.description;
+  }
+
+  getCapabilities(): AgentCapability {
+    return this.metadata.capabilities;
   }
 
   getMetadata(): AgentMetadata {

@@ -99,7 +99,7 @@
                 <li :class="{ 'text-green-600': /[A-Z]/.test(form.password) }">• One uppercase letter</li>
                 <li :class="{ 'text-green-600': /[a-z]/.test(form.password) }">• One lowercase letter</li>
                 <li :class="{ 'text-green-600': /\d/.test(form.password) }">• One number</li>
-                <li :class="{ 'text-green-600': /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>?]/.test(form.password) }">• One special character</li>
+                <li :class="{ 'text-green-600': hasSpecialChar }">• One special character</li>
               </ul>
             </div>
           </div>
@@ -143,7 +143,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useAuth } from '../composables/useAuth.js';
+import { useAuth } from '../composables/useAuth';
 
 // Auth composable
 const {
@@ -173,6 +173,8 @@ const passwordError = computed(() => form.value.password ? validatePassword(form
 const confirmPasswordError = computed(() => 
   form.value.confirmPassword ? validateConfirmPassword(form.value.password, form.value.confirmPassword) : null
 );
+
+const hasSpecialChar = computed(() => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>?]/.test(form.value.password));
 
 const isFormValid = computed(() => 
   !nameError.value && 

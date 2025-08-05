@@ -4,8 +4,8 @@
 
 import { computed, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useAuthStore } from '../stores/auth.js';
-import type { RegistrationData, LoginData, ProfileUpdateData } from '../services/auth.js';
+import { useAuthStore } from '../stores/auth';
+import type { RegistrationData, LoginData, ProfileUpdateData } from '../services/auth';
 
 export function useAuth() {
   const authStore = useAuthStore();
