@@ -24,6 +24,11 @@ export interface AgentOptions {
   temperature?: number;
   model?: string;
   useCache?: boolean;
+  analysisDepth?: 'basic' | 'standard' | 'comprehensive';
+  maxSegments?: number;
+  maxPersonas?: number;
+  timeConstraints?: number;
+  focusAreas?: string[];
 }
 
 export interface AgentResponse {
@@ -39,6 +44,14 @@ export interface AgentResponse {
     tokensUsed?: number;
     apiCalls?: number;
     cacheHits?: number;
+    analysisDepth?: string;
+    focusAreas?: number;
+    dataQuality?: number;
+    completeness?: number;
+    version?: string;
+    executionId?: string;
+    correlationId?: string;
+    error?: string;
   };
   rawData: Record<string, any>;
 }
@@ -54,7 +67,7 @@ export interface AgentExecutionContext {
 export interface AgentCapability {
   name: string;
   version: string;
-  dependencies: AgentType[];
+  dependencies: string[];
   provides: string[];
   requires: string[];
 }
@@ -135,7 +148,7 @@ export abstract class BaseAgent {
 
   canExecuteWith(dependencies: Map<AgentType, AgentResponse>): boolean {
     const requiredDeps = this.metadata.capabilities.dependencies;
-    return requiredDeps.every(dep => dependencies.has(dep));
+    return requiredDeps.every(dep => dependencies.has(dep as AgentType));
   }
 
   async executeWithCoordination(
