@@ -466,7 +466,7 @@ export class MockQueueManager extends EventEmitter implements IQueueManager {
             job.delay = this.config.retryDelayMs;
             console.log(`[MockQueueManager] Scheduling retry for job: ${job.id}`);
             // Restart processing to pick up the retried job
-            this.processJobs();
+            this.processJobs.bind(this)();
           }
         }, this.config.retryDelayMs);
       }

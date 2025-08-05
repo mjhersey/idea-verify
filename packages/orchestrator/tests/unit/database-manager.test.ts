@@ -185,7 +185,7 @@ describe('DatabaseManager', () => {
     it('should handle connection failures', async () => {
       const invalidConfig: DatabaseConfig = {
         host: 'invalid-host-12345',
-        port: 99999,
+        port: 9999,
         database: 'invalid-db',
         username: 'invalid-user',
         password: 'invalid-pass',

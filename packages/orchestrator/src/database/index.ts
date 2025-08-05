@@ -13,6 +13,9 @@ export { DatabaseManager } from './database-manager.js';
 export { DatabaseFactory } from './database-factory.js';
 export type { RepositoryInstances } from './database-factory.js';
 
+// Import for initialization
+import { DatabaseFactory } from './database-factory.js';
+
 // Initialize database factory and get repository instances
 const databaseFactory = DatabaseFactory.getInstance();
 

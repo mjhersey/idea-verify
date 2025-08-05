@@ -11,6 +11,11 @@ export { MockQueueManager } from './mock-queue-manager.js';
 export { MockDatabaseManager } from './mock-database-manager.js';
 export type { MockDatabaseConfig } from './mock-database-manager.js';
 
+// Imports for internal use
+import { MockLLMProvider } from './mock-llm-provider.js';
+import { MockQueueManager } from './mock-queue-manager.js';
+import { MockDatabaseManager } from './mock-database-manager.js';
+
 // Mock factory for creating configured instances
 export class MockServiceFactory {
   static createLLMProvider(config: any = {}): MockLLMProvider {

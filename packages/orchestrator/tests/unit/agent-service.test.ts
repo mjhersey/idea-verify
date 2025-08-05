@@ -334,7 +334,7 @@ describe('AgentService', () => {
   });
 
   describe('getAvailableAgents', () => {
-    it('should return available agent information', () => {
+    it('should return available agent information', async () => {
       const { AgentFactory } = await import('../../src/agents/agent-factory.js');
       
       const mockAgent = {

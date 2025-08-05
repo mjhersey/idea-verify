@@ -802,9 +802,9 @@ export class MultiAgentOrchestrator extends EventEmitter {
   }
 
   // Test utilities
-  static resetInstance(): void {
+  static async resetInstance(): Promise<void> {
     if (MultiAgentOrchestrator.instance) {
-      MultiAgentOrchestrator.instance.shutdown();
+      await MultiAgentOrchestrator.instance.shutdown();
     }
     MultiAgentOrchestrator.instance = null as any;
   }

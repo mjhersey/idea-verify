@@ -67,8 +67,8 @@ describe('MultiAgentOrchestrator', () => {
     orchestrator = MultiAgentOrchestrator.getInstance();
   });
 
-  afterEach(() => {
-    MultiAgentOrchestrator.resetInstance();
+  afterEach(async () => {
+    await MultiAgentOrchestrator.resetInstance();
   });
 
   describe('Workflow Execution', () => {
@@ -90,7 +90,7 @@ describe('MultiAgentOrchestrator', () => {
       mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123');
 
       const workflowId = await orchestrator.executeWorkflow(
-        'workflow-123',
+        'standard-evaluation',
         'eval-123',
         businessIdea
       );
@@ -98,7 +98,7 @@ describe('MultiAgentOrchestrator', () => {
       expect(workflowId).toBe('workflow-job-123');
       expect(mockQueueManager.addMultiAgentEvaluation).toHaveBeenCalledWith({
         evaluationId: 'eval-123',
-        workflowId: 'workflow-123',
+        workflowId: 'standard-evaluation',
         agentTypes: ['market-research'],
         parallelGroups: [['market-research']],
         dependencies: expect.any(Object),
@@ -136,7 +136,7 @@ describe('MultiAgentOrchestrator', () => {
       mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123');
 
       const workflowId = await orchestrator.executeWorkflow(
-        'workflow-123',
+        'standard-evaluation',
         'eval-123',
         businessIdea
       );
@@ -165,7 +165,7 @@ describe('MultiAgentOrchestrator', () => {
       });
 
       await expect(
-        orchestrator.executeWorkflow('workflow-123', 'eval-123', businessIdea)
+        orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea)
       ).rejects.toThrow('Dependency validation failed');
     });
 
@@ -187,7 +187,7 @@ describe('MultiAgentOrchestrator', () => {
       mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123');
 
       const workflowId = await orchestrator.executeWorkflow(
-        'workflow-123',
+        'standard-evaluation',
         'eval-123',
         businessIdea,
         {
@@ -271,10 +271,10 @@ describe('MultiAgentOrchestrator', () => {
       });
       mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123');
 
-      await orchestrator.executeWorkflow('workflow-123', 'eval-123', businessIdea);
+      await orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea);
 
       const activeWorkflows = orchestrator.getActiveWorkflows();
-      expect(activeWorkflows).toContain('workflow-123');
+      expect(activeWorkflows).toContain('standard-evaluation');
     });
 
     test('should get workflow status', async () => {
@@ -290,11 +290,11 @@ describe('MultiAgentOrchestrator', () => {
       });
       mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123');
 
-      await orchestrator.executeWorkflow('workflow-123', 'eval-123', businessIdea);
+      await orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea);
 
-      const status = orchestrator.getWorkflowStatus('workflow-123');
+      const status = orchestrator.getWorkflowStatus('standard-evaluation');
       expect(status).toBeDefined();
-      expect(status?.workflowId).toBe('workflow-123');
+      expect(status?.workflowId).toBe('standard-evaluation');
       expect(status?.evaluationId).toBe('eval-123');
       expect(status?.status).toBe('running');
       expect(status?.agentTypes).toContain('market-research');
@@ -318,12 +318,12 @@ describe('MultiAgentOrchestrator', () => {
       });
       mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123');
 
-      await orchestrator.executeWorkflow('workflow-123', 'eval-123', businessIdea);
+      await orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea);
 
-      const result = await orchestrator.cancelWorkflow('workflow-123');
+      const result = await orchestrator.cancelWorkflow('standard-evaluation');
       expect(result).toBe(true);
 
-      const status = orchestrator.getWorkflowStatus('workflow-123');
+      const status = orchestrator.getWorkflowStatus('standard-evaluation');
       expect(status?.status).toBe('cancelled');
     });
 
@@ -350,10 +350,10 @@ describe('MultiAgentOrchestrator', () => {
       });
       mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123');
 
-      await orchestrator.executeWorkflow('workflow-123', 'eval-123', businessIdea);
+      await orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea);
 
       expect(eventSpy).toHaveBeenCalledWith({
-        workflowId: 'workflow-123',
+        workflowId: 'standard-evaluation',
         evaluationId: 'eval-123',
         jobId: 'workflow-job-123',
         agentTypes: ['market-research'],
@@ -496,7 +496,7 @@ describe('MultiAgentOrchestrator', () => {
       mockQueueManager.addMultiAgentEvaluation.mockRejectedValue(new Error('Queue unavailable'));
 
       await expect(
-        orchestrator.executeWorkflow('workflow-123', 'eval-123', businessIdea)
+        orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea)
       ).rejects.toThrow('Queue unavailable');
     });
 
@@ -508,7 +508,7 @@ describe('MultiAgentOrchestrator', () => {
       });
 
       await expect(
-        orchestrator.executeWorkflow('workflow-123', 'eval-123', businessIdea)
+        orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea)
       ).rejects.toThrow('Registry unavailable');
     });
 
@@ -521,7 +521,7 @@ describe('MultiAgentOrchestrator', () => {
       });
 
       await expect(
-        orchestrator.executeWorkflow('workflow-123', 'eval-123', businessIdea, {
+        orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea, {
           requiredAgents: agentTypes
         })
       ).rejects.toThrow('Dependency engine error');
@@ -554,7 +554,7 @@ describe('MultiAgentOrchestrator', () => {
       });
       mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123');
 
-      await orchestrator.executeWorkflow('workflow-123', 'eval-123', businessIdea);
+      await orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea);
 
       const stats = orchestrator.getStatistics();
       expect(stats.totalWorkflows).toBe(1);
@@ -570,9 +570,9 @@ describe('MultiAgentOrchestrator', () => {
       expect(instance1).toBe(instance2);
     });
 
-    test('should reset instance for testing', () => {
+    test('should reset instance for testing', async () => {
       const instance1 = MultiAgentOrchestrator.getInstance();
-      MultiAgentOrchestrator.resetInstance();
+      await MultiAgentOrchestrator.resetInstance();
       const instance2 = MultiAgentOrchestrator.getInstance();
       
       expect(instance1).not.toBe(instance2);

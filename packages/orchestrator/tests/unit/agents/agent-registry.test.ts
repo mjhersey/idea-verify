@@ -28,14 +28,18 @@ class MockAgent extends BaseAgent {
     return `Mock agent for ${this.agentType}`;
   }
 
-  getCapabilities() {
+  defineCapabilities() {
     return {
       name: this.agentType,
       version: '1.0.0',
-      dependencies: this.dependencies,
-      provides: this.capabilities,
-      requires: this.dependencies.map(dep => `${dep}-data`)
+      dependencies: this.dependencies || [],
+      provides: this.capabilities || [],
+      requires: (this.dependencies || []).map(dep => `${dep}-data`)
     };
+  }
+
+  getCapabilities() {
+    return this.defineCapabilities();
   }
 
   async initialize(): Promise<void> {
