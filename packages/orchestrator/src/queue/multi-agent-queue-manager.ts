@@ -482,6 +482,8 @@ export class MultiAgentQueueManager extends EventEmitter {
     if (this.coordinationQueue) pausePromises.push(this.coordinationQueue.pause());
     this.agentQueues.forEach(queue => pausePromises.push(queue.pause()));
     if (this.resultsQueue) pausePromises.push(this.resultsQueue.pause());
+    if (this.healthQueue) pausePromises.push(this.healthQueue.pause());
+    if (this.deadLetterQueue) pausePromises.push(this.deadLetterQueue.pause());
 
     await Promise.all(pausePromises);
     console.log('[MultiAgentQueueManager] All queues paused');
@@ -493,6 +495,8 @@ export class MultiAgentQueueManager extends EventEmitter {
     if (this.coordinationQueue) resumePromises.push(this.coordinationQueue.resume());
     this.agentQueues.forEach(queue => resumePromises.push(queue.resume()));
     if (this.resultsQueue) resumePromises.push(this.resultsQueue.resume());
+    if (this.healthQueue) resumePromises.push(this.healthQueue.resume());
+    if (this.deadLetterQueue) resumePromises.push(this.deadLetterQueue.resume());
 
     await Promise.all(resumePromises);
     console.log('[MultiAgentQueueManager] All queues resumed');
@@ -535,5 +539,22 @@ export class MultiAgentQueueManager extends EventEmitter {
 
   getAgentConfigs(): Map<AgentType, AgentQueueConfig> {
     return new Map(this.agentConfigs);
+  }
+
+  // Test utility to access internal queues for testing
+  getInternalQueues(): {
+    agentQueues: Map<AgentType, BaseQueue>;
+    coordinationQueue: BaseQueue | null;
+    resultsQueue: BaseQueue | null;
+    healthQueue: BaseQueue | null;
+    deadLetterQueue: BaseQueue | null;
+  } {
+    return {
+      agentQueues: this.agentQueues,
+      coordinationQueue: this.coordinationQueue,
+      resultsQueue: this.resultsQueue,
+      healthQueue: this.healthQueue,
+      deadLetterQueue: this.deadLetterQueue
+    };
   }
 }

@@ -44,6 +44,11 @@ export class AgentRegistry extends EventEmitter {
   async registerAgent(agent: BaseAgent): Promise<void> {
     const agentType = agent.getAgentType();
     
+    // Check for duplicate registration
+    if (this.registrations.has(agentType)) {
+      throw new Error(`Agent ${agentType} is already registered`);
+    }
+    
     // Initialize agent if not already initialized
     if (!agent.isInitialized()) {
       await agent.initialize();
@@ -66,9 +71,9 @@ export class AgentRegistry extends EventEmitter {
     console.log(`[AgentRegistry] Registered agent: ${agentType}`);
   }
 
-  async unregisterAgent(agentType: AgentType): Promise<void> {
+  async unregisterAgent(agentType: AgentType): Promise<boolean> {
     const registration = this.registrations.get(agentType);
-    if (!registration) return;
+    if (!registration) return false;
 
     // Cleanup agent
     await registration.agent.cleanup();
@@ -78,6 +83,7 @@ export class AgentRegistry extends EventEmitter {
     this.emit('agentUnregistered', { agentType });
 
     console.log(`[AgentRegistry] Unregistered agent: ${agentType}`);
+    return true;
   }
 
   getAgent(agentType: AgentType): BaseAgent | undefined {
@@ -105,8 +111,89 @@ export class AgentRegistry extends EventEmitter {
     return registration?.metadata.capabilities;
   }
 
-  getDependencyGraph(): AgentDependencyGraph {
-    return { ...this.dependencyGraph };
+  findAgentsByCapability(capability: string): AgentType[] {
+    return Array.from(this.registrations.entries())
+      .filter(([_, registration]) => {
+        const capabilities = registration.metadata.capabilities;
+        return capabilities.provides.includes(capability) || 
+               capabilities.name === capability;
+      })
+      .map(([agentType, _]) => agentType);
+  }
+
+  isAgentAvailable(agentType: AgentType): boolean {
+    const registration = this.registrations.get(agentType);
+    return registration ? registration.status === 'active' : false;
+  }
+
+  getRegistryStatistics(): {
+    totalAgents: number;
+    healthyAgents: number;
+    unhealthyAgents: number;
+    activeAgents: number;
+    agentTypes: AgentType[];
+  } {
+    const total = this.registrations.size;
+    let healthy = 0;
+    let active = 0;
+
+    this.registrations.forEach((registration) => {
+      if (registration.metadata.healthStatus === 'healthy') {
+        healthy++;
+      }
+      if (registration.status === 'active') {
+        active++;
+      }
+    });
+
+    return {
+      totalAgents: total,
+      healthyAgents: healthy,
+      unhealthyAgents: total - healthy,
+      activeAgents: active,
+      agentTypes: Array.from(this.registrations.keys())
+    };
+  }
+
+  getDependencyGraph(): {
+    nodes: AgentType[];
+    edges: Array<{ from: AgentType; to: AgentType }>;
+    levels: AgentType[][];
+  } {
+    const nodes = Array.from(this.registrations.keys());
+    const edges: Array<{ from: AgentType; to: AgentType }> = [];
+    
+    // Build edges from dependency graph
+    Object.entries(this.dependencyGraph).forEach(([agentType, config]) => {
+      config.dependencies.forEach(dep => {
+        edges.push({ from: dep, to: agentType as AgentType });
+      });
+    });
+
+    // Build levels based on execution order
+    const levels: AgentType[][] = [];
+    const orderMap = new Map<number, AgentType[]>();
+    
+    Object.entries(this.dependencyGraph).forEach(([agentType, config]) => {
+      const order = config.executionOrder;
+      if (!orderMap.has(order)) {
+        orderMap.set(order, []);
+      }
+      orderMap.get(order)!.push(agentType as AgentType);
+    });
+
+    // Convert to ordered array
+    const sortedOrders = Array.from(orderMap.keys()).sort((a, b) => a - b);
+    sortedOrders.forEach(order => {
+      levels.push(orderMap.get(order)!);
+    });
+
+    // If no levels exist (no dependencies), put all agents in level 0
+    if (levels.length === 0 && nodes.length > 0) {
+      levels.push(nodes);
+    }
+
+    return { nodes, edges, levels };
   }
 
   getExecutionOrder(): AgentType[] {
@@ -228,6 +315,19 @@ export class AgentRegistry extends EventEmitter {
     );
 
     await Promise.all(healthPromises);
+
+    // Emit health check completion event
+    const stats = this.getRegistryStatistics();
+    this.emit('healthCheckCompleted', {
+      totalAgents: stats.totalAgents,
+      healthyAgents: stats.healthyAgents,
+      unhealthyAgents: stats.unhealthyAgents,
+      results: Array.from(healthResults.entries()).map(([agentType, metadata]) => ({
+        agentType,
+        ...metadata
+      }))
+    });
+
     return healthResults;
   }
 

@@ -323,10 +323,21 @@ describe('MultiAgentQueueManager', () => {
     });
 
     test('should pause and resume all queues', async () => {
-      const pauseSpies = Array.from(mockQueues.values()).map(queue => 
+      // Get the actual queues from the manager
+      const internalQueues = queueManager.getInternalQueues();
+      const allQueues = [
+        ...Array.from(internalQueues.agentQueues.values()),
+        internalQueues.coordinationQueue,
+        internalQueues.resultsQueue,
+        internalQueues.healthQueue,
+        internalQueues.deadLetterQueue
+      ].filter(queue => queue !== null);
+
+
+      const pauseSpies = allQueues.map(queue => 
         vi.spyOn(queue, 'pause')
       );
-      const resumeSpies = Array.from(mockQueues.values()).map(queue => 
+      const resumeSpies = allQueues.map(queue => 
         vi.spyOn(queue, 'resume')
       );
 

@@ -8,6 +8,8 @@ import { DependencyEngine } from '../../../src/orchestrator/dependency-engine.js
 import { ResultAggregator } from '../../../src/orchestrator/result-aggregator.js';
 import { MultiAgentQueueManager } from '../../../src/queue/multi-agent-queue-manager.js';
 import { AgentRegistry } from '../../../src/agents/agent-registry.js';
+import { MessageRouter } from '../../../src/communication/message-router.js';
+import { AgentService } from '../../../src/agents/agent-service.js';
 import { AgentType } from '@ai-validation/shared';
 
 // Mock dependencies
@@ -15,11 +17,15 @@ vi.mock('../../../src/orchestrator/dependency-engine.js');
 vi.mock('../../../src/orchestrator/result-aggregator.js');
 vi.mock('../../../src/queue/multi-agent-queue-manager.js');
 vi.mock('../../../src/agents/agent-registry.js');
+vi.mock('../../../src/communication/message-router.js');
+vi.mock('../../../src/agents/agent-service.js');
 
 const MockDependencyEngine = vi.mocked(DependencyEngine);
 const MockResultAggregator = vi.mocked(ResultAggregator);
 const MockMultiAgentQueueManager = vi.mocked(MultiAgentQueueManager);
 const MockAgentRegistry = vi.mocked(AgentRegistry);
+const MockMessageRouter = vi.mocked(MessageRouter);
+const MockAgentService = vi.mocked(AgentService);
 
 describe('MultiAgentOrchestrator', () => {
   let orchestrator: MultiAgentOrchestrator;
@@ -27,8 +33,10 @@ describe('MultiAgentOrchestrator', () => {
   let mockResultAggregator: any;
   let mockQueueManager: any;
   let mockAgentRegistry: any;
+  let mockMessageRouter: any;
+  let mockAgentService: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
 
     // Setup mock instances
@@ -52,7 +60,10 @@ describe('MultiAgentOrchestrator', () => {
       addAgentExecution: vi.fn(),
       getQueueMetrics: vi.fn(),
       on: vi.fn(),
-      off: vi.fn()
+      off: vi.fn(),
+      initialize: vi.fn().mockResolvedValue(undefined),
+      shutdown: vi.fn().mockResolvedValue(undefined),
+      pauseAgent: vi.fn().mockResolvedValue(undefined)
     };
     MockMultiAgentQueueManager.getInstance.mockReturnValue(mockQueueManager);
 
@@ -60,11 +71,26 @@ describe('MultiAgentOrchestrator', () => {
       getAllRegisteredAgents: vi.fn(),
       getParallelExecutionGroups: vi.fn(),
       validateDependencies: vi.fn(),
-      isAgentAvailable: vi.fn()
+      isAgentAvailable: vi.fn(),
+      initialize: vi.fn().mockResolvedValue(undefined),
+      on: vi.fn(),
+      off: vi.fn()
     };
     MockAgentRegistry.getInstance.mockReturnValue(mockAgentRegistry);
 
+    mockMessageRouter = {
+      registerHandler: vi.fn(),
+      addRoutingRule: vi.fn(),
+      addFanoutPattern: vi.fn(),
+      shutdown: vi.fn().mockResolvedValue(undefined)
+    };
+    MockMessageRouter.getInstance.mockReturnValue(mockMessageRouter);
+
+    mockAgentService = {};
+    MockAgentService.getInstance.mockReturnValue(mockAgentService);
+
     orchestrator = MultiAgentOrchestrator.getInstance();
+    await orchestrator.initialize();
   });
 
   afterEach(async () => {

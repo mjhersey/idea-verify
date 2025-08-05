@@ -8,6 +8,7 @@ import { AgentRegistry } from '../agents/agent-registry.js';
 import { MultiAgentQueueManager, MultiAgentJobData, AgentExecutionJob } from '../queue/multi-agent-queue-manager.js';
 import { MessageRouter } from '../communication/message-router.js';
 import { AgentService } from '../agents/agent-service.js';
+import { DependencyEngine } from './dependency-engine.js';
 import { 
   AgentRequest, 
   AgentExecutionContext, 
@@ -78,6 +79,7 @@ export class MultiAgentOrchestrator extends EventEmitter {
   private queueManager: MultiAgentQueueManager;
   private messageRouter: MessageRouter;
   private agentService: AgentService;
+  private dependencyEngine: DependencyEngine;
 
   private workflows: Map<string, WorkflowDefinition> = new Map();
   private activeExecutions: Map<string, WorkflowExecution> = new Map();
@@ -93,6 +95,7 @@ export class MultiAgentOrchestrator extends EventEmitter {
     this.queueManager = MultiAgentQueueManager.getInstance();
     this.messageRouter = MessageRouter.getInstance();
     this.agentService = AgentService.getInstance();
+    this.dependencyEngine = DependencyEngine.getInstance();
   }
 
   static getInstance(): MultiAgentOrchestrator {
@@ -273,6 +276,7 @@ export class MultiAgentOrchestrator extends EventEmitter {
       requestedBy?: string;
       correlationId?: string;
       customAgentOrder?: AgentType[];
+      requiredAgents?: AgentType[];
     } = {}
   ): Promise<string> {
     if (this.activeExecutions.size >= this.maxConcurrentWorkflows) {
@@ -284,8 +288,51 @@ export class MultiAgentOrchestrator extends EventEmitter {
       throw new Error(`Workflow not found: ${workflowId}`);
     }
 
+    // Get available agents from registry and filter workflow accordingly
+    let availableAgents = this.agentRegistry.getAllRegisteredAgents();
+    
+    // Use requiredAgents if specified, otherwise use available agents that are in the workflow
+    let effectiveAgents: AgentType[];
+    if (options.requiredAgents && options.requiredAgents.length > 0) {
+      effectiveAgents = options.requiredAgents;
+    } else {
+      effectiveAgents = workflow.agents.filter(agent => availableAgents.includes(agent));
+    }
+
+    // Validate dependencies with agent registry
+    const dependencyValidation = this.agentRegistry.validateDependencies();
+    if (!dependencyValidation.valid) {
+      throw new Error(`Dependency validation failed: ${dependencyValidation.issues.join(', ')}`);
+    }
+
+    // Create effective workflow with filtered agents
+    const effectiveWorkflow: WorkflowDefinition = {
+      ...workflow,
+      agents: effectiveAgents,
+      // Filter dependencies to only include effective agents
+      dependencies: Object.fromEntries(
+        Object.entries(workflow.dependencies)
+          .filter(([agent, _]) => effectiveAgents.includes(agent as AgentType))
+          .map(([agent, deps]) => [
+            agent, 
+            deps.filter(dep => effectiveAgents.includes(dep))
+          ])
+      ),
+      // Get parallel execution groups from agent registry if available, otherwise calculate
+      parallelGroups: this.agentRegistry.getParallelExecutionGroups().length > 0 
+        ? this.agentRegistry.getParallelExecutionGroups().filter(group => 
+            group.some(agent => effectiveAgents.includes(agent))
+          )
+        : this.calculateParallelGroups(effectiveAgents, workflow.dependencies)
+    };
+
     // Create execution plan
-    const executionPlan = await this.createExecutionPlan(workflow, evaluationId, options);
+    let executionPlan: ExecutionPlan;
+    try {
+      executionPlan = await this.createExecutionPlan(effectiveWorkflow, evaluationId, options);
+    } catch (error) {
+      throw error; // Re-throw dependency engine or other errors
+    }
 
     // Create workflow execution
     const execution: WorkflowExecution = {
@@ -312,7 +359,7 @@ export class MultiAgentOrchestrator extends EventEmitter {
     };
 
     // Initialize agent statuses
-    for (const agentType of workflow.agents) {
+    for (const agentType of effectiveWorkflow.agents) {
       execution.agentStatuses.set(agentType, {
         status: 'pending',
         retryCount: 0
@@ -322,12 +369,12 @@ export class MultiAgentOrchestrator extends EventEmitter {
     this.activeExecutions.set(evaluationId, execution);
 
     // Start execution
-    await this.startWorkflowExecution(execution, executionPlan);
+    const jobId = await this.startWorkflowExecution(execution, executionPlan);
 
     console.log(`[MultiAgentOrchestrator] Started workflow: ${workflowId} for evaluation: ${evaluationId}`);
-    this.emit('workflowStarted', { evaluationId, workflowId, execution });
+    this.emit('workflowStarted', { evaluationId, workflowId, jobId, agentTypes: effectiveWorkflow.agents, startedAt: execution.startedAt });
 
-    return evaluationId;
+    return jobId;
   }
 
   private async createExecutionPlan(
@@ -376,7 +423,7 @@ export class MultiAgentOrchestrator extends EventEmitter {
     };
   }
 
-  private async startWorkflowExecution(execution: WorkflowExecution, plan: ExecutionPlan): Promise<void> {
+  private async startWorkflowExecution(execution: WorkflowExecution, plan: ExecutionPlan): Promise<string> {
     execution.status = 'running';
     execution.startedAt = new Date();
 
@@ -396,11 +443,12 @@ export class MultiAgentOrchestrator extends EventEmitter {
       }
     } as any;
 
-    await this.queueManager.addMultiAgentEvaluation(jobData, {
+    const jobId = await this.queueManager.addMultiAgentEvaluation(jobData, {
       priority: execution.metadata.priority
     });
 
     this.updateWorkflowProgress(execution);
+    return jobId;
   }
 
   // Event Handlers
@@ -746,6 +794,56 @@ export class MultiAgentOrchestrator extends EventEmitter {
     return result;
   }
 
+  private calculateParallelGroups(agents: AgentType[], dependencies: Record<AgentType, AgentType[]>): AgentType[][] {
+    const groups: AgentType[][] = [];
+    const processed = new Set<AgentType>();
+    const inDegree = new Map<AgentType, number>();
+    
+    // Initialize in-degrees for selected agents only
+    agents.forEach(agent => {
+      const deps = dependencies[agent] || [];
+      const relevantDeps = deps.filter(dep => agents.includes(dep));
+      inDegree.set(agent, relevantDeps.length);
+    });
+    
+    // Process in levels
+    while (processed.size < agents.length) {
+      const currentLevel: AgentType[] = [];
+      
+      // Find agents with no remaining dependencies
+      agents.forEach(agent => {
+        if (!processed.has(agent) && inDegree.get(agent) === 0) {
+          currentLevel.push(agent);
+        }
+      });
+      
+      if (currentLevel.length === 0) {
+        // Handle circular dependencies or remaining agents
+        const remaining = agents.filter(agent => !processed.has(agent));
+        currentLevel.push(...remaining);
+      }
+      
+      // Mark as processed and update in-degrees
+      currentLevel.forEach(agent => {
+        processed.add(agent);
+        
+        // Reduce in-degree for dependents
+        agents.forEach(dependent => {
+          const deps = dependencies[dependent] || [];
+          if (deps.includes(agent)) {
+            inDegree.set(dependent, (inDegree.get(dependent) || 0) - 1);
+          }
+        });
+      });
+      
+      if (currentLevel.length > 0) {
+        groups.push(currentLevel);
+      }
+    }
+    
+    return groups;
+  }
+
   // Public API
   getActiveExecutions(): WorkflowExecution[] {
     return Array.from(this.activeExecutions.values());
@@ -799,6 +897,76 @@ export class MultiAgentOrchestrator extends EventEmitter {
     this.isInitialized = false;
 
     console.log('[MultiAgentOrchestrator] Shutdown complete');
+  }
+
+  // Additional Public API methods for comprehensive workflow management
+  buildDependencyGraph(agentTypes: AgentType[]): { nodes: AgentType[]; edges: Array<{ from: AgentType; to: AgentType }>; levels: AgentType[][] } {
+    return this.dependencyEngine.buildDependencyGraph(agentTypes);
+  }
+
+  optimizeWorkflowExecution(agentTypes: AgentType[]): any {
+    const graph = this.dependencyEngine.buildDependencyGraph(agentTypes);
+    return this.dependencyEngine.optimizeExecutionOrder(graph);
+  }
+
+  calculateCriticalPath(agentTypes: AgentType[]): { path: AgentType[]; duration: number } {
+    const graph = this.dependencyEngine.buildDependencyGraph(agentTypes);
+    return this.dependencyEngine.calculateCriticalPath(graph);
+  }
+
+  getStatistics(): {
+    totalWorkflows: number;
+    activeWorkflows: number;
+    completedWorkflows: number;
+    failedWorkflows: number;
+    averageExecutionTime: number;
+  } {
+    const totalWorkflows = this.activeExecutions.size + this.executionHistory.size;
+    const activeWorkflows = this.activeExecutions.size;
+    const completedWorkflows = Array.from(this.executionHistory.values())
+      .filter(execution => execution.status === 'completed').length;
+    const failedWorkflows = Array.from(this.executionHistory.values())
+      .filter(execution => execution.status === 'failed').length;
+
+    // Calculate average execution time from completed workflows
+    const completedExecutions = Array.from(this.executionHistory.values())
+      .filter(execution => execution.status === 'completed' && execution.startedAt && execution.completedAt);
+    const averageExecutionTime = completedExecutions.length > 0
+      ? completedExecutions.reduce((sum, execution) => {
+          const duration = execution.completedAt!.getTime() - execution.startedAt!.getTime();
+          return sum + duration;
+        }, 0) / completedExecutions.length
+      : 0;
+
+    return {
+      totalWorkflows,
+      activeWorkflows,
+      completedWorkflows,
+      failedWorkflows,
+      averageExecutionTime
+    };
+  }
+
+  getActiveWorkflows(): string[] {
+    return Array.from(this.activeExecutions.values()).map(execution => execution.workflowId);
+  }
+
+  getWorkflowStatus(workflowId: string): WorkflowExecution | undefined {
+    // Find by workflow ID in active executions
+    for (const execution of this.activeExecutions.values()) {
+      if (execution.workflowId === workflowId) {
+        return execution;
+      }
+    }
+    
+    // Find by workflow ID in execution history
+    for (const execution of this.executionHistory.values()) {
+      if (execution.workflowId === workflowId) {
+        return execution;
+      }
+    }
+    
+    return undefined;
   }
 
   // Test utilities

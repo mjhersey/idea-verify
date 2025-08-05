@@ -9,26 +9,16 @@ import { AgentType } from '@ai-validation/shared';
 
 // Mock agent implementation for testing
 class MockAgent extends BaseAgent {
-  private agentType: AgentType;
   private dependencies: AgentType[];
   private capabilities: string[];
 
   constructor(type: AgentType, deps: AgentType[] = [], caps: string[] = []) {
-    super();
-    this.agentType = type;
+    super(type, `Mock ${type} Agent`, `Mock agent for ${type}`);
     this.dependencies = deps;
     this.capabilities = caps;
   }
 
-  getName(): string {
-    return `Mock ${this.agentType} Agent`;
-  }
-
-  getDescription(): string {
-    return `Mock agent for ${this.agentType}`;
-  }
-
-  defineCapabilities() {
+  protected defineCapabilities(): AgentCapability {
     return {
       name: this.agentType,
       version: '1.0.0',
@@ -37,17 +27,17 @@ class MockAgent extends BaseAgent {
       requires: (this.dependencies || []).map(dep => `${dep}-data`)
     };
   }
+  
+  protected async onInitialize(): Promise<void> {
+    // Mock initialization
+  }
+  
+  protected async onCleanup(): Promise<void> {
+    // Mock cleanup
+  }
 
   getCapabilities() {
     return this.defineCapabilities();
-  }
-
-  async initialize(): Promise<void> {
-    // Mock initialization
-  }
-
-  async cleanup(): Promise<void> {
-    // Mock cleanup
   }
 
   async healthCheck() {
@@ -66,12 +56,12 @@ class MockAgent extends BaseAgent {
     };
   }
 
-  async execute() {
+  async execute(request: any, context: any) {
     return {
+      agentType: this.agentType,
       score: 85,
       confidence: 'high' as const,
       insights: ['Mock insight'],
-      recommendations: ['Mock recommendation'],
       metadata: { processingTime: 1000, model: 'mock', retryCount: 0 },
       rawData: { mockData: true }
     };

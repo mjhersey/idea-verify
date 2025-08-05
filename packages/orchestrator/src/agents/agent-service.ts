@@ -186,7 +186,7 @@ export class AgentService implements MessageHandler {
     } = {}
   ): Promise<AgentExecutionResult> {
     const startTime = Date.now();
-    const maxRetries = options.maxRetries || 3;
+    const maxRetries = options.maxRetries ?? 3;
     const timeout = options.timeout || 30000; // 30 seconds
 
     console.log(`Executing agent: ${agentType} for evaluation: ${context.evaluationId}`);
@@ -330,6 +330,8 @@ export class AgentService implements MessageHandler {
     signal?: AbortSignal
   ): Promise<T> {
     return new Promise((resolve, reject) => {
+      let settled = false;
+      
       // Check if already aborted
       if (signal?.aborted) {
         reject(new Error('Operation was aborted'));
@@ -337,27 +339,39 @@ export class AgentService implements MessageHandler {
       }
 
       const timeoutId = setTimeout(() => {
-        reject(new Error(`Agent execution timed out after ${timeoutMs}ms`));
+        if (!settled) {
+          settled = true;
+          reject(new Error(`Agent execution timed out after ${timeoutMs}ms`));
+        }
       }, timeoutMs);
 
       // Handle abort signal
       const abortHandler = () => {
-        clearTimeout(timeoutId);
-        reject(new Error('Agent execution was aborted'));
+        if (!settled) {
+          settled = true;
+          clearTimeout(timeoutId);
+          reject(new Error('Agent execution was aborted'));
+        }
       };
 
       signal?.addEventListener('abort', abortHandler);
 
       operation()
         .then(result => {
-          clearTimeout(timeoutId);
-          signal?.removeEventListener('abort', abortHandler);
-          resolve(result);
+          if (!settled) {
+            settled = true;
+            clearTimeout(timeoutId);
+            signal?.removeEventListener('abort', abortHandler);
+            resolve(result);
+          }
         })
         .catch(error => {
-          clearTimeout(timeoutId);
-          signal?.removeEventListener('abort', abortHandler);
-          reject(error);
+          if (!settled) {
+            settled = true;
+            clearTimeout(timeoutId);
+            signal?.removeEventListener('abort', abortHandler);
+            reject(error);
+          }
         });
     });
   }

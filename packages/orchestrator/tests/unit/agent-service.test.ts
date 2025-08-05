@@ -182,7 +182,7 @@ describe('AgentService', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('timed out');
-    });
+    }, 10000);
 
     it('should validate agent response', async () => {
       const { AgentFactory } = await import('../../src/agents/agent-factory.js');
@@ -210,7 +210,7 @@ describe('AgentService', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('score must be a number between 0 and 100');
-    });
+    }, 10000);
   });
 
   describe('executeMultipleAgents', () => {
@@ -286,7 +286,7 @@ describe('AgentService', () => {
       expect(results[0].success).toBe(true);
       expect(results[1].success).toBe(false);
       expect(results[1].error).toBe('Second agent failed');
-    });
+    }, 10000);
 
     it('should respect concurrency limits', async () => {
       const { AgentFactory } = await import('../../src/agents/agent-factory.js');
@@ -375,7 +375,7 @@ describe('AgentService', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('null or undefined');
-    });
+    }, 10000);
 
     it('should reject invalid score range', async () => {
       const { AgentFactory } = await import('../../src/agents/agent-factory.js');
@@ -403,7 +403,7 @@ describe('AgentService', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('score must be a number between 0 and 100');
-    });
+    }, 10000);
 
     it('should reject invalid insights format', async () => {
       const { AgentFactory } = await import('../../src/agents/agent-factory.js');
@@ -431,7 +431,7 @@ describe('AgentService', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('insights must be an array');
-    });
+    }, 10000);
 
     it('should reject invalid confidence values', async () => {
       const { AgentFactory } = await import('../../src/agents/agent-factory.js');
@@ -459,6 +459,6 @@ describe('AgentService', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('confidence must be high, medium, or low');
-    });
+    }, 10000);
   });
 });

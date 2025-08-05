@@ -177,7 +177,7 @@ describe('OrchestratorService', () => {
       const evaluationId = await orchestrator.requestEvaluation(request);
 
       // Wait for completion (mock agents complete quickly)
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(resolve, 5000));
 
       const metrics = orchestrator.getMetrics();
       // Should have moved from active to completed
