@@ -38,6 +38,7 @@ export interface WorkflowExecution {
   progress: number;
   startedAt?: Date;
   completedAt?: Date;
+  agentTypes: AgentType[];
   agentStatuses: Map<AgentType, {
     status: 'pending' | 'running' | 'completed' | 'failed' | 'skipped';
     startedAt?: Date;
@@ -243,6 +244,10 @@ export class MultiAgentOrchestrator extends EventEmitter {
       await this.handleEvaluationCompleted(event);
     });
 
+    this.queueManager.on('evaluationFailed', async (event) => {
+      await this.handleEvaluationFailed(event);
+    });
+
     // Listen to agent registry events
     this.agentRegistry.on('agentHealthUpdate', (event) => {
       this.handleAgentHealthUpdate(event);
@@ -340,6 +345,7 @@ export class MultiAgentOrchestrator extends EventEmitter {
       evaluationId,
       status: 'pending',
       progress: 0,
+      agentTypes: effectiveWorkflow.agents,
       agentStatuses: new Map(),
       sharedContext: {
         sharedData: new Map(),
@@ -523,6 +529,13 @@ export class MultiAgentOrchestrator extends EventEmitter {
   private async handleEvaluationCompleted(event: { jobId: string }): Promise<void> {
     // Implementation would depend on specific event structure
     console.log(`[MultiAgentOrchestrator] Evaluation completed: ${event.jobId}`);
+    this.emit('workflowCompleted', { jobId: event.jobId });
+  }
+
+  private async handleEvaluationFailed(event: { jobId: string; error: any }): Promise<void> {
+    // Implementation would depend on specific event structure
+    console.log(`[MultiAgentOrchestrator] Evaluation failed: ${event.jobId}`);
+    this.emit('workflowFailed', { jobId: event.jobId, error: event.error });
   }
 
   private handleAgentHealthUpdate(event: { agentType: AgentType; metadata: any }): void {

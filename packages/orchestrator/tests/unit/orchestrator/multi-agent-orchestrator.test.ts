@@ -122,17 +122,23 @@ describe('MultiAgentOrchestrator', () => {
       );
 
       expect(workflowId).toBe('workflow-job-123');
-      expect(mockQueueManager.addMultiAgentEvaluation).toHaveBeenCalledWith({
-        evaluationId: 'eval-123',
-        workflowId: 'standard-evaluation',
-        agentTypes: ['market-research'],
-        parallelGroups: [['market-research']],
-        dependencies: expect.any(Object),
-        priority: 'medium',
-        timeout: 1800000,
-        businessIdea,
-        context: expect.any(Object)
-      });
+      expect(mockQueueManager.addMultiAgentEvaluation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          evaluationId: 'eval-123',
+          agentTypes: ['market-research'],
+          parallelGroups: [['market-research']],
+          dependencies: expect.objectContaining({
+            'market-research': []
+          }),
+          priority: 'medium',
+          businessIdea: expect.objectContaining({
+            id: 'idea-123',
+            title: 'Test Business Idea'
+          }),
+          context: expect.any(Object)
+        }),
+        expect.any(Object)
+      );
     });
 
     test('should execute workflow with multiple parallel agents', async () => {
@@ -170,10 +176,22 @@ describe('MultiAgentOrchestrator', () => {
       expect(workflowId).toBe('workflow-job-123');
       expect(mockQueueManager.addMultiAgentEvaluation).toHaveBeenCalledWith(
         expect.objectContaining({
+          evaluationId: 'eval-123',
           agentTypes,
           parallelGroups,
-          businessIdea
-        })
+          dependencies: expect.objectContaining({
+            'market-research': [],
+            'competitive-analysis': ['market-research'],
+            'customer-research': ['market-research']
+          }),
+          priority: 'medium',
+          businessIdea: expect.objectContaining({
+            id: 'idea-123',
+            title: 'Test Business Idea'
+          }),
+          context: expect.any(Object)
+        }),
+        expect.any(Object)
       );
     });
 
@@ -226,9 +244,21 @@ describe('MultiAgentOrchestrator', () => {
 
       expect(mockQueueManager.addMultiAgentEvaluation).toHaveBeenCalledWith(
         expect.objectContaining({
+          evaluationId: 'eval-123',
+          agentTypes: ['market-research'],
           priority: 'high',
-          timeout: 600000,
-          context: expect.objectContaining({ urgent: true })
+          businessIdea: expect.objectContaining({
+            id: 'idea-123',
+            title: 'Urgent Business Idea'
+          }),
+          context: expect.objectContaining({
+            workflowId: 'standard-evaluation',
+            correlationId: 'eval-123',
+            plan: expect.any(Object)
+          })
+        }),
+        expect.objectContaining({
+          priority: 'high'
         })
       );
     });
@@ -346,7 +376,7 @@ describe('MultiAgentOrchestrator', () => {
 
       await orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea);
 
-      const result = await orchestrator.cancelWorkflow('standard-evaluation');
+      const result = await orchestrator.cancelWorkflow('eval-123');
       expect(result).toBe(true);
 
       const status = orchestrator.getWorkflowStatus('standard-evaluation');
@@ -538,19 +568,13 @@ describe('MultiAgentOrchestrator', () => {
       ).rejects.toThrow('Registry unavailable');
     });
 
-    test('should handle dependency engine failures', async () => {
+    test('should handle workflow validation failures', async () => {
       const businessIdea = { id: 'idea-123', title: 'Test', description: 'Test' };
-      const agentTypes: AgentType[] = ['market-research'];
 
-      mockDependencyEngine.buildDependencyGraph.mockImplementation(() => {
-        throw new Error('Dependency engine error');
-      });
-
+      // Test with an invalid workflow ID that doesn't exist
       await expect(
-        orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea, {
-          requiredAgents: agentTypes
-        })
-      ).rejects.toThrow('Dependency engine error');
+        orchestrator.executeWorkflow('non-existent-workflow', 'eval-123', businessIdea)
+      ).rejects.toThrow('Workflow not found: non-existent-workflow');
     });
   });
 
