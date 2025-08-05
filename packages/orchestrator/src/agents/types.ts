@@ -9,6 +9,9 @@ export interface AgentRequest {
     id: string;
     title: string;
     description: string;
+    targetMarket?: string;
+    category?: string;
+    geography?: string[];
   };
   analysisType: string;
   context?: Record<string, any>;
