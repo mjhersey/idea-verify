@@ -20,7 +20,7 @@ class IntegrationTestSuite {
             includeErrorScenarios: true,
             timeout: 30000,
             maxConcurrency: 3,
-            ...options
+            ...options,
         };
         this.validator = new credential_validator_js_1.CredentialValidator();
         // Initialize secrets manager if not in mock mode
@@ -49,7 +49,7 @@ class IntegrationTestSuite {
             () => this.testHealthChecks(),
             () => this.testRateLimiting(),
             () => this.testErrorHandling(),
-            () => this.testServiceDegradation()
+            () => this.testServiceDegradation(),
         ];
         for (const testCategory of testCategories) {
             try {
@@ -62,7 +62,7 @@ class IntegrationTestSuite {
                     test: 'category-execution',
                     passed: false,
                     duration: 0,
-                    error: error instanceof Error ? error.message : String(error)
+                    error: error instanceof Error ? error.message : String(error),
                 });
             }
         }
@@ -109,7 +109,7 @@ class IntegrationTestSuite {
                     passed: validationResult?.valid || false,
                     duration: Date.now() - startTime,
                     error: validationResult?.error,
-                    details: validationResult?.details
+                    details: validationResult?.details,
                 });
             }
             catch (error) {
@@ -118,7 +118,7 @@ class IntegrationTestSuite {
                     test: 'credential-validation',
                     passed: false,
                     duration: Date.now() - startTime,
-                    error: error instanceof Error ? error.message : String(error)
+                    error: error instanceof Error ? error.message : String(error),
                 });
             }
         }
@@ -150,7 +150,7 @@ class IntegrationTestSuite {
                     test: 'service-connection',
                     passed: true,
                     duration: Date.now() - startTime,
-                    details: { response: result }
+                    details: { response: result },
                 });
             }
             catch (error) {
@@ -159,7 +159,7 @@ class IntegrationTestSuite {
                     test: 'service-connection',
                     passed: false,
                     duration: Date.now() - startTime,
-                    error: error instanceof Error ? error.message : String(error)
+                    error: error instanceof Error ? error.message : String(error),
                 });
             }
         }
@@ -174,13 +174,13 @@ class IntegrationTestSuite {
         const healthChecks = [
             { service: 'openai', url: 'http://localhost:3001/health' },
             { service: 'anthropic', url: 'http://localhost:3002/health' },
-            { service: 'localstack', url: 'http://localhost:4566/health' }
+            { service: 'localstack', url: 'http://localhost:4566/health' },
         ];
         for (const { service, url } of healthChecks) {
             const startTime = Date.now();
             try {
                 const response = await fetch(url, {
-                    signal: AbortSignal.timeout(this.options.timeout)
+                    signal: AbortSignal.timeout(this.options.timeout),
                 });
                 const isHealthy = response.ok;
                 let healthData;
@@ -195,7 +195,7 @@ class IntegrationTestSuite {
                     test: 'health-check',
                     passed: isHealthy,
                     duration: Date.now() - startTime,
-                    details: healthData
+                    details: healthData,
                 });
             }
             catch (error) {
@@ -204,7 +204,7 @@ class IntegrationTestSuite {
                     test: 'health-check',
                     passed: false,
                     duration: Date.now() - startTime,
-                    error: error instanceof Error ? error.message : String(error)
+                    error: error instanceof Error ? error.message : String(error),
                 });
             }
         }
@@ -223,8 +223,10 @@ class IntegrationTestSuite {
                 const config = (0, rate_limit_configs_js_1.getServiceConfig)(service);
                 const client = new service_client_js_1.ServiceClient(service, config);
                 // Make rapid requests to test rate limiting
-                const rapidRequests = Array(5).fill(null).map(() => client.executeRequest(async () => ({ test: 'rate-limit' }), {
-                    estimatedTokens: 1
+                const rapidRequests = Array(5)
+                    .fill(null)
+                    .map(() => client.executeRequest(async () => ({ test: 'rate-limit' }), {
+                    estimatedTokens: 1,
                 }));
                 const results_rapid = await Promise.allSettled(rapidRequests);
                 const successCount = results_rapid.filter(r => r.status === 'fulfilled').length;
@@ -236,8 +238,8 @@ class IntegrationTestSuite {
                     details: {
                         totalRequests: rapidRequests.length,
                         successfulRequests: successCount,
-                        status: client.getStatus()
-                    }
+                        status: client.getStatus(),
+                    },
                 });
             }
             catch (error) {
@@ -246,7 +248,7 @@ class IntegrationTestSuite {
                     test: 'rate-limiting',
                     passed: false,
                     duration: Date.now() - startTime,
-                    error: error instanceof Error ? error.message : String(error)
+                    error: error instanceof Error ? error.message : String(error),
                 });
             }
         }
@@ -265,14 +267,14 @@ class IntegrationTestSuite {
         const startTime = Date.now();
         try {
             const invalidResult = await this.validator.validateOpenAI({
-                apiKey: 'invalid-key'
+                apiKey: 'invalid-key',
             });
             results.push({
                 service: 'openai',
                 test: 'invalid-credentials',
                 passed: !invalidResult.valid, // Should fail validation
                 duration: Date.now() - startTime,
-                details: invalidResult
+                details: invalidResult,
             });
         }
         catch (error) {
@@ -281,7 +283,7 @@ class IntegrationTestSuite {
                 test: 'invalid-credentials',
                 passed: true, // Exception is expected
                 duration: Date.now() - startTime,
-                details: { expectedError: true }
+                details: { expectedError: true },
             });
         }
         return results;
@@ -307,7 +309,7 @@ class IntegrationTestSuite {
                     test: 'degradation-strategy',
                     passed: hasFallbackStrategy || hasRecommendations,
                     duration: Date.now() - startTime,
-                    details: status.fallbackRecommendations
+                    details: status.fallbackRecommendations,
                 });
             }
             catch (error) {
@@ -316,7 +318,7 @@ class IntegrationTestSuite {
                     test: 'degradation-strategy',
                     passed: false,
                     duration: Date.now() - startTime,
-                    error: error instanceof Error ? error.message : String(error)
+                    error: error instanceof Error ? error.message : String(error),
                 });
             }
         }
@@ -328,7 +330,7 @@ class IntegrationTestSuite {
     async testOpenAIConnection() {
         if (process.env.USE_MOCK_SERVICES === 'true') {
             return await fetch('http://localhost:3001/v1/models', {
-                headers: { 'Authorization': 'Bearer sk-test' }
+                headers: { Authorization: 'Bearer sk-test' },
             }).then(r => r.json());
         }
         // Would make real API call in production
@@ -344,13 +346,13 @@ class IntegrationTestSuite {
                 headers: {
                     'Content-Type': 'application/json',
                     'x-api-key': 'sk-ant-test',
-                    'anthropic-version': '2023-06-01'
+                    'anthropic-version': '2023-06-01',
                 },
                 body: JSON.stringify({
                     model: 'claude-3-haiku-20240307',
                     max_tokens: 1,
-                    messages: [{ role: 'user', content: 'test' }]
-                })
+                    messages: [{ role: 'user', content: 'test' }],
+                }),
             }).then(r => r.json());
         }
         // Would make real API call in production
@@ -369,7 +371,7 @@ class IntegrationTestSuite {
                 return {
                     accessKeyId: 'AKIATEST',
                     secretAccessKey: 'test-secret',
-                    region: 'us-east-1'
+                    region: 'us-east-1',
                 };
             default:
                 return {};
@@ -388,7 +390,7 @@ class IntegrationTestSuite {
                 return {
                     accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'missing',
                     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'missing',
-                    region: process.env.AWS_REGION || 'us-east-1'
+                    region: process.env.AWS_REGION || 'us-east-1',
                 };
             default:
                 return {};
@@ -410,7 +412,9 @@ class IntegrationTestSuite {
         console.log(`Success Rate: ${Math.round((passed / results.length) * 100)}%`);
         if (failed > 0) {
             console.log('\nFailed Tests:');
-            results.filter(r => !r.passed).forEach(r => {
+            results
+                .filter(r => !r.passed)
+                .forEach(r => {
                 console.log(`  - ${r.service}/${r.test}: ${r.error || 'Unknown error'}`);
             });
         }

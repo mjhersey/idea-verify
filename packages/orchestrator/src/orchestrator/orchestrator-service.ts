@@ -1054,7 +1054,7 @@ export class OrchestratorService extends EventEmitter implements MessageHandler 
     // Also reset repository and queue state for clean test environment
     try {
       // Reset repositories if they're in-memory implementations
-      ;(evaluationRepository as any).resetState?.()
+      (evaluationRepository as any).resetState?.()
       ;(agentResultRepository as any).resetState?.()
 
       // Reset queue manager state

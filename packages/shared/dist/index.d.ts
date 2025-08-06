@@ -3,6 +3,7 @@
  */
 export * from './types/credentials.js';
 export * from './types/database.js';
+export * from './types/websocket.js';
 export * from './secrets/secrets-manager.js';
 export * from './config/environment.js';
 export * from './utils/credential-validator.js';
@@ -16,4 +17,7 @@ export * from './health/service-registry.js';
 export * from './mocks/mock-service-manager.js';
 export * from './mocks/openai/mock-openai-service.js';
 export * from './mocks/anthropic/mock-anthropic-service.js';
+export * from './utils/logger.js';
+export * from './config/feature-flags.js';
+export * from './testing/environment-validator.js';
 //# sourceMappingURL=index.d.ts.map

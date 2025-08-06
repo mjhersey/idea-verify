@@ -41,6 +41,7 @@ export class ExternalServiceMonitor {
 
     const startTime = Date.now()
     try {
+      // eslint-disable-next-line no-undef
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 10000)
 
@@ -110,6 +111,7 @@ export class ExternalServiceMonitor {
 
     const startTime = Date.now()
     try {
+      // eslint-disable-next-line no-undef
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 10000)
 

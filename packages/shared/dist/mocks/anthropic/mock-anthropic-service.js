@@ -17,9 +17,9 @@ class MockAnthropicService {
         this.config = {
             rateLimits: {
                 requestsPerMinute: 500,
-                tokensPerMinute: 50000
+                tokensPerMinute: 50000,
             },
-            ...config
+            ...config,
         };
     }
     /**
@@ -41,7 +41,7 @@ class MockAnthropicService {
      * Stop the mock server
      */
     async stop() {
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
             if (this.server) {
                 this.server.close(() => {
                     console.log('Mock Anthropic service stopped');
@@ -81,8 +81,8 @@ class MockAnthropicService {
                 type: 'error',
                 error: {
                     type: 'authentication_error',
-                    message: 'Invalid API key provided'
-                }
+                    message: 'Invalid API key provided',
+                },
             }));
             return;
         }
@@ -94,8 +94,8 @@ class MockAnthropicService {
                 type: 'error',
                 error: {
                     type: 'rate_limit_error',
-                    message: 'Rate limit exceeded'
-                }
+                    message: 'Rate limit exceeded',
+                },
             }));
             return;
         }
@@ -112,8 +112,8 @@ class MockAnthropicService {
                 type: 'error',
                 error: {
                     type: 'not_found_error',
-                    message: 'Not found'
-                }
+                    message: 'Not found',
+                },
             }));
         }
     }
@@ -143,8 +143,8 @@ class MockAnthropicService {
                     type: 'error',
                     error: {
                         type: 'invalid_request_error',
-                        message: 'Invalid JSON in request body'
-                    }
+                        message: 'Invalid JSON in request body',
+                    },
                 }));
             }
         });
@@ -156,15 +156,18 @@ class MockAnthropicService {
         const messages = request.messages || [];
         const lastMessage = messages[messages.length - 1];
         // Generate contextual response based on request
-        let mockContent = "This is a mock response from the Anthropic Claude API service.";
+        let mockContent = 'This is a mock response from the Anthropic Claude API service.';
         if (lastMessage?.content?.toLowerCase().includes('business idea')) {
-            mockContent = "I've analyzed your business idea thoroughly. The concept demonstrates several promising characteristics: strong market alignment, clear value proposition, and scalable business model. Key considerations include competitive landscape analysis, customer acquisition strategy, and regulatory compliance. I recommend conducting targeted market research to validate core assumptions before proceeding with development.";
+            mockContent =
+                "I've analyzed your business idea thoroughly. The concept demonstrates several promising characteristics: strong market alignment, clear value proposition, and scalable business model. Key considerations include competitive landscape analysis, customer acquisition strategy, and regulatory compliance. I recommend conducting targeted market research to validate core assumptions before proceeding with development.";
         }
         else if (lastMessage?.content?.toLowerCase().includes('evaluate')) {
-            mockContent = "My evaluation indicates this is a viable business opportunity with moderate to high potential. Strengths: Clear problem-solution fit, addressable market opportunity, defensible business model. Areas requiring attention: Go-to-market strategy, competitive differentiation, financial projections. Overall assessment: Proceed with cautious optimism and structured validation approach.";
+            mockContent =
+                'My evaluation indicates this is a viable business opportunity with moderate to high potential. Strengths: Clear problem-solution fit, addressable market opportunity, defensible business model. Areas requiring attention: Go-to-market strategy, competitive differentiation, financial projections. Overall assessment: Proceed with cautious optimism and structured validation approach.';
         }
         else if (lastMessage?.content?.toLowerCase().includes('market analysis')) {
-            mockContent = "Market analysis reveals favorable conditions for this business concept. Total Addressable Market (TAM) appears substantial with growing demand trends. Key market drivers include: digital transformation, changing consumer preferences, regulatory support. Competitive landscape shows room for differentiation. Recommended next steps: primary market research, customer interviews, competitive intelligence gathering.";
+            mockContent =
+                'Market analysis reveals favorable conditions for this business concept. Total Addressable Market (TAM) appears substantial with growing demand trends. Key market drivers include: digital transformation, changing consumer preferences, regulatory support. Competitive landscape shows room for differentiation. Recommended next steps: primary market research, customer interviews, competitive intelligence gathering.';
         }
         const inputTokens = this.estimateTokens(messages.map((m) => m.content).join(' '));
         const outputTokens = this.estimateTokens(mockContent);
@@ -172,17 +175,19 @@ class MockAnthropicService {
             id: `msg_mock_${Date.now()}`,
             type: 'message',
             role: 'assistant',
-            content: [{
+            content: [
+                {
                     type: 'text',
-                    text: mockContent
-                }],
+                    text: mockContent,
+                },
+            ],
             model: request.model || 'claude-3-sonnet-20240229',
             stop_reason: 'end_turn',
             stop_sequence: null,
             usage: {
                 input_tokens: inputTokens,
-                output_tokens: outputTokens
-            }
+                output_tokens: outputTokens,
+            },
         };
     }
     /**
@@ -210,7 +215,7 @@ class MockAnthropicService {
         res.end(JSON.stringify({
             status: 'healthy',
             service: 'mock-anthropic',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
         }));
     }
     /**

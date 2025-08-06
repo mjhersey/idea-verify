@@ -214,7 +214,7 @@ export class QueueManager {
   resetState(): void {
     // Clear any queued jobs if queues support it
     try {
-      ;(this.evaluationQueue as any)?.resetState?.()
+      (this.evaluationQueue as any)?.resetState?.()
       ;(this.agentQueue as any)?.resetState?.()
       ;(this.resultQueue as any)?.resetState?.()
     } catch (e) {

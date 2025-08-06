@@ -61,7 +61,8 @@ export class WebSocketRateLimiter {
   /**
    * Check if a user can establish a new connection
    */
-  canConnect(userId: string, socketId: string): { allowed: boolean; reason?: string } {
+  // eslint-disable-next-line no-unused-vars
+  canConnect(userId: string, _socketId: string): { allowed: boolean; reason?: string } {
     // Check if user is banned
     if (this.isUserBanned(userId)) {
       return { allowed: false, reason: 'User is temporarily banned for rate limit violations' }
@@ -315,7 +316,8 @@ export class WebSocketRateLimiter {
     const now = Date.now()
     const seenUsers = new Set<string>()
 
-    for (const [_, metrics] of this.connections) {
+    // eslint-disable-next-line no-unused-vars
+    for (const [_socketId, metrics] of this.connections) {
       totalMessages += metrics.messageCount
       totalViolations += metrics.violations
 
@@ -346,7 +348,8 @@ export class WebSocketRateLimiter {
     let clearedBans = 0
 
     // Clean up expired bans
-    for (const [socketId, metrics] of this.connections) {
+    // eslint-disable-next-line no-unused-vars
+    for (const [_socketId, metrics] of this.connections) {
       if (metrics.isBanned && metrics.banExpiresAt && now >= metrics.banExpiresAt) {
         metrics.isBanned = false
         metrics.banExpiresAt = undefined

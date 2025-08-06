@@ -407,7 +407,7 @@ class WebSocketService {
 
     if (this.connection) {
       if (this.usingSSE) {
-        ;(this.connection as EventSource).close()
+        (this.connection as EventSource).close()
       } else {
         this.connection.disconnect()
       }

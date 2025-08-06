@@ -27,7 +27,7 @@ describe('DatabaseManager', () => {
       await dbManager.shutdown()
     }
     // Reset singleton for other tests
-    ;(DatabaseManager as any).instance = null
+    (DatabaseManager as any).instance = null
   })
 
   describe('Singleton Pattern', () => {

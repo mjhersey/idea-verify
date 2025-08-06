@@ -20,7 +20,7 @@ class ServiceClient {
         // Configure quota monitoring with alert callback
         this.quotaMonitor.configure(serviceName, {
             ...config.quotaMonitoring,
-            alertCallback: this.handleQuotaAlert.bind(this)
+            alertCallback: this.handleQuotaAlert.bind(this),
         });
     }
     /**
@@ -43,7 +43,8 @@ class ServiceClient {
             // Record failed usage
             this.quotaMonitor.recordUsage(this.serviceName, 0, 0, true);
             // Check if we should attempt fallback
-            if (this.config.fallbackEnabled && this.shouldUseFallback(error)) {
+            if (this.config.fallbackEnabled &&
+                this.shouldUseFallback(error)) {
                 const fallback = this.getFallbackService();
                 if (fallback) {
                     console.warn(`Service ${this.serviceName} failed, attempting fallback to ${fallback}`);
@@ -61,7 +62,7 @@ class ServiceClient {
         return {
             rateLimitStatus: this.rateLimiter.getRateLimitStatus(this.serviceName),
             quotaStatus: this.quotaMonitor.getQuotaStatus(this.serviceName),
-            fallbackRecommendations: this.quotaMonitor.getFallbackStrategy(this.serviceName)
+            fallbackRecommendations: this.quotaMonitor.getFallbackStrategy(this.serviceName),
         };
     }
     /**
@@ -74,7 +75,7 @@ class ServiceClient {
             current: alert.current,
             limit: alert.limit,
             message: alert.message,
-            severity: alert.severity
+            severity: alert.severity,
         });
         // If critical, consider automatic fallback
         if (alert.severity === 'critical' && this.config.fallbackEnabled) {

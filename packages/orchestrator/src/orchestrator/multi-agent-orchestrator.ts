@@ -334,12 +334,11 @@ export class MultiAgentOrchestrator extends EventEmitter {
     }
 
     // Create execution plan
-    let executionPlan: ExecutionPlan
-    try {
-      executionPlan = await this.createExecutionPlan(effectiveWorkflow, evaluationId, options)
-    } catch (error) {
-      throw error // Re-throw dependency engine or other errors
-    }
+    const executionPlan: ExecutionPlan = await this.createExecutionPlan(
+      effectiveWorkflow,
+      evaluationId,
+      options
+    )
 
     // Create workflow execution
     const execution: WorkflowExecution = {

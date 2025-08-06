@@ -121,6 +121,7 @@ export class ServiceRegistry {
     data?: any
   }> {
     const url = `${service.url}${service.healthPath}`
+    // eslint-disable-next-line no-undef
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), service.timeout)
 
@@ -219,7 +220,8 @@ export class ServiceRegistry {
         }
       }
 
-      const controller = new AbortController()
+      // eslint-disable-next-line no-undef
+    const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), config.timeout)
 
       try {

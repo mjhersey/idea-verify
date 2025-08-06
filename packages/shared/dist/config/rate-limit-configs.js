@@ -20,7 +20,7 @@ exports.OPENAI_RATE_LIMITS = {
     maxRetries: 3,
     baseDelayMs: 1000, // 1 second base delay
     maxDelayMs: 60000, // Max 60 seconds
-    jitterEnabled: true
+    jitterEnabled: true,
 };
 exports.OPENAI_QUOTA_CONFIG = {
     dailyLimit: 200000, // Daily request limit
@@ -42,7 +42,7 @@ exports.ANTHROPIC_RATE_LIMITS = {
     maxRetries: 3,
     baseDelayMs: 1000,
     maxDelayMs: 60000,
-    jitterEnabled: true
+    jitterEnabled: true,
 };
 exports.ANTHROPIC_QUOTA_CONFIG = {
     dailyLimit: 100000,
@@ -61,7 +61,7 @@ exports.AWS_RATE_LIMITS = {
     maxRetries: 3,
     baseDelayMs: 500,
     maxDelayMs: 30000,
-    jitterEnabled: true
+    jitterEnabled: true,
 };
 exports.AWS_QUOTA_CONFIG = {
     dailyLimit: 1000000,
@@ -78,7 +78,7 @@ exports.MOCK_RATE_LIMITS = {
     maxRetries: 1, // Don't retry much in mock mode
     baseDelayMs: 100,
     maxDelayMs: 1000,
-    jitterEnabled: false // No jitter needed for mocks
+    jitterEnabled: false, // No jitter needed for mocks
 };
 exports.MOCK_QUOTA_CONFIG = {
     dailyLimit: 100000,
@@ -94,32 +94,32 @@ exports.SERVICE_CONFIGS = {
         rateLimiting: exports.OPENAI_RATE_LIMITS,
         quotaMonitoring: exports.OPENAI_QUOTA_CONFIG,
         fallbackEnabled: true,
-        fallbackServices: ['anthropic', 'mock-openai']
+        fallbackServices: ['anthropic', 'mock-openai'],
     },
     anthropic: {
         rateLimiting: exports.ANTHROPIC_RATE_LIMITS,
         quotaMonitoring: exports.ANTHROPIC_QUOTA_CONFIG,
         fallbackEnabled: true,
-        fallbackServices: ['openai', 'mock-anthropic']
+        fallbackServices: ['openai', 'mock-anthropic'],
     },
     aws: {
         rateLimiting: exports.AWS_RATE_LIMITS,
         quotaMonitoring: exports.AWS_QUOTA_CONFIG,
         fallbackEnabled: false, // No fallback for AWS services
-        fallbackServices: []
+        fallbackServices: [],
     },
     'mock-openai': {
         rateLimiting: exports.MOCK_RATE_LIMITS,
         quotaMonitoring: exports.MOCK_QUOTA_CONFIG,
         fallbackEnabled: false,
-        fallbackServices: []
+        fallbackServices: [],
     },
     'mock-anthropic': {
         rateLimiting: exports.MOCK_RATE_LIMITS,
         quotaMonitoring: exports.MOCK_QUOTA_CONFIG,
         fallbackEnabled: false,
-        fallbackServices: []
-    }
+        fallbackServices: [],
+    },
 };
 /**
  * Get configuration for a service with environment-based overrides
@@ -134,7 +134,7 @@ function getServiceConfig(serviceName) {
         return {
             ...baseConfig,
             rateLimiting: exports.MOCK_RATE_LIMITS,
-            quotaMonitoring: exports.MOCK_QUOTA_CONFIG
+            quotaMonitoring: exports.MOCK_QUOTA_CONFIG,
         };
     }
     return baseConfig;
@@ -148,30 +148,30 @@ exports.RATE_LIMIT_DOCS = {
         tiers: {
             'Tier 1': { rpm: 500, tpm: 30000 },
             'Tier 2': { rpm: 5000, tpm: 450000 },
-            'Tier 3': { rpm: 5000, tpm: 1000000 }
+            'Tier 3': { rpm: 5000, tpm: 1000000 },
         },
         upgradeInfo: 'Upgrade tier by spending $100+ and waiting 7+ days',
-        documentation: 'https://platform.openai.com/docs/guides/rate-limits'
+        documentation: 'https://platform.openai.com/docs/guides/rate-limits',
     },
     anthropic: {
         description: 'Anthropic Claude API rate limits based on usage tier',
         tiers: {
-            'Developer': { rpm: 100, tpm: 10000 },
-            'Build': { rpm: 1000, tpm: 40000 },
-            'Scale': { rpm: 2000, tpm: 100000 }
+            Developer: { rpm: 100, tpm: 10000 },
+            Build: { rpm: 1000, tpm: 40000 },
+            Scale: { rpm: 2000, tpm: 100000 },
         },
         upgradeInfo: 'Contact Anthropic for tier upgrades',
-        documentation: 'https://docs.anthropic.com/claude/reference/rate-limits'
+        documentation: 'https://docs.anthropic.com/claude/reference/rate-limits',
     },
     aws: {
         description: 'AWS service limits vary by service and region',
         services: {
             'Secrets Manager': { rpm: 5000, burst: 10000 },
-            'S3': { rpm: 3500, burst: 5500 },
-            'IAM': { rpm: 1000, burst: 2000 }
+            S3: { rpm: 3500, burst: 5500 },
+            IAM: { rpm: 1000, burst: 2000 },
         },
         upgradeInfo: 'Request limit increases through AWS Support',
-        documentation: 'https://docs.aws.amazon.com/general/latest/gr/aws_service_limits.html'
-    }
+        documentation: 'https://docs.aws.amazon.com/general/latest/gr/aws_service_limits.html',
+    },
 };
 //# sourceMappingURL=rate-limit-configs.js.map

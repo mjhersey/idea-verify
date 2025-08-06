@@ -20,7 +20,7 @@ class QuotaMonitor {
                 tokens: 0,
                 cost: 0,
                 errors: 0,
-                lastRequest: new Date()
+                lastRequest: new Date(),
             });
         }
     }
@@ -33,7 +33,7 @@ class QuotaMonitor {
             tokens: 0,
             cost: 0,
             errors: 0,
-            lastRequest: new Date()
+            lastRequest: new Date(),
         };
         metrics.requests += 1;
         metrics.tokens += tokens;
@@ -63,20 +63,20 @@ class QuotaMonitor {
                 used: usage.requests,
                 limit: config.dailyLimit || 0,
                 resetTime: this.getNextResetTime(),
-                percentageUsed: config.dailyLimit ? (usage.requests / config.dailyLimit) * 100 : 0
+                percentageUsed: config.dailyLimit ? (usage.requests / config.dailyLimit) * 100 : 0,
             },
             tokens: {
                 used: usage.tokens,
                 limit: config.monthlyLimit || 0,
                 resetTime: this.getNextMonthlyReset(),
-                percentageUsed: config.monthlyLimit ? (usage.tokens / config.monthlyLimit) * 100 : 0
+                percentageUsed: config.monthlyLimit ? (usage.tokens / config.monthlyLimit) * 100 : 0,
             },
             cost: {
                 used: usage.cost,
                 limit: config.costLimit || 0,
                 resetTime: this.getNextMonthlyReset(),
-                percentageUsed: config.costLimit ? (usage.cost / config.costLimit) * 100 : 0
-            }
+                percentageUsed: config.costLimit ? (usage.cost / config.costLimit) * 100 : 0,
+            },
         };
     }
     /**
@@ -111,7 +111,7 @@ class QuotaMonitor {
             return {
                 canSwitch: false,
                 alternatives: [],
-                recommendations: ['Configure quota monitoring first']
+                recommendations: ['Configure quota monitoring first'],
             };
         }
         const status = this.getQuotaStatus(service);
@@ -119,7 +119,7 @@ class QuotaMonitor {
             return {
                 canSwitch: false,
                 alternatives: [],
-                recommendations: ['Unable to determine quota status']
+                recommendations: ['Unable to determine quota status'],
             };
         }
         const recommendations = [];
@@ -143,7 +143,7 @@ class QuotaMonitor {
         return {
             canSwitch: alternatives.length > 0,
             alternatives,
-            recommendations
+            recommendations,
         };
     }
     /**
@@ -173,7 +173,8 @@ class QuotaMonitor {
             return;
         // Check request thresholds
         for (const threshold of config.alertThresholds) {
-            if (status.requests.percentageUsed >= threshold && !this.wasAlertSentRecently(service, `requests_${threshold}`)) {
+            if (status.requests.percentageUsed >= threshold &&
+                !this.wasAlertSentRecently(service, `requests_${threshold}`)) {
                 this.sendAlert({
                     service,
                     type: 'usage',
@@ -182,14 +183,15 @@ class QuotaMonitor {
                     limit: status.requests.limit,
                     message: `Request quota at ${threshold}% (${status.requests.used}/${status.requests.limit})`,
                     timestamp: new Date(),
-                    severity: threshold >= 90 ? 'critical' : 'warning'
+                    severity: threshold >= 90 ? 'critical' : 'warning',
                 });
                 this.recordAlert(service, `requests_${threshold}`);
             }
         }
         // Check cost thresholds
         for (const threshold of config.alertThresholds) {
-            if (status.cost.percentageUsed >= threshold && !this.wasAlertSentRecently(service, `cost_${threshold}`)) {
+            if (status.cost.percentageUsed >= threshold &&
+                !this.wasAlertSentRecently(service, `cost_${threshold}`)) {
                 this.sendAlert({
                     service,
                     type: 'cost',
@@ -198,7 +200,7 @@ class QuotaMonitor {
                     limit: status.cost.limit,
                     message: `Cost quota at ${threshold}% ($${status.cost.used.toFixed(2)}/$${status.cost.limit.toFixed(2)})`,
                     timestamp: new Date(),
-                    severity: threshold >= 90 ? 'critical' : 'warning'
+                    severity: threshold >= 90 ? 'critical' : 'warning',
                 });
                 this.recordAlert(service, `cost_${threshold}`);
             }
@@ -222,7 +224,7 @@ class QuotaMonitor {
     wasAlertSentRecently(service, alertKey) {
         const key = `${service}_${alertKey}`;
         const alerts = this.alertHistory.get(key) || [];
-        const recentThreshold = Date.now() - (60 * 60 * 1000); // 1 hour
+        const recentThreshold = Date.now() - 60 * 60 * 1000; // 1 hour
         return alerts.some(alertTime => alertTime.getTime() > recentThreshold);
     }
     /**

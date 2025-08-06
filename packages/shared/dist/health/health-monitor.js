@@ -21,7 +21,7 @@ class HealthMonitor {
             retries: 3,
             degradedThreshold: 2000, // 2 seconds
             unhealthyThreshold: 3, // 3 consecutive failures
-            ...config
+            ...config,
         };
         this.configs.set(serviceName, fullConfig);
         this.alertConfig = { ...this.alertConfig, ...alertConfig };
@@ -33,7 +33,7 @@ class HealthMonitor {
             lastCheck: new Date(),
             responseTime: 0,
             uptime: 0,
-            consecutiveFailures: 0
+            consecutiveFailures: 0,
         });
         // Start monitoring
         this.startMonitoring(serviceName, healthCheckFn);
@@ -72,7 +72,7 @@ class HealthMonitor {
             total: services.length,
             healthy: services.filter(s => s.status === 'healthy').length,
             degraded: services.filter(s => s.status === 'degraded').length,
-            unhealthy: services.filter(s => s.status === 'unhealthy').length
+            unhealthy: services.filter(s => s.status === 'unhealthy').length,
         };
         let systemStatus = 'healthy';
         if (summary.unhealthy > 0) {
@@ -84,7 +84,7 @@ class HealthMonitor {
         return {
             status: systemStatus,
             services,
-            summary
+            summary,
         };
     }
     /**
@@ -168,7 +168,7 @@ class HealthMonitor {
             }
             newStatus.details = {
                 error: error instanceof Error ? error.message : String(error),
-                consecutiveFailures: newStatus.consecutiveFailures
+                consecutiveFailures: newStatus.consecutiveFailures,
             };
         }
         // Check for status changes and trigger alerts
@@ -190,7 +190,9 @@ class HealthMonitor {
         if (newStatus.status === 'unhealthy' && this.alertConfig.onUnhealthy) {
             this.alertConfig.onUnhealthy(newStatus);
         }
-        if (oldStatus.status === 'unhealthy' && newStatus.status !== 'unhealthy' && this.alertConfig.onRecovered) {
+        if (oldStatus.status === 'unhealthy' &&
+            newStatus.status !== 'unhealthy' &&
+            this.alertConfig.onRecovered) {
             this.alertConfig.onRecovered(newStatus);
         }
         // Log status change
@@ -224,8 +226,8 @@ class ServiceHealthMonitors {
             }
             return await response.json();
         }, config, {
-            onUnhealthy: (status) => console.warn(`🚨 OpenAI service unhealthy: ${status.details?.error}`),
-            onRecovered: (_status) => console.log(`✅ OpenAI service recovered`)
+            onUnhealthy: status => console.warn(`🚨 OpenAI service unhealthy: ${status.details?.error}`),
+            onRecovered: _status => console.log(`✅ OpenAI service recovered`),
         });
     }
     /**
@@ -249,8 +251,8 @@ class ServiceHealthMonitors {
                 return { status: 'healthy' };
             }
         }, config, {
-            onUnhealthy: (status) => console.warn(`🚨 Anthropic service unhealthy: ${status.details?.error}`),
-            onRecovered: (_status) => console.log(`✅ Anthropic service recovered`)
+            onUnhealthy: status => console.warn(`🚨 Anthropic service unhealthy: ${status.details?.error}`),
+            onRecovered: _status => console.log(`✅ Anthropic service recovered`),
         });
     }
     /**
@@ -264,8 +266,8 @@ class ServiceHealthMonitors {
             }
             return await response.json();
         }, config, {
-            onUnhealthy: (status) => console.warn(`🚨 LocalStack service unhealthy: ${status.details?.error}`),
-            onRecovered: (_status) => console.log(`✅ LocalStack service recovered`)
+            onUnhealthy: status => console.warn(`🚨 LocalStack service unhealthy: ${status.details?.error}`),
+            onRecovered: _status => console.log(`✅ LocalStack service recovered`),
         });
     }
     /**

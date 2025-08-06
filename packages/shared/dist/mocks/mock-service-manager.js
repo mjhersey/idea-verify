@@ -28,10 +28,7 @@ class MockServiceManager {
         console.log('🔧 Starting mock services...');
         try {
             // Start services in parallel
-            await Promise.all([
-                this.openaiService.start(),
-                this.anthropicService.start()
-            ]);
+            await Promise.all([this.openaiService.start(), this.anthropicService.start()]);
             this.isRunning = true;
             console.log('✅ All mock services started successfully');
             console.log(`   - OpenAI API: http://localhost:${this.config.openai.port}`);
@@ -53,10 +50,7 @@ class MockServiceManager {
         }
         console.log('🛑 Stopping mock services...');
         try {
-            await Promise.all([
-                this.openaiService.stop(),
-                this.anthropicService.stop()
-            ]);
+            await Promise.all([this.openaiService.stop(), this.anthropicService.stop()]);
             this.isRunning = false;
             console.log('✅ All mock services stopped');
         }
@@ -75,18 +69,18 @@ class MockServiceManager {
                 openai: {
                     port: this.config.openai.port,
                     url: `http://localhost:${this.config.openai.port}`,
-                    healthCheck: `http://localhost:${this.config.openai.port}/health`
+                    healthCheck: `http://localhost:${this.config.openai.port}/health`,
                 },
                 anthropic: {
                     port: this.config.anthropic.port,
                     url: `http://localhost:${this.config.anthropic.port}`,
-                    healthCheck: `http://localhost:${this.config.anthropic.port}/health`
+                    healthCheck: `http://localhost:${this.config.anthropic.port}/health`,
                 },
                 localstack: {
                     endpoint: this.config.localstack.endpoint,
-                    services: this.config.localstack.services
-                }
-            }
+                    services: this.config.localstack.services,
+                },
+            },
         };
     }
     /**

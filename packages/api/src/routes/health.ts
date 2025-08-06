@@ -29,7 +29,6 @@ router.get('/detailed', async (req: Request, res: Response) => {
   }
 
   let overallStatus = 'healthy'
-  const statusCode = 200
 
   // Database health check
   try {

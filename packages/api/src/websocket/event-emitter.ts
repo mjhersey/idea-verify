@@ -176,6 +176,7 @@ export class EventEmitter {
   }
 
   // Emit to specific user's connections
+  // eslint-disable-next-line no-unused-vars
   emitToUser(_userId: string, _event: string, _data: any): void {
     // This would require ConnectionManager integration
     // Implementation depends on how we track user->socket mappings

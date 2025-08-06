@@ -457,7 +457,7 @@ export class MockDatabaseManager extends EventEmitter implements IDatabaseManage
 
     // Default: include all parameters as numbered fields
     params.forEach((param, index) => {
-      ;(baseRecord as any)[`field_${index}`] = param
+      (baseRecord as any)[`field_${index}`] = param
     })
 
     return baseRecord

@@ -5,6 +5,7 @@
 import { getPrismaClient } from './index.js'
 import type { PrismaClient } from '../generated/prisma/index.js'
 
+// eslint-disable-next-line no-unused-vars
 type TransactionCallback<T> = (tx: PrismaClient) => Promise<T>
 
 /**
@@ -127,6 +128,7 @@ export async function withIsolationLevel<T>(
 export class SavepointManager {
   private savepointCounter = 0
 
+  // eslint-disable-next-line no-unused-vars
   async withSavepoint<T>(tx: PrismaClient, callback: (tx: PrismaClient) => Promise<T>): Promise<T> {
     const savepointName = `sp_${++this.savepointCounter}`
 
@@ -170,7 +172,8 @@ export class BulkOperationManager {
           tx as Record<
             string,
             {
-              createMany: (args: {
+              // eslint-disable-next-line no-unused-vars
+              createMany: (_args: {
                 data: unknown[]
                 skipDuplicates: boolean
               }) => Promise<{ count: number }>
@@ -206,7 +209,8 @@ export class BulkOperationManager {
           tx as Record<
             string,
             {
-              updateMany: (args: {
+              // eslint-disable-next-line no-unused-vars
+              updateMany: (_args: {
                 where: Record<string, unknown>
                 data: unknown
               }) => Promise<{ count: number }>
@@ -245,7 +249,8 @@ export class BulkOperationManager {
         const model = (
           tx as Record<
             string,
-            { deleteMany: (args: { where: Record<string, unknown> }) => Promise<{ count: number }> }
+            // eslint-disable-next-line no-unused-vars
+            { deleteMany: (_args: { where: Record<string, unknown> }) => Promise<{ count: number }> }
           >
         )[tableName]
         const deletePromises = batch.map(where => model.deleteMany({ where }))

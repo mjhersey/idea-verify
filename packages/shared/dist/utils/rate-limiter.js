@@ -38,21 +38,21 @@ class RateLimiter {
         if (currentRequests >= this.config.requestsPerMinute) {
             return false;
         }
-        if (this.config.tokensPerMinute && (currentTokens + tokenCount) > this.config.tokensPerMinute) {
+        if (this.config.tokensPerMinute && currentTokens + tokenCount > this.config.tokensPerMinute) {
             return false;
         }
         // Check hourly limits
         if (this.config.requestsPerHour && currentHourlyRequests >= this.config.requestsPerHour) {
             return false;
         }
-        if (this.config.tokensPerHour && (currentHourlyTokens + tokenCount) > this.config.tokensPerHour) {
+        if (this.config.tokensPerHour && currentHourlyTokens + tokenCount > this.config.tokensPerHour) {
             return false;
         }
         // Check daily limits
         if (this.config.requestsPerDay && currentDailyRequests >= this.config.requestsPerDay) {
             return false;
         }
-        if (this.config.tokensPerDay && (currentDailyTokens + tokenCount) > this.config.tokensPerDay) {
+        if (this.config.tokensPerDay && currentDailyTokens + tokenCount > this.config.tokensPerDay) {
             return false;
         }
         return true;
@@ -98,7 +98,7 @@ class RateLimiter {
         const status = {
             remaining,
             resetTime,
-            retryAfter: remaining === 0 ? Math.ceil((resetTime.getTime() - Date.now()) / 1000) : undefined
+            retryAfter: remaining === 0 ? Math.ceil((resetTime.getTime() - Date.now()) / 1000) : undefined,
         };
         // Add hourly status if configured
         if (this.config.requestsPerHour) {
@@ -106,7 +106,7 @@ class RateLimiter {
             const hourlyResetTime = this.hourlyResetTimes.get(service) || new Date(Date.now() + 3600000);
             status.hourly = {
                 remaining: Math.max(0, this.config.requestsPerHour - currentHourlyRequests),
-                resetTime: hourlyResetTime
+                resetTime: hourlyResetTime,
             };
         }
         // Add daily status if configured
@@ -115,7 +115,7 @@ class RateLimiter {
             const dailyResetTime = this.dailyResetTimes.get(service) || new Date(Date.now() + 86400000);
             status.daily = {
                 remaining: Math.max(0, this.config.requestsPerDay - currentDailyRequests),
-                resetTime: dailyResetTime
+                resetTime: dailyResetTime,
             };
         }
         return status;

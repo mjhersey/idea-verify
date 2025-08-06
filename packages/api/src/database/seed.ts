@@ -200,8 +200,8 @@ async function seed() {
       const user = users.find(u => u.email === ideaData.userEmail)
       if (!user) continue
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { userEmail, ...ideaInput } = ideaData
+      // eslint-disable-next-line no-unused-vars
+      const { userEmail: _, ...ideaInput } = ideaData
       const businessIdea = await prisma.businessIdea.create({
         data: {
           ...ideaInput,

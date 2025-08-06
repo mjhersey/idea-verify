@@ -5,6 +5,7 @@ export interface ApiError extends Error {
   status?: string
 }
 
+// eslint-disable-next-line no-unused-vars
 export const errorHandler = (err: ApiError, req: Request, res: Response, _next: NextFunction) => {
   const error = { ...err }
   error.message = err.message

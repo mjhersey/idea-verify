@@ -3,7 +3,7 @@ import { Server as SocketIOServer, Socket } from 'socket.io'
 import { authMiddleware } from './middleware/auth-middleware.js'
 import { ConnectionManager } from './connection-manager.js'
 import { EventEmitter } from './event-emitter.js'
-import { WebSocketRateLimiter, RateLimitConfig } from './rate-limiter.js'
+import { WebSocketRateLimiter } from './rate-limiter.js'
 
 export class WebSocketServer {
   private io: SocketIOServer

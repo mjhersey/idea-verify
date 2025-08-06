@@ -19,6 +19,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./types/credentials.js"), exports);
 __exportStar(require("./types/database.js"), exports);
+__exportStar(require("./types/websocket.js"), exports);
 __exportStar(require("./secrets/secrets-manager.js"), exports);
 __exportStar(require("./config/environment.js"), exports);
 __exportStar(require("./utils/credential-validator.js"), exports);
@@ -32,4 +33,7 @@ __exportStar(require("./health/service-registry.js"), exports);
 __exportStar(require("./mocks/mock-service-manager.js"), exports);
 __exportStar(require("./mocks/openai/mock-openai-service.js"), exports);
 __exportStar(require("./mocks/anthropic/mock-anthropic-service.js"), exports);
+__exportStar(require("./utils/logger.js"), exports);
+__exportStar(require("./config/feature-flags.js"), exports);
+__exportStar(require("./testing/environment-validator.js"), exports);
 //# sourceMappingURL=index.js.map
