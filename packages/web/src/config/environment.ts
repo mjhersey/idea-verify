@@ -29,7 +29,7 @@ const validateEnvironment = (): FrontendConfig => {
   
   if (apiBaseUrl) {
     // Validate URL format using a more compatible approach
-    const urlPattern = /^https?:\/\/(?:[-\w.])+(?:\:[0-9]+)?(?:\/.*)?$/
+    const urlPattern = /^https?:\/\/(?:[-\w.])+(?::[0-9]+)?(?:\/.*)?$/
     if (!urlPattern.test(apiBaseUrl)) {
       errors.push(`Invalid VITE_API_BASE_URL format: ${apiBaseUrl}. Must be a valid HTTP/HTTPS URL`)
     }

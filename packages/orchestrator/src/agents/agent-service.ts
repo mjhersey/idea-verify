@@ -6,6 +6,7 @@ import { AgentType } from '@ai-validation/shared';
 import { AgentFactory } from './agent-factory.js';
 import { AgentRequest, AgentResponse, AgentExecutionContext } from './types.js';
 import { MessageBus } from '../communication/message-bus.js';
+import { ProgressEmitter } from '../events/progress-emitter.js';
 import { 
   MessageType, 
   MessageHandler, 
@@ -27,10 +28,12 @@ export interface AgentExecutionResult {
 export class AgentService implements MessageHandler {
   private static instance: AgentService;
   private messageBus: MessageBus;
+  private progressEmitter: ProgressEmitter;
   private activeExecutions: Map<string, AbortController> = new Map();
 
   private constructor() {
     this.messageBus = MessageBus.getInstance();
+    this.progressEmitter = ProgressEmitter.getInstance();
     this.initializeMessageHandlers();
   }
 
@@ -213,16 +216,35 @@ export class AgentService implements MessageHandler {
 
         console.log(`Agent ${agentType} attempt ${attempt + 1}/${maxRetries + 1}`);
 
-        // Publish progress at start of attempt
+        const currentProgress = (attempt / (maxRetries + 1)) * 100;
+        const status = attempt === 0 ? 'initializing' : 'retrying';
+        
+        // Publish progress via message bus (for internal coordination)
         await this.publishProgress(
           context.evaluationId,
           agentType,
-          (attempt / (maxRetries + 1)) * 100,
+          currentProgress,
           `Attempt ${attempt + 1}/${maxRetries + 1}`
+        );
+
+        // Emit progress for WebSocket clients
+        this.progressEmitter.emitAgentProgress(
+          context.evaluationId,
+          agentType,
+          status,
+          Math.round(currentProgress)
         );
 
         // Get agent instance
         const agent = AgentFactory.getAgent(agentType);
+
+        // Emit running status
+        this.progressEmitter.emitAgentProgress(
+          context.evaluationId,
+          agentType,
+          'running',
+          50
+        );
 
         // Execute with timeout and abort signal
         const response = await this.executeWithTimeout(
@@ -235,6 +257,37 @@ export class AgentService implements MessageHandler {
         this.validateResponse(response);
 
         console.log(`Agent ${agentType} completed successfully with score: ${response.score}`);
+
+        // Emit completion with final score and insights
+        this.progressEmitter.emitAgentCompleted(
+          context.evaluationId,
+          agentType,
+          {
+            score: response.score,
+            keyFindings: response.insights.slice(0, 3).map(i => i.finding),
+            recommendation: response.recommendation
+          },
+          Date.now() - startTime,
+          response.score
+        );
+
+        // Emit any insights discovered
+        if (response.insights && response.insights.length > 0) {
+          response.insights.forEach(insight => {
+            this.progressEmitter.emitInsightDiscovered(
+              context.evaluationId,
+              agentType,
+              {
+                type: insight.type || 'analysis',
+                content: insight.finding,
+                importance: insight.confidence > 0.8 ? 'high' : 
+                          insight.confidence > 0.6 ? 'medium' : 'low'
+              },
+              insight.confidence,
+              { source: insight.source }
+            );
+          });
+        }
 
         return {
           success: true,
@@ -254,6 +307,15 @@ export class AgentService implements MessageHandler {
         retryCount = attempt;
 
         console.warn(`Agent ${agentType} attempt ${attempt + 1} failed:`, lastError.message);
+
+        // Emit error for WebSocket clients
+        this.progressEmitter.emitError(
+          context.evaluationId,
+          `Agent ${agentType} attempt ${attempt + 1} failed: ${lastError.message}`,
+          attempt < maxRetries ? 'medium' : 'high',
+          agentType,
+          attempt < maxRetries ? ['Retrying with exponential backoff'] : ['Max retries exceeded']
+        );
 
         if (attempt < maxRetries) {
           // Wait before retry with exponential backoff

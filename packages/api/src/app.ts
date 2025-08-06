@@ -14,6 +14,7 @@ import healthRoutes from './routes/health.js'
 import evaluationRoutes from './routes/evaluations.js'
 import authRoutes from './routes/auth.js'
 import ideaRoutes from './routes/ideas.js'
+import sseRoutes from './routes/sse-events.js'
 
 const app = express()
 
@@ -44,6 +45,7 @@ app.use('/health', healthRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/ideas', ideaRoutes)
 app.use('/api/evaluations', evaluationRoutes)
+app.use('/api/events', sseRoutes)
 
 // Error handling
 app.use(notFoundHandler)

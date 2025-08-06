@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="handleSubmit" class="space-y-6">
+  <form class="space-y-6" @submit.prevent="handleSubmit">
     <!-- Title Input (Optional) -->
     <div>
       <label for="title" class="block text-sm font-medium text-gray-700 mb-2">

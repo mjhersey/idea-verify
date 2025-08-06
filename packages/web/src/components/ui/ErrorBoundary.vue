@@ -16,15 +16,15 @@
         <div class="mt-4">
           <div class="flex space-x-2">
             <button
-              @click="retry"
               class="bg-red-100 px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-red-200"
+              @click="retry"
             >
               Try again
             </button>
             <button
               v-if="showDetails"
-              @click="toggleDetails"
               class="bg-white px-3 py-2 rounded-md text-sm font-medium text-red-800 hover:bg-gray-50 border border-red-300"
+              @click="toggleDetails"
             >
               {{ showingDetails ? 'Hide details' : 'Show details' }}
             </button>
@@ -47,7 +47,7 @@ import { ref, onErrorCaptured, provide } from 'vue'
 interface Props {
   fallbackMessage?: string
   showDetails?: boolean
-  onError?: (error: Error, instance: any, info: string) => void
+  onError?: () => void
 }
 
 const props = withDefaults(defineProps<Props>(), {

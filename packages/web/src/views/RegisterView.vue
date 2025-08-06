@@ -174,7 +174,7 @@ const confirmPasswordError = computed(() =>
   form.value.confirmPassword ? validateConfirmPassword(form.value.password, form.value.confirmPassword) : null
 );
 
-const hasSpecialChar = computed(() => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>?]/.test(form.value.password));
+const hasSpecialChar = computed(() => /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>?]/.test(form.value.password));
 
 const isFormValid = computed(() => 
   !nameError.value && 

@@ -2,6 +2,7 @@
   "name": "ai-validation-platform",
   "version": "1.0.0",
   "description": "AI-Powered Business Idea Validation Platform",
+  "type": "module",
   "private": true,
   "workspaces": [
     "packages/*",
@@ -26,6 +27,9 @@
     "test:integration:auth": "vitest run tests/integration/auth-flow.test.ts --config vitest.integration.config.ts",
     "test:integration:evaluation": "vitest run tests/integration/evaluation-pipeline.test.ts --config vitest.integration.config.ts",
     "test:integration:performance": "vitest run tests/integration/performance.test.ts --config vitest.integration.config.ts",
+    "test:integration:websocket": "vitest run tests/integration/websocket-integration.test.ts --config vitest.integration.config.ts",
+    "test:integration:websocket:performance": "vitest run tests/integration/websocket-performance.test.ts --config vitest.integration.config.ts",
+    "test:integration:websocket:all": "vitest run tests/integration/websocket*.test.ts --config vitest.integration.config.ts",
     "test:integration:full": "node tools/test-with-services.js",
     "validate:environment": "node scripts/validate-environment.js",
     "test": "npm run test --workspaces",
@@ -54,9 +58,12 @@
   "devDependencies": {
     "@commitlint/cli": "^18.4.0",
     "@commitlint/config-conventional": "^18.4.0",
+    "@types/eventsource": "^1.1.15",
+    "eventsource": "^2.0.2",
     "husky": "^8.0.3",
     "lint-staged": "^15.2.0",
     "prettier": "^3.1.0",
+    "socket.io-client": "^4.7.4",
     "vitest": "^3.2.4"
   },
   "engines": {

@@ -93,7 +93,7 @@ describe('Idea Submission Integration', () => {
   describe('Complete Idea Submission Flow', () => {
     it('should complete full idea submission and evaluation flow', async () => {
       // Mock successful submission
-      const mockSubmitIdea = vi.spyOn(ideasStore, 'submitIdea').mockImplementation(async (data) => {
+      const mockSubmitIdea = vi.spyOn(ideasStore, 'submitIdea').mockImplementation(async () => {
         // Simulate the store's actual behavior
         ideasStore.isSubmitting = true
         await new Promise(resolve => setTimeout(resolve, 10))
@@ -184,6 +184,9 @@ describe('Idea Submission Integration', () => {
 
       // Should show error message
       expect(wrapper.text()).toContain('Network error occurred')
+      
+      // Should have called the submit function
+      expect(mockSubmitIdea).toHaveBeenCalled()
     })
 
     it('should validate form before submission', async () => {
@@ -228,6 +231,9 @@ describe('Idea Submission Integration', () => {
       // Should show loading state
       expect(wrapper.text()).toContain('Submitting...')
       expect(submitButton.attributes('disabled')).toBeDefined()
+      
+      // Should have called the submit function
+      expect(mockSubmitIdea).toHaveBeenCalled()
     })
   })
 
@@ -311,6 +317,9 @@ describe('Idea Submission Integration', () => {
 
       // Should handle the error gracefully
       expect(wrapper.find('.text-red-600').exists()).toBe(true)
+      
+      // Should have called the submit function
+      expect(mockSubmitIdea).toHaveBeenCalled()
     })
 
     it('should clear previous errors on new submission', async () => {

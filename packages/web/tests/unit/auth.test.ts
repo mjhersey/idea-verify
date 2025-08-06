@@ -2,7 +2,7 @@
  * Frontend authentication tests
  */
 
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useAuthStore } from '../../src/stores/auth.js';
 import { authService } from '../../src/services/auth.js';

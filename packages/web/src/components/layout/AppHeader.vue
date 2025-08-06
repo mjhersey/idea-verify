@@ -19,8 +19,8 @@
             Home
           </router-link>
           <router-link
-            to="/dashboard"
             v-if="authStore.isAuthenticated"
+            to="/dashboard"
             class="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
             :class="{ 'text-gray-900 bg-gray-100': $route.path === '/dashboard' }"
           >
@@ -34,8 +34,8 @@
               Welcome, {{ authStore.user?.name || authStore.user?.email }}
             </span>
             <button
-              @click="handleLogout"
               class="bg-gray-800 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700"
+              @click="handleLogout"
             >
               Logout
             </button>
@@ -59,8 +59,8 @@
         <!-- Mobile menu button -->
         <div class="md:hidden">
           <button
-            @click="mobileMenuOpen = !mobileMenuOpen"
             class="bg-gray-50 p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+            @click="mobileMenuOpen = !mobileMenuOpen"
           >
             <span class="sr-only">Open main menu</span>
             <svg
@@ -92,8 +92,8 @@
             Home
           </router-link>
           <router-link
-            to="/dashboard"
             v-if="authStore.isAuthenticated"
+            to="/dashboard"
             class="text-gray-500 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium"
             @click="mobileMenuOpen = false"
           >
@@ -117,8 +117,8 @@
           </template>
           <template v-else>
             <button
-              @click="handleLogout"
               class="text-gray-500 hover:text-gray-900 block w-full text-left px-3 py-2 rounded-md text-base font-medium"
+              @click="handleLogout"
             >
               Logout
             </button>
