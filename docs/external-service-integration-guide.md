@@ -2,11 +2,15 @@
 
 ## Overview
 
-This guide provides comprehensive information for integrating with external services in the AI-Powered Business Idea Validation Platform. The platform integrates with OpenAI, Anthropic, and AWS services while maintaining security, reliability, and cost efficiency.
+This guide provides comprehensive information for integrating with external
+services in the AI-Powered Business Idea Validation Platform. The platform
+integrates with OpenAI, Anthropic, and AWS services while maintaining security,
+reliability, and cost efficiency.
 
 ## Architecture Overview
 
-The platform uses a microservices architecture with centralized credential management, rate limiting, and monitoring:
+The platform uses a microservices architecture with centralized credential
+management, rate limiting, and monitoring:
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -29,18 +33,21 @@ The platform uses a microservices architecture with centralized credential manag
 ## Supported Services
 
 ### OpenAI API
+
 - **Purpose**: Primary LLM provider for business idea evaluation
 - **Models**: GPT-4, GPT-4 Turbo, GPT-3.5 Turbo
 - **Rate Limits**: Tier-based (500-5000 RPM, 30K-1M TPM)
 - **Cost**: $0.01-0.06 per 1K tokens depending on model
 
 ### Anthropic Claude API
+
 - **Purpose**: Secondary LLM provider and fallback
 - **Models**: Claude-3 Haiku, Claude-3 Sonnet, Claude-3 Opus
 - **Rate Limits**: Tier-based (100-2000 RPM, 10K-100K TPM)
 - **Cost**: $0.25-15.00 per 1M tokens depending on model
 
 ### AWS Services
+
 - **Secrets Manager**: Secure credential storage
 - **S3**: File storage and data persistence
 - **CloudWatch**: Monitoring and alerting
@@ -50,7 +57,8 @@ The platform uses a microservices architecture with centralized credential manag
 
 ### 1. Account Setup
 
-Before development can begin, ensure all external service accounts are properly configured:
+Before development can begin, ensure all external service accounts are properly
+configured:
 
 ```bash
 # Validate user account setup
@@ -58,6 +66,7 @@ npm run validate:accounts
 ```
 
 Required accounts:
+
 - [x] OpenAI account with API access enabled
 - [x] Anthropic account with Claude API access
 - [x] AWS account with development IAM user
@@ -86,7 +95,7 @@ npm run validate:credentials
 
 # Expected output:
 # ✅ OPENAI: Valid
-# ✅ ANTHROPIC: Valid  
+# ✅ ANTHROPIC: Valid
 # ✅ AWS: Valid
 ```
 
@@ -108,6 +117,7 @@ npm run test:offline
 ```
 
 Mock services include:
+
 - OpenAI API mock (port 3001) with realistic business evaluation responses
 - Anthropic API mock (port 3002) with Claude-compatible message format
 - LocalStack for AWS services (port 4566)
@@ -129,27 +139,28 @@ npm run validate:credentials
 
 ### 1. Using ServiceClient (Recommended)
 
-The `ServiceClient` class provides built-in rate limiting, quota management, and error handling:
+The `ServiceClient` class provides built-in rate limiting, quota management, and
+error handling:
 
 ```typescript
-import { ServiceClient, getServiceConfig } from '@ai-validation/shared';
+import { ServiceClient, getServiceConfig } from '@ai-validation/shared'
 
 // Initialize client
-const config = getServiceConfig('openai');
-const client = new ServiceClient('openai', config);
+const config = getServiceConfig('openai')
+const client = new ServiceClient('openai', config)
 
 // Execute request with automatic retry and rate limiting
 const result = await client.executeRequest(
   async () => {
     // Your API call here
-    return await openaiAPI.createCompletion(params);
+    return await openaiAPI.createCompletion(params)
   },
   {
     estimatedTokens: 1000,
     estimatedCost: 0.02,
-    priority: 'high'
+    priority: 'high',
   }
-);
+)
 ```
 
 ### 2. Manual Integration
@@ -157,20 +168,20 @@ const result = await client.executeRequest(
 For custom integration patterns:
 
 ```typescript
-import { 
-  RateLimiter, 
-  QuotaMonitor, 
-  CredentialValidator 
-} from '@ai-validation/shared';
+import {
+  RateLimiter,
+  QuotaMonitor,
+  CredentialValidator,
+} from '@ai-validation/shared'
 
 // Initialize components
-const rateLimiter = new RateLimiter(config.rateLimiting);
-const quotaMonitor = new QuotaMonitor();
-const validator = new CredentialValidator();
+const rateLimiter = new RateLimiter(config.rateLimiting)
+const quotaMonitor = new QuotaMonitor()
+const validator = new CredentialValidator()
 
 // Validate credentials
-const credentials = await getCredentials('openai');
-const isValid = await validator.validateOpenAI(credentials);
+const credentials = await getCredentials('openai')
+const isValid = await validator.validateOpenAI(credentials)
 
 // Execute with rate limiting
 if (isValid.valid) {
@@ -178,7 +189,7 @@ if (isValid.valid) {
     'openai',
     () => makeAPICall(credentials),
     estimatedTokens
-  );
+  )
 }
 ```
 
@@ -195,17 +206,17 @@ const openaiLimits = {
   tokensPerMinute: 30000,
   maxRetries: 3,
   baseDelayMs: 1000,
-  maxDelayMs: 60000
-};
+  maxDelayMs: 60000,
+}
 
-// Anthropic Developer Tier (default)  
+// Anthropic Developer Tier (default)
 const anthropicLimits = {
   requestsPerMinute: 100,
   tokensPerMinute: 10000,
   maxRetries: 3,
   baseDelayMs: 1000,
-  maxDelayMs: 60000
-};
+  maxDelayMs: 60000,
+}
 ```
 
 ### Monitoring
@@ -221,6 +232,7 @@ npm run monitor:rates
 ### Fallback Strategies
 
 When quotas are exceeded:
+
 1. **Primary → Secondary**: OpenAI → Anthropic
 2. **Secondary → Mock**: Anthropic → Mock Services
 3. **Graceful Degradation**: Reduced functionality with cached data
@@ -253,12 +265,12 @@ When quotas are exceeded:
 
 ```typescript
 interface ServiceError {
-  service: string;
-  type: 'rate_limit' | 'auth' | 'network' | 'server' | 'quota';
-  message: string;
-  retryable: boolean;
-  retryAfter?: number;
-  fallbackAvailable: boolean;
+  service: string
+  type: 'rate_limit' | 'auth' | 'network' | 'server' | 'quota'
+  message: string
+  retryable: boolean
+  retryAfter?: number
+  fallbackAvailable: boolean
 }
 ```
 
@@ -267,10 +279,10 @@ interface ServiceError {
 ### Health Monitoring
 
 ```typescript
-import { ServiceHealthMonitors } from '@ai-validation/shared';
+import { ServiceHealthMonitors } from '@ai-validation/shared'
 
-const monitors = new ServiceHealthMonitors();
-monitors.startAllMonitoring();
+const monitors = new ServiceHealthMonitors()
+monitors.startAllMonitoring()
 
 // Custom alert handling
 monitors.getMonitor().registerService(
@@ -278,10 +290,10 @@ monitors.getMonitor().registerService(
   async () => healthCheck(),
   { interval: 60000, timeout: 10000 },
   {
-    onUnhealthy: (status) => sendAlert(status),
-    onRecovered: (status) => sendRecoveryNotification(status)
+    onUnhealthy: status => sendAlert(status),
+    onRecovered: status => sendRecoveryNotification(status),
   }
-);
+)
 ```
 
 ### Integration Testing
@@ -296,6 +308,7 @@ npm run test:integration -- --real-services
 ```
 
 Test coverage includes:
+
 - Credential validation for all services
 - Service connectivity and response validation
 - Health check endpoint verification
@@ -335,13 +348,13 @@ Test coverage includes:
 
 ```typescript
 // Estimate tokens before API calls
-const estimatedTokens = estimateTokenCount(prompt);
+const estimatedTokens = estimateTokenCount(prompt)
 if (estimatedTokens > maxTokens) {
-  throw new Error('Request exceeds token limit');
+  throw new Error('Request exceeds token limit')
 }
 
 // Track costs in real-time
-quotaMonitor.recordUsage(service, tokens, cost);
+quotaMonitor.recordUsage(service, tokens, cost)
 ```
 
 ### Service Selection
@@ -350,9 +363,9 @@ quotaMonitor.recordUsage(service, tokens, cost);
 // Choose service based on cost and capability
 function selectService(complexity: 'simple' | 'complex'): string {
   if (complexity === 'simple') {
-    return 'gpt-3.5-turbo'; // Lower cost
+    return 'gpt-3.5-turbo' // Lower cost
   } else {
-    return 'gpt-4'; // Higher capability
+    return 'gpt-4' // Higher capability
   }
 }
 ```
@@ -367,7 +380,8 @@ function selectService(complexity: 'simple' | 'complex'): string {
 
 ## Troubleshooting
 
-Common issues and solutions are documented in the [Troubleshooting Runbook](./troubleshooting-runbook.md).
+Common issues and solutions are documented in the
+[Troubleshooting Runbook](./troubleshooting-runbook.md).
 
 ## Configuration Reference
 
@@ -379,7 +393,7 @@ NODE_ENV=development|production
 USE_MOCK_SERVICES=true|false
 USE_REAL_SERVICES=true|false
 
-# AWS Configuration  
+# AWS Configuration
 AWS_REGION=us-east-1
 AWS_PROFILE=default
 SECRETS_OPENAI_NAME=ai-validation-platform/openai
@@ -419,5 +433,4 @@ LOCALSTACK_URL=http://localhost:4566
 
 ---
 
-*Last updated: January 2025*
-*Version: 1.0*
+_Last updated: January 2025_ _Version: 1.0_

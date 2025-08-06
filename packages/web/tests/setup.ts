@@ -9,7 +9,7 @@ const localStorageMock = {
 }
 
 Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
+  value: localStorageMock,
 })
 
 // Reset mocks before each test

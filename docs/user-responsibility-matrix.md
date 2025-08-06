@@ -1,6 +1,8 @@
 # User Responsibility Matrix
 
-This matrix defines clear ownership and handoff procedures between users and the development team, particularly for Story 1.0 and ongoing project responsibilities.
+This matrix defines clear ownership and handoff procedures between users and the
+development team, particularly for Story 1.0 and ongoing project
+responsibilities.
 
 ## **Phase 1: Initial Setup (Story 1.0)**
 
@@ -33,14 +35,16 @@ This matrix defines clear ownership and handoff procedures between users and the
 
 ### **Daily Operations:**
 
-- **User → Development:** Slack channel `#project-credentials` for non-urgent items
+- **User → Development:** Slack channel `#project-credentials` for non-urgent
+  items
 - **Development → User:** Email digest for usage reports and rotation reminders
 
 ### **Urgent Issues:**
 
 - **Emergency Contact:** Direct phone/SMS for security incidents
 - **Escalation Path:** User → Tech Lead → Project Manager → Executive Sponsor
-- **Response Time:** <2 hours for credential issues, <30 minutes for security incidents
+- **Response Time:** <2 hours for credential issues, <30 minutes for security
+  incidents
 
 ### **Regular Reviews:**
 
@@ -52,9 +56,11 @@ This matrix defines clear ownership and handoff procedures between users and the
 
 ### **Credential Handoff Security:**
 
-1. **Secure Channel Only:** Encrypted files, password managers, or in-person transfer
+1. **Secure Channel Only:** Encrypted files, password managers, or in-person
+   transfer
 2. **No Email/Slack:** Never send credentials via email or unencrypted chat
-3. **Verification Required:** Development team confirms receipt and functionality
+3. **Verification Required:** Development team confirms receipt and
+   functionality
 4. **Immediate Deletion:** User deletes local copies after successful handoff
 5. **Audit Trail:** All handoffs logged with timestamps and participants
 

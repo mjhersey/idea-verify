@@ -33,7 +33,7 @@ export class ExternalServiceMonitor {
         name: 'openai',
         status: 'not_configured',
         lastCheck: new Date(),
-        metadata: { configured: false }
+        metadata: { configured: false },
       }
       this.healthCache.set('openai', status)
       return status
@@ -48,10 +48,10 @@ export class ExternalServiceMonitor {
         const response = await fetch('https://api.openai.com/v1/models', {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-            'Content-Type': 'application/json'
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
           },
-          signal: controller.signal
+          signal: controller.signal,
         })
 
         clearTimeout(timeoutId)
@@ -66,8 +66,8 @@ export class ExternalServiceMonitor {
             configured: true,
             statusCode: response.status,
             rateLimitRemaining: response.headers.get('x-ratelimit-remaining-requests'),
-            rateLimitReset: response.headers.get('x-ratelimit-reset-requests')
-          }
+            rateLimitReset: response.headers.get('x-ratelimit-reset-requests'),
+          },
         }
 
         if (!response.ok) {
@@ -76,11 +76,9 @@ export class ExternalServiceMonitor {
 
         this.healthCache.set('openai', status)
         return status
-
       } finally {
         clearTimeout(timeoutId)
       }
-
     } catch (error) {
       const status: ExternalServiceStatus = {
         name: 'openai',
@@ -88,7 +86,7 @@ export class ExternalServiceMonitor {
         responseTime: Date.now() - startTime,
         lastCheck: new Date(),
         error: error instanceof Error ? error.message : 'Unknown error',
-        metadata: { configured: true }
+        metadata: { configured: true },
       }
       this.healthCache.set('openai', status)
       return status
@@ -104,7 +102,7 @@ export class ExternalServiceMonitor {
         name: 'anthropic',
         status: 'not_configured',
         lastCheck: new Date(),
-        metadata: { configured: false }
+        metadata: { configured: false },
       }
       this.healthCache.set('anthropic', status)
       return status
@@ -122,14 +120,14 @@ export class ExternalServiceMonitor {
           headers: {
             'x-api-key': process.env.ANTHROPIC_API_KEY,
             'Content-Type': 'application/json',
-            'anthropic-version': '2023-06-01'
+            'anthropic-version': '2023-06-01',
           },
           body: JSON.stringify({
             model: 'claude-3-haiku-20240307',
             max_tokens: 1,
-            messages: [{ role: 'user', content: 'test' }]
+            messages: [{ role: 'user', content: 'test' }],
           }),
-          signal: controller.signal
+          signal: controller.signal,
         })
 
         clearTimeout(timeoutId)
@@ -144,8 +142,8 @@ export class ExternalServiceMonitor {
             configured: true,
             statusCode: response.status,
             rateLimitRemaining: response.headers.get('anthropic-ratelimit-requests-remaining'),
-            rateLimitReset: response.headers.get('anthropic-ratelimit-requests-reset')
-          }
+            rateLimitReset: response.headers.get('anthropic-ratelimit-requests-reset'),
+          },
         }
 
         if (!response.ok && response.status !== 400) {
@@ -154,11 +152,9 @@ export class ExternalServiceMonitor {
 
         this.healthCache.set('anthropic', status)
         return status
-
       } finally {
         clearTimeout(timeoutId)
       }
-
     } catch (error) {
       const status: ExternalServiceStatus = {
         name: 'anthropic',
@@ -166,7 +162,7 @@ export class ExternalServiceMonitor {
         responseTime: Date.now() - startTime,
         lastCheck: new Date(),
         error: error instanceof Error ? error.message : 'Unknown error',
-        metadata: { configured: true }
+        metadata: { configured: true },
       }
       this.healthCache.set('anthropic', status)
       return status
@@ -185,15 +181,15 @@ export class ExternalServiceMonitor {
           lastCheck: new Date(),
           metadata: {
             configured: true,
-            connectionString: process.env.DATABASE_URL.split('@')[1] || 'configured'
-          }
+            connectionString: process.env.DATABASE_URL.split('@')[1] || 'configured',
+          },
         })
       } else {
         services.push({
           name: 'aws_rds',
           status: 'not_configured',
           lastCheck: new Date(),
-          metadata: { configured: false }
+          metadata: { configured: false },
         })
       }
     } catch (error) {
@@ -201,7 +197,7 @@ export class ExternalServiceMonitor {
         name: 'aws_rds',
         status: 'unhealthy',
         lastCheck: new Date(),
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       })
     }
 
@@ -214,15 +210,15 @@ export class ExternalServiceMonitor {
           lastCheck: new Date(),
           metadata: {
             configured: true,
-            redisUrl: process.env.REDIS_URL.split('@')[1] || 'configured'
-          }
+            redisUrl: process.env.REDIS_URL.split('@')[1] || 'configured',
+          },
         })
       } else {
         services.push({
           name: 'aws_elasticache',
           status: 'not_configured',
           lastCheck: new Date(),
-          metadata: { configured: false }
+          metadata: { configured: false },
         })
       }
     } catch (error) {
@@ -230,7 +226,7 @@ export class ExternalServiceMonitor {
         name: 'aws_elasticache',
         status: 'unhealthy',
         lastCheck: new Date(),
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       })
     }
 
@@ -244,15 +240,15 @@ export class ExternalServiceMonitor {
           metadata: {
             configured: true,
             reportsBucket: process.env.REPORTS_BUCKET,
-            assetsBucket: process.env.ASSETS_BUCKET
-          }
+            assetsBucket: process.env.ASSETS_BUCKET,
+          },
         })
       } else {
         services.push({
           name: 'aws_s3',
           status: 'not_configured',
           lastCheck: new Date(),
-          metadata: { configured: false }
+          metadata: { configured: false },
         })
       }
     } catch (error) {
@@ -260,7 +256,7 @@ export class ExternalServiceMonitor {
         name: 'aws_s3',
         status: 'unhealthy',
         lastCheck: new Date(),
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       })
     }
 
@@ -271,7 +267,7 @@ export class ExternalServiceMonitor {
     const [openai, anthropic, awsServices] = await Promise.all([
       this.checkOpenAIHealth(),
       this.checkAnthropicHealth(),
-      this.checkAWSServicesHealth()
+      this.checkAWSServicesHealth(),
     ])
 
     return [openai, anthropic, ...awsServices]
@@ -297,12 +293,12 @@ export class ExternalServiceMonitor {
     notConfigured: string[]
   }> {
     const services = await this.checkAllExternalServices()
-    
+
     const map = {
       configured: [] as string[],
       healthy: [] as string[],
       unhealthy: [] as string[],
-      notConfigured: [] as string[]
+      notConfigured: [] as string[],
     }
 
     services.forEach(service => {
@@ -327,16 +323,16 @@ export class ExternalServiceMonitor {
 
   getOverallExternalServiceHealth(): 'healthy' | 'degraded' | 'unhealthy' {
     const statuses = Array.from(this.healthCache.values())
-    
+
     if (statuses.length === 0) return 'healthy'
-    
+
     const unhealthyCount = statuses.filter(s => s.status === 'unhealthy').length
     const totalConfigured = statuses.filter(s => s.status !== 'not_configured').length
-    
+
     if (totalConfigured === 0) return 'healthy' // No services configured
     if (unhealthyCount === 0) return 'healthy'
     if (unhealthyCount === totalConfigured) return 'unhealthy'
-    
+
     return 'degraded'
   }
 }

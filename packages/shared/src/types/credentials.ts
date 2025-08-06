@@ -3,53 +3,53 @@
  */
 
 export interface ExternalServiceCredentials {
-  openai: OpenAICredentials;
-  anthropic: AnthropicCredentials;
-  aws: AWSCredentials;
+  openai: OpenAICredentials
+  anthropic: AnthropicCredentials
+  aws: AWSCredentials
 }
 
 export interface OpenAICredentials {
-  apiKey: string;
-  organizationId?: string;
-  projectId?: string;
+  apiKey: string
+  organizationId?: string
+  projectId?: string
 }
 
 export interface AnthropicCredentials {
-  apiKey: string;
+  apiKey: string
 }
 
 export interface AWSCredentials {
-  accessKeyId: string;
-  secretAccessKey: string;
-  region: string;
-  sessionToken?: string;
+  accessKeyId: string
+  secretAccessKey: string
+  region: string
+  sessionToken?: string
 }
 
 export interface CredentialValidationResult {
-  service: string;
-  valid: boolean;
-  error?: string;
+  service: string
+  valid: boolean
+  error?: string
   details?: {
-    accountInfo?: Record<string, unknown>;
+    accountInfo?: Record<string, unknown>
     rateLimit?: {
-      remaining: number;
-      resetTime: Date;
-    };
-  };
+      remaining: number
+      resetTime: Date
+    }
+  }
 }
 
 export interface SecretsManagerConfig {
-  region: string;
+  region: string
   secretNames: {
-    openai: string;
-    anthropic: string;
-    aws: string;
-  };
+    openai: string
+    anthropic: string
+    aws: string
+  }
 }
 
 export interface CredentialRotationConfig {
-  enabled: boolean;
-  schedule: string; // cron expression
-  notificationEmail?: string;
-  gracePeriodDays: number;
+  enabled: boolean
+  schedule: string // cron expression
+  notificationEmail?: string
+  gracePeriodDays: number
 }

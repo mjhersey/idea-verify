@@ -2,7 +2,12 @@
  * Credential validation utilities for external services
  */
 
-import { CredentialValidationResult, OpenAICredentials, AnthropicCredentials, AWSCredentials } from '../types/credentials.js';
+import {
+  CredentialValidationResult,
+  OpenAICredentials,
+  AnthropicCredentials,
+  AWSCredentials,
+} from '../types/credentials.js'
 
 export class CredentialValidator {
   /**
@@ -17,25 +22,25 @@ export class CredentialValidator {
           valid: credentials.apiKey.startsWith('sk-'),
           details: {
             accountInfo: { type: 'individual', tier: 'tier-1' },
-            rateLimit: { remaining: 1000, resetTime: new Date(Date.now() + 3600000) }
-          }
-        };
+            rateLimit: { remaining: 1000, resetTime: new Date(Date.now() + 3600000) },
+          },
+        }
       }
 
       // Real validation would make API call here
       const response = await fetch('https://api.openai.com/v1/models', {
         headers: {
-          'Authorization': `Bearer ${credentials.apiKey}`,
-          'User-Agent': 'AI-Validation-Platform/1.0'
-        }
-      });
+          Authorization: `Bearer ${credentials.apiKey}`,
+          'User-Agent': 'AI-Validation-Platform/1.0',
+        },
+      })
 
       if (!response.ok) {
         return {
           service: 'openai',
           valid: false,
-          error: `HTTP ${response.status}: ${response.statusText}`
-        };
+          error: `HTTP ${response.status}: ${response.statusText}`,
+        }
       }
 
       return {
@@ -44,16 +49,18 @@ export class CredentialValidator {
         details: {
           rateLimit: {
             remaining: parseInt(response.headers.get('x-ratelimit-remaining') || '0'),
-            resetTime: new Date(parseInt(response.headers.get('x-ratelimit-reset-time') || '0') * 1000)
-          }
-        }
-      };
+            resetTime: new Date(
+              parseInt(response.headers.get('x-ratelimit-reset-time') || '0') * 1000
+            ),
+          },
+        },
+      }
     } catch (error) {
       return {
         service: 'openai',
         valid: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      };
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }
     }
   }
 
@@ -69,9 +76,9 @@ export class CredentialValidator {
           valid: credentials.apiKey.startsWith('sk-ant-'),
           details: {
             accountInfo: { type: 'individual' },
-            rateLimit: { remaining: 500, resetTime: new Date(Date.now() + 3600000) }
-          }
-        };
+            rateLimit: { remaining: 500, resetTime: new Date(Date.now() + 3600000) },
+          },
+        }
       }
 
       // Real validation would make API call here
@@ -80,26 +87,26 @@ export class CredentialValidator {
         headers: {
           'Content-Type': 'application/json',
           'x-api-key': credentials.apiKey,
-          'anthropic-version': '2023-06-01'
+          'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
           model: 'claude-3-haiku-20240307',
           max_tokens: 1,
-          messages: [{ role: 'user', content: 'test' }]
-        })
-      });
+          messages: [{ role: 'user', content: 'test' }],
+        }),
+      })
 
       return {
         service: 'anthropic',
         valid: response.ok,
-        error: response.ok ? undefined : `HTTP ${response.status}: ${response.statusText}`
-      };
+        error: response.ok ? undefined : `HTTP ${response.status}: ${response.statusText}`,
+      }
     } catch (error) {
       return {
         service: 'anthropic',
         valid: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      };
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }
     }
   }
 
@@ -114,9 +121,9 @@ export class CredentialValidator {
           service: 'aws',
           valid: credentials.accessKeyId.length > 0 && credentials.secretAccessKey.length > 0,
           details: {
-            accountInfo: { accountId: '123456789012', region: credentials.region }
-          }
-        };
+            accountInfo: { accountId: '123456789012', region: credentials.region },
+          },
+        }
       }
 
       // Real validation would use AWS SDK here
@@ -125,15 +132,15 @@ export class CredentialValidator {
         service: 'aws',
         valid: true,
         details: {
-          accountInfo: { region: credentials.region }
-        }
-      };
+          accountInfo: { region: credentials.region },
+        },
+      }
     } catch (error) {
       return {
         service: 'aws',
         valid: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      };
+        error: error instanceof Error ? error.message : 'Unknown error',
+      }
     }
   }
 
@@ -148,9 +155,9 @@ export class CredentialValidator {
     const results = await Promise.all([
       this.validateOpenAI(openai),
       this.validateAnthropic(anthropic),
-      this.validateAWS(aws)
-    ]);
+      this.validateAWS(aws),
+    ])
 
-    return results;
+    return results
   }
 }

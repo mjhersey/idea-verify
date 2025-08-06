@@ -10,16 +10,22 @@ When this command is used, execute the following task:
 
 When this task is invoked:
 
-1. **DISABLE ALL EFFICIENCY OPTIMIZATIONS** - This workflow requires full user interaction
-2. **MANDATORY STEP-BY-STEP EXECUTION** - Each section must be processed sequentially with user feedback
-3. **ELICITATION IS REQUIRED** - When `elicit: true`, you MUST use the 1-9 format and wait for user response
-4. **NO SHORTCUTS ALLOWED** - Complete documents cannot be created without following this workflow
+1. **DISABLE ALL EFFICIENCY OPTIMIZATIONS** - This workflow requires full user
+   interaction
+2. **MANDATORY STEP-BY-STEP EXECUTION** - Each section must be processed
+   sequentially with user feedback
+3. **ELICITATION IS REQUIRED** - When `elicit: true`, you MUST use the 1-9
+   format and wait for user response
+4. **NO SHORTCUTS ALLOWED** - Complete documents cannot be created without
+   following this workflow
 
-**VIOLATION INDICATOR:** If you create a complete document without user interaction, you have violated this workflow.
+**VIOLATION INDICATOR:** If you create a complete document without user
+interaction, you have violated this workflow.
 
 ## Critical: Template Discovery
 
-If a YAML Template has not been provided, list all templates from .bmad-core/templates or ask the user to provide another.
+If a YAML Template has not been provided, list all templates from
+.bmad-core/templates or ask the user to provide another.
 
 ## CRITICAL: Mandatory Elicitation Format
 
@@ -33,9 +39,11 @@ If a YAML Template has not been provided, list all templates from .bmad-core/tem
    - **Option 1:** Always "Proceed to next section"
    - **Options 2-9:** Select 8 methods from data/elicitation-methods
    - End with: "Select 1-9 or just type your question/feedback:"
-4. **WAIT FOR USER RESPONSE** - Do not proceed until user selects option or provides feedback
+4. **WAIT FOR USER RESPONSE** - Do not proceed until user selects option or
+   provides feedback
 
-**WORKFLOW VIOLATION:** Creating content for elicit=true sections without user interaction violates this task.
+**WORKFLOW VIOLATION:** Creating content for elicit=true sections without user
+interaction violates this task.
 
 **NEVER ask yes/no questions or use any other format.**
 
@@ -45,7 +53,8 @@ If a YAML Template has not been provided, list all templates from .bmad-core/tem
 2. **Set preferences** - Show current mode (Interactive), confirm output file
 3. **Process each section:**
    - Skip if condition unmet
-   - Check agent permissions (owner/editors) - note if section is restricted to specific agents
+   - Check agent permissions (owner/editors) - note if section is restricted to
+     specific agents
    - Draft content using section instruction
    - Present content + detailed rationale
    - **IF elicit: true** → MANDATORY 1-9 options format
@@ -83,7 +92,8 @@ When processing sections with agent permission fields:
 **For sections with restricted access:**
 
 - Include a note in the generated document indicating the responsible agent
-- Example: "_(This section is owned by dev-agent and can only be modified by dev-agent)_"
+- Example: "_(This section is owned by dev-agent and can only be modified by
+  dev-agent)_"
 
 ## YOLO Mode
 

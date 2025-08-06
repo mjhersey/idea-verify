@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
@@ -15,7 +15,7 @@ export default defineConfig({
       DATABASE_URL: 'postgresql://test:test@localhost:5432/test',
       SECRETS_OPENAI_NAME: 'test-openai-secret',
       SECRETS_ANTHROPIC_NAME: 'test-anthropic-secret',
-      SECRETS_AWS_NAME: 'test-aws-secret'
+      SECRETS_AWS_NAME: 'test-aws-secret',
     },
   },
-});
+})

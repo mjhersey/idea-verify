@@ -1,11 +1,12 @@
 # Epic 3: Evaluation Intelligence & Reporting
 
-**Epic Goal**: Develop sophisticated scoring algorithms, recommendation logic, and comprehensive report generation. This epic transforms raw agent data into actionable business insights.
+**Epic Goal**: Develop sophisticated scoring algorithms, recommendation logic,
+and comprehensive report generation. This epic transforms raw agent data into
+actionable business insights.
 
 ## Story 3.1: Technical Feasibility Agent
 
-**As a user,**
-**I want to understand the technical complexity of my idea,**
+**As a user,** **I want to understand the technical complexity of my idea,**
 **so that I can plan resources and timeline appropriately.**
 
 **Acceptance Criteria:**
@@ -21,9 +22,8 @@
 
 ## Story 3.2: Financial Analysis Agent
 
-**As a user,**
-**I want financial projections for my idea,**
-**so that I can understand revenue potential and investment needs.**
+**As a user,** **I want financial projections for my idea,** **so that I can
+understand revenue potential and investment needs.**
 
 **Acceptance Criteria:**
 
@@ -38,9 +38,8 @@
 
 ## Story 3.3: Scoring Algorithm & Recommendations
 
-**As a user,**
-**I want a clear GO/NO-GO/PIVOT recommendation,**
-**so that I have actionable guidance on my idea.**
+**As a user,** **I want a clear GO/NO-GO/PIVOT recommendation,** **so that I
+have actionable guidance on my idea.**
 
 **Acceptance Criteria:**
 
@@ -51,13 +50,13 @@
 5. Specific action items for each recommendation type
 6. Pivot suggestions when applicable
 
-**Dependencies:** Requires all agent stories (2.2-2.4, 3.1-3.2) for complete scoring data.
+**Dependencies:** Requires all agent stories (2.2-2.4, 3.1-3.2) for complete
+scoring data.
 
 ## Story 3.4: Report Generation Engine
 
-**As a user,**
-**I want a comprehensive PDF report of my evaluation,**
-**so that I can review findings offline and share with others.**
+**As a user,** **I want a comprehensive PDF report of my evaluation,** **so that
+I can review findings offline and share with others.**
 
 **Acceptance Criteria:**
 
@@ -72,9 +71,8 @@
 
 ## Story 3.5: Results Dashboard UI
 
-**As a user,**
-**I want an interactive dashboard showing my evaluation results,**
-**so that I can easily understand and explore the findings.**
+**As a user,** **I want an interactive dashboard showing my evaluation
+results,** **so that I can easily understand and explore the findings.**
 
 **Acceptance Criteria:**
 
@@ -86,7 +84,8 @@
 6. Download report button
 7. Start iteration button
 
-**Dependencies:** Requires Stories 3.3-3.4 for results data and report generation.
+**Dependencies:** Requires Stories 3.3-3.4 for results data and report
+generation.
 
 ---
 
@@ -188,9 +187,11 @@
 
 ## Epic 3 Definition of Done
 
-✅ **Comprehensive scoring system** - 5 agent scores combined with industry-specific weights  
+✅ **Comprehensive scoring system** - 5 agent scores combined with
+industry-specific weights  
 ✅ **Clear recommendations** - GO/NO-GO/PIVOT with detailed justification  
-✅ **Professional reporting** - PDF reports with visualizations and executive summary  
+✅ **Professional reporting** - PDF reports with visualizations and executive
+summary  
 ✅ **Interactive results UI** - Engaging dashboard for exploring findings  
 ✅ **Financial modeling** - Revenue projections and unit economics analysis  
 ✅ **Technical assessment** - Development complexity and resource estimation

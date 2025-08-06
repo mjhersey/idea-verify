@@ -2,18 +2,18 @@
  * OpenAI Provider Implementation
  */
 
-import { ChatOpenAI } from '@langchain/openai';
-import { BaseProvider } from './provider-base.js';
-import { LLMProvider, LLMResponse, LLMProviderConfig } from './types.js';
+import { ChatOpenAI } from '@langchain/openai'
+import { BaseProvider } from './provider-base.js'
+import { LLMProvider, LLMResponse, LLMProviderConfig } from './types.js'
 
 export class OpenAIProvider extends BaseProvider {
-  private client: ChatOpenAI | null = null;
+  private client: ChatOpenAI | null = null
 
   constructor(config: Omit<LLMProviderConfig, 'provider'>) {
-    super(LLMProvider.OPENAI, config);
-    
+    super(LLMProvider.OPENAI, config)
+
     if (this.apiKey) {
-      this.initializeClient();
+      this.initializeClient()
     }
   }
 
@@ -24,26 +24,26 @@ export class OpenAIProvider extends BaseProvider {
       temperature: this.temperature,
       maxTokens: this.maxTokens,
       timeout: this.timeout,
-      maxRetries: this.maxRetries
-    });
+      maxRetries: this.maxRetries,
+    })
   }
 
   protected getDefaultModel(): string {
-    return 'gpt-4-turbo-preview';
+    return 'gpt-4-turbo-preview'
   }
 
   async invoke(prompt: string, context?: Record<string, any>): Promise<LLMResponse> {
     if (!this.client) {
-      throw new Error('OpenAI client not initialized. Please provide an API key.');
+      throw new Error('OpenAI client not initialized. Please provide an API key.')
     }
 
     return this.retryWithBackoff(async () => {
-      const startTime = Date.now();
-      
+      const startTime = Date.now()
+
       try {
-        const response = await this.client!.invoke(prompt);
-        const content = response.content.toString();
-        
+        const response = await this.client!.invoke(prompt)
+        const content = response.content.toString()
+
         return {
           content,
           provider: this.provider,
@@ -52,35 +52,35 @@ export class OpenAIProvider extends BaseProvider {
           usage: {
             promptTokens: 0, // Would need to parse from response
             completionTokens: 0,
-            totalTokens: 0
-          }
-        };
+            totalTokens: 0,
+          },
+        }
       } catch (error: any) {
         // Handle rate limiting
         if (error.status === 429) {
-          throw new Error('OpenAI rate limit exceeded. Retrying...');
+          throw new Error('OpenAI rate limit exceeded. Retrying...')
         }
-        throw error;
+        throw error
       }
-    });
+    })
   }
 
   async isAvailable(): Promise<boolean> {
     if (!this.apiKey) {
-      return false;
+      return false
     }
 
     try {
       // Try a minimal request to check availability
-      await this.invoke('Hello', { test: true });
-      return true;
+      await this.invoke('Hello', { test: true })
+      return true
     } catch (error) {
-      console.error('OpenAI provider not available:', error);
-      return false;
+      console.error('OpenAI provider not available:', error)
+      return false
     }
   }
 
   async isHealthy(): Promise<boolean> {
-    return this.isAvailable();
+    return this.isAvailable()
   }
 }

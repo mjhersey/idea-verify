@@ -1,6 +1,8 @@
 # System Resilience & Error Handling Strategy
 
-This section defines comprehensive error handling and fallback strategies to ensure robust user experience even when system components fail. Based on PO Master Checklist validation recommendations.
+This section defines comprehensive error handling and fallback strategies to
+ensure robust user experience even when system components fail. Based on PO
+Master Checklist validation recommendations.
 
 ## **Error Categories & Response Matrix**
 
@@ -19,7 +21,8 @@ This section defines comprehensive error handling and fallback strategies to ens
 
 **User Experience:**
 
-- Evaluation continues with notice: "Using alternate AI provider due to temporary service issue"
+- Evaluation continues with notice: "Using alternate AI provider due to
+  temporary service issue"
 - Slight delay (1-2 minutes) during provider switching
 - Results quality maintained
 
@@ -43,7 +46,8 @@ This section defines comprehensive error handling and fallback strategies to ens
 
 **User Experience:**
 
-- Clear message: "AI services temporarily unavailable. Your evaluation will resume automatically when service is restored."
+- Clear message: "AI services temporarily unavailable. Your evaluation will
+  resume automatically when service is restored."
 - Option to save idea draft and get email notification when ready
 - Estimated restoration time displayed
 
@@ -81,7 +85,8 @@ This section defines comprehensive error handling and fallback strategies to ens
 
 **User Experience:**
 
-- Evaluation paused with message: "Service experiencing issues - your evaluation will resume shortly"
+- Evaluation paused with message: "Service experiencing issues - your evaluation
+  will resume shortly"
 - Option to try again later or contact support
 - No partial results shown (insufficient data)
 
@@ -310,35 +315,35 @@ This section defines comprehensive error handling and fallback strategies to ens
 
 ```typescript
 class LLMProviderCircuitBreaker {
-  private failureCount = 0;
-  private lastFailureTime = 0;
-  private state: "CLOSED" | "OPEN" | "HALF_OPEN" = "CLOSED";
+  private failureCount = 0
+  private lastFailureTime = 0
+  private state: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED'
 
   async callProvider(request: any): Promise<any> {
-    if (this.state === "OPEN") {
+    if (this.state === 'OPEN') {
       if (Date.now() - this.lastFailureTime > 60000) {
         // 1 minute
-        this.state = "HALF_OPEN";
+        this.state = 'HALF_OPEN'
       } else {
-        throw new Error("Circuit breaker is OPEN");
+        throw new Error('Circuit breaker is OPEN')
       }
     }
 
     try {
-      const result = await this.makeAPICall(request);
-      if (this.state === "HALF_OPEN") {
-        this.state = "CLOSED";
-        this.failureCount = 0;
+      const result = await this.makeAPICall(request)
+      if (this.state === 'HALF_OPEN') {
+        this.state = 'CLOSED'
+        this.failureCount = 0
       }
-      return result;
+      return result
     } catch (error) {
-      this.failureCount++;
-      this.lastFailureTime = Date.now();
+      this.failureCount++
+      this.lastFailureTime = Date.now()
 
       if (this.failureCount >= 5) {
-        this.state = "OPEN";
+        this.state = 'OPEN'
       }
-      throw error;
+      throw error
     }
   }
 }
@@ -354,14 +359,14 @@ async function retryWithBackoff<T>(
 ): Promise<T> {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      return await operation();
+      return await operation()
     } catch (error) {
       if (attempt === maxRetries) {
-        throw error;
+        throw error
       }
 
-      const delay = baseDelay * Math.pow(2, attempt);
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      const delay = baseDelay * Math.pow(2, attempt)
+      await new Promise(resolve => setTimeout(resolve, delay))
     }
   }
 }
@@ -373,30 +378,30 @@ async function retryWithBackoff<T>(
 class EvaluationService {
   async evaluateIdea(idea: string): Promise<EvaluationResult> {
     const agents = [
-      "market-research",
-      "competitive-analysis",
-      "customer-research",
-      "technical-feasibility",
-      "financial-analysis",
-    ];
+      'market-research',
+      'competitive-analysis',
+      'customer-research',
+      'technical-feasibility',
+      'financial-analysis',
+    ]
 
-    const results: AgentResult[] = [];
+    const results: AgentResult[] = []
 
     for (const agentType of agents) {
       try {
-        const result = await this.runAgent(agentType, idea);
-        results.push(result);
+        const result = await this.runAgent(agentType, idea)
+        results.push(result)
       } catch (error) {
-        console.log(`Agent ${agentType} failed, continuing with others`);
+        console.log(`Agent ${agentType} failed, continuing with others`)
         // Log failure but continue with other agents
       }
     }
 
     if (results.length < 3) {
-      throw new Error("Insufficient agents completed - evaluation failed");
+      throw new Error('Insufficient agents completed - evaluation failed')
     }
 
-    return this.generateReport(results);
+    return this.generateReport(results)
   }
 }
 ```
@@ -406,31 +411,33 @@ class EvaluationService {
 ```typescript
 const ERROR_MESSAGES = {
   LLM_PROVIDER_DOWN: {
-    title: "AI Service Temporarily Unavailable",
+    title: 'AI Service Temporarily Unavailable',
     message:
       "We're switching to our backup AI service. Your evaluation will continue shortly.",
-    action: "Please wait while we resolve this automatically.",
-    estimatedTime: "1-2 minutes",
+    action: 'Please wait while we resolve this automatically.',
+    estimatedTime: '1-2 minutes',
   },
 
   PARTIAL_AGENT_FAILURE: {
-    title: "Evaluation Continuing with Available Data",
+    title: 'Evaluation Continuing with Available Data',
     message:
       "Some analysis components are experiencing delays, but we're proceeding with available information.",
     action:
       "You'll receive a partial report, and we'll update it when all services are restored.",
-    estimatedTime: "Normal completion time",
+    estimatedTime: 'Normal completion time',
   },
 
   COMPLETE_SERVICE_DOWN: {
-    title: "Service Temporarily Unavailable",
+    title: 'Service Temporarily Unavailable',
     message:
       "We're experiencing technical difficulties and are working to restore service.",
     action:
-      "Your evaluation has been saved and will resume automatically when service is restored.",
+      'Your evaluation has been saved and will resume automatically when service is restored.',
     estimatedTime: "We'll email you when ready",
   },
-};
+}
 ```
 
-This comprehensive strategy ensures that users receive consistent, reliable service even when individual components fail, maintaining trust and usability throughout various failure scenarios.
+This comprehensive strategy ensures that users receive consistent, reliable
+service even when individual components fail, maintaining trust and usability
+throughout various failure scenarios.

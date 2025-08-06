@@ -3,39 +3,39 @@
  */
 
 export interface TestEnvironmentConfig {
-  name: string;
-  apiBaseUrl: string;
-  webBaseUrl: string;
-  databaseUrl?: string;
-  redisUrl?: string;
-  timeout: number;
-  retryAttempts: number;
+  name: string
+  apiBaseUrl: string
+  webBaseUrl: string
+  databaseUrl?: string
+  redisUrl?: string
+  timeout: number
+  retryAttempts: number
   authentication: {
-    enabled: boolean;
+    enabled: boolean
     testUsers: {
-      admin: { email: string; password: string };
-      user: { email: string; password: string };
-      readonly: { email: string; password: string };
-    };
-  };
+      admin: { email: string; password: string }
+      user: { email: string; password: string }
+      readonly: { email: string; password: string }
+    }
+  }
   features: {
-    enableDetailedLogging: boolean;
-    enablePerformanceTesting: boolean;
-    enableSecurityTesting: boolean;
-    enableLoadTesting: boolean;
-    skipSlowTests: boolean;
-  };
+    enableDetailedLogging: boolean
+    enablePerformanceTesting: boolean
+    enableSecurityTesting: boolean
+    enableLoadTesting: boolean
+    skipSlowTests: boolean
+  }
   limits: {
-    maxRequestsPerSecond: number;
-    maxConcurrentUsers: number;
-    testDataCleanupEnabled: boolean;
-    cleanupDelayMs: number;
-  };
+    maxRequestsPerSecond: number
+    maxConcurrentUsers: number
+    testDataCleanupEnabled: boolean
+    cleanupDelayMs: number
+  }
   monitoring: {
-    metricsEnabled: boolean;
-    traceEnabled: boolean;
-    logLevel: 'debug' | 'info' | 'warn' | 'error';
-  };
+    metricsEnabled: boolean
+    traceEnabled: boolean
+    logLevel: 'debug' | 'info' | 'warn' | 'error'
+  }
 }
 
 const commonConfig = {
@@ -43,21 +43,21 @@ const commonConfig = {
   authentication: {
     enabled: true,
     testUsers: {
-      admin: { 
-        email: 'admin@test.aivalidation.com', 
-        password: 'TestAdmin123!' 
+      admin: {
+        email: 'admin@test.aivalidation.com',
+        password: 'TestAdmin123!',
       },
-      user: { 
-        email: 'user@test.aivalidation.com', 
-        password: 'TestUser123!' 
+      user: {
+        email: 'user@test.aivalidation.com',
+        password: 'TestUser123!',
       },
-      readonly: { 
-        email: 'readonly@test.aivalidation.com', 
-        password: 'TestReadonly123!' 
+      readonly: {
+        email: 'readonly@test.aivalidation.com',
+        password: 'TestReadonly123!',
       },
     },
   },
-};
+}
 
 export const testEnvironments: Record<string, TestEnvironmentConfig> = {
   local: {
@@ -87,7 +87,7 @@ export const testEnvironments: Record<string, TestEnvironmentConfig> = {
       logLevel: 'debug',
     },
   },
-  
+
   dev: {
     name: 'dev',
     apiBaseUrl: 'https://dev.aivalidation.com',
@@ -113,7 +113,7 @@ export const testEnvironments: Record<string, TestEnvironmentConfig> = {
       logLevel: 'info',
     },
   },
-  
+
   staging: {
     name: 'staging',
     apiBaseUrl: 'https://staging.aivalidation.com',
@@ -123,17 +123,17 @@ export const testEnvironments: Record<string, TestEnvironmentConfig> = {
     authentication: {
       ...commonConfig.authentication,
       testUsers: {
-        admin: { 
-          email: 'admin@staging.aivalidation.com', 
-          password: process.env.STAGING_ADMIN_PASSWORD || 'StagingAdmin123!' 
+        admin: {
+          email: 'admin@staging.aivalidation.com',
+          password: process.env.STAGING_ADMIN_PASSWORD || 'StagingAdmin123!',
         },
-        user: { 
-          email: 'user@staging.aivalidation.com', 
-          password: process.env.STAGING_USER_PASSWORD || 'StagingUser123!' 
+        user: {
+          email: 'user@staging.aivalidation.com',
+          password: process.env.STAGING_USER_PASSWORD || 'StagingUser123!',
         },
-        readonly: { 
-          email: 'readonly@staging.aivalidation.com', 
-          password: process.env.STAGING_READONLY_PASSWORD || 'StagingReadonly123!' 
+        readonly: {
+          email: 'readonly@staging.aivalidation.com',
+          password: process.env.STAGING_READONLY_PASSWORD || 'StagingReadonly123!',
         },
       },
     },
@@ -156,7 +156,7 @@ export const testEnvironments: Record<string, TestEnvironmentConfig> = {
       logLevel: 'info',
     },
   },
-  
+
   prod: {
     name: 'prod',
     apiBaseUrl: 'https://aivalidation.com',
@@ -166,52 +166,52 @@ export const testEnvironments: Record<string, TestEnvironmentConfig> = {
     authentication: {
       enabled: true,
       testUsers: {
-        admin: { 
-          email: process.env.PROD_ADMIN_EMAIL || 'admin@aivalidation.com', 
-          password: process.env.PROD_ADMIN_PASSWORD || '' 
+        admin: {
+          email: process.env.PROD_ADMIN_EMAIL || 'admin@aivalidation.com',
+          password: process.env.PROD_ADMIN_PASSWORD || '',
         },
-        user: { 
-          email: process.env.PROD_USER_EMAIL || 'user@aivalidation.com', 
-          password: process.env.PROD_USER_PASSWORD || '' 
+        user: {
+          email: process.env.PROD_USER_EMAIL || 'user@aivalidation.com',
+          password: process.env.PROD_USER_PASSWORD || '',
         },
-        readonly: { 
-          email: process.env.PROD_READONLY_EMAIL || 'readonly@aivalidation.com', 
-          password: process.env.PROD_READONLY_PASSWORD || '' 
+        readonly: {
+          email: process.env.PROD_READONLY_EMAIL || 'readonly@aivalidation.com',
+          password: process.env.PROD_READONLY_PASSWORD || '',
         },
       },
     },
     features: {
       enableDetailedLogging: false,
       enablePerformanceTesting: false, // Only run performance tests manually in prod
-      enableSecurityTesting: false,    // Only run security tests manually in prod
-      enableLoadTesting: false,        // Never run load tests in prod
+      enableSecurityTesting: false, // Only run security tests manually in prod
+      enableLoadTesting: false, // Never run load tests in prod
       skipSlowTests: true,
     },
     limits: {
-      maxRequestsPerSecond: 10,  // Conservative for production
-      maxConcurrentUsers: 5,     // Limited concurrent tests in production
+      maxRequestsPerSecond: 10, // Conservative for production
+      maxConcurrentUsers: 5, // Limited concurrent tests in production
       testDataCleanupEnabled: true,
-      cleanupDelayMs: 10000,     // Longer delays in production
+      cleanupDelayMs: 10000, // Longer delays in production
     },
     monitoring: {
-      metricsEnabled: false,     // Don't interfere with production metrics
+      metricsEnabled: false, // Don't interfere with production metrics
       traceEnabled: false,
       logLevel: 'warn',
     },
   },
-};
+}
 
 /**
  * Get test environment configuration
  */
 export function getTestEnvironment(envName?: string): TestEnvironmentConfig {
-  const environment = envName || process.env.TEST_ENVIRONMENT || 'local';
-  
-  const config = testEnvironments[environment];
+  const environment = envName || process.env.TEST_ENVIRONMENT || 'local'
+
+  const config = testEnvironments[environment]
   if (!config) {
-    throw new Error(`Unknown test environment: ${environment}`);
+    throw new Error(`Unknown test environment: ${environment}`)
   }
-  
+
   // Validate required environment variables for production
   if (environment === 'prod') {
     const requiredEnvVars = [
@@ -219,71 +219,76 @@ export function getTestEnvironment(envName?: string): TestEnvironmentConfig {
       'PROD_ADMIN_PASSWORD',
       'PROD_USER_EMAIL',
       'PROD_USER_PASSWORD',
-    ];
-    
-    const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+    ]
+
+    const missingVars = requiredEnvVars.filter(varName => !process.env[varName])
     if (missingVars.length > 0) {
-      throw new Error(`Missing required environment variables for production testing: ${missingVars.join(', ')}`);
+      throw new Error(
+        `Missing required environment variables for production testing: ${missingVars.join(', ')}`
+      )
     }
   }
-  
-  return config;
+
+  return config
 }
 
 /**
  * Check if a feature is enabled for the current environment
  */
-export function isFeatureEnabled(feature: keyof TestEnvironmentConfig['features'], envName?: string): boolean {
-  const config = getTestEnvironment(envName);
-  return config.features[feature];
+export function isFeatureEnabled(
+  feature: keyof TestEnvironmentConfig['features'],
+  envName?: string
+): boolean {
+  const config = getTestEnvironment(envName)
+  return config.features[feature]
 }
 
 /**
  * Get test user credentials for authentication
  */
 export function getTestUser(userType: 'admin' | 'user' | 'readonly', envName?: string) {
-  const config = getTestEnvironment(envName);
-  return config.authentication.testUsers[userType];
+  const config = getTestEnvironment(envName)
+  return config.authentication.testUsers[userType]
 }
 
 /**
  * Should skip slow tests based on environment configuration
  */
 export function shouldSkipSlowTests(envName?: string): boolean {
-  const config = getTestEnvironment(envName);
-  return config.features.skipSlowTests;
+  const config = getTestEnvironment(envName)
+  return config.features.skipSlowTests
 }
 
 /**
  * Get rate limiting configuration for tests
  */
 export function getRateLimits(envName?: string) {
-  const config = getTestEnvironment(envName);
+  const config = getTestEnvironment(envName)
   return {
     maxRequestsPerSecond: config.limits.maxRequestsPerSecond,
     maxConcurrentUsers: config.limits.maxConcurrentUsers,
-  };
+  }
 }
 
 /**
  * Create a delay based on environment settings
  */
 export function createEnvironmentDelay(envName?: string): Promise<void> {
-  const config = getTestEnvironment(envName);
+  const config = getTestEnvironment(envName)
   return new Promise(resolve => {
-    setTimeout(resolve, config.limits.cleanupDelayMs);
-  });
+    setTimeout(resolve, config.limits.cleanupDelayMs)
+  })
 }
 
 /**
  * Get logging configuration for tests
  */
 export function getLoggingConfig(envName?: string) {
-  const config = getTestEnvironment(envName);
+  const config = getTestEnvironment(envName)
   return {
     level: config.monitoring.logLevel,
     enableMetrics: config.monitoring.metricsEnabled,
     enableTrace: config.monitoring.traceEnabled,
     enableDetailedLogging: config.features.enableDetailedLogging,
-  };
+  }
 }

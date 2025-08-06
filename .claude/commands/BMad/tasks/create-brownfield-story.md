@@ -6,7 +6,11 @@ When this command is used, execute the following task:
 
 ## Purpose
 
-Create detailed, implementation-ready stories for brownfield projects where traditional sharded PRD/architecture documents may not exist. This task bridges the gap between various documentation formats (document-project output, brownfield PRDs, epics, or user documentation) and executable stories for the Dev agent.
+Create detailed, implementation-ready stories for brownfield projects where
+traditional sharded PRD/architecture documents may not exist. This task bridges
+the gap between various documentation formats (document-project output,
+brownfield PRDs, epics, or user documentation) and executable stories for the
+Dev agent.
 
 ## When to Use This Task
 
@@ -33,7 +37,8 @@ Check for available documentation in this order:
 1. **Sharded PRD/Architecture** (docs/prd/, docs/architecture/)
    - If found, recommend using create-next-story task instead
 
-2. **Brownfield Architecture Document** (docs/brownfield-architecture.md or similar)
+2. **Brownfield Architecture Document** (docs/brownfield-architecture.md or
+   similar)
    - Created by document-project task
    - Contains actual system state, technical debt, workarounds
 
@@ -59,7 +64,8 @@ Based on available documentation:
 
 #### 1.2 Gather Essential Context
 
-CRITICAL: For brownfield stories, you MUST gather enough context for safe implementation. Be prepared to ask the user for missing information.
+CRITICAL: For brownfield stories, you MUST gather enough context for safe
+implementation. Be prepared to ask the user for missing information.
 
 **Required Information Checklist:**
 
@@ -69,7 +75,8 @@ CRITICAL: For brownfield stories, you MUST gather enough context for safe implem
 - [ ] What technical constraints exist?
 - [ ] Are there any "gotchas" or workarounds to know about?
 
-If any required information is missing, list the missing information and ask the user to provide it.
+If any required information is missing, list the missing information and ask the
+user to provide it.
 
 ### 2. Extract Technical Context from Available Sources
 
@@ -114,9 +121,8 @@ Start with the story template, filling in what's known:
 
 ## Story
 
-As a {{user_type}},
-I want {{enhancement_capability}},
-so that {{value_delivered}}.
+As a {{user_type}}, I want {{enhancement_capability}}, so that
+{{value_delivered}}.
 
 ## Context Source
 
@@ -127,37 +133,43 @@ so that {{value_delivered}}.
 
 #### 3.2 Develop Acceptance Criteria
 
-Critical: For brownfield, ALWAYS include criteria about maintaining existing functionality
+Critical: For brownfield, ALWAYS include criteria about maintaining existing
+functionality
 
 Standard structure:
 
 1. New functionality works as specified
-2. Existing {{affected feature}} continues to work unchanged  
+2. Existing {{affected feature}} continues to work unchanged
 3. Integration with {{existing system}} maintains current behavior
 4. No regression in {{related area}}
 5. Performance remains within acceptable bounds
 
 #### 3.3 Gather Technical Guidance
 
-Critical: This is where you'll need to be interactive with the user if information is missing
+Critical: This is where you'll need to be interactive with the user if
+information is missing
 
 Create Dev Technical Guidance section with available information:
 
-```markdown
+````markdown
 ## Dev Technical Guidance
 
 ### Existing System Context
+
 [Extract from available documentation]
 
 ### Integration Approach
+
 [Based on patterns found or ask user]
 
 ### Technical Constraints
+
 [From documentation or user input]
 
 ### Missing Information
 
-Critical: List anything you couldn't find that dev will need and ask for the missing information
+Critical: List anything you couldn't find that dev will need and ask for the
+missing information
 
 ### 4. Task Generation with Safety Checks
 
@@ -195,6 +207,7 @@ Example task structure for brownfield:
   - [ ] Integration test for {{integration point}}
   - [ ] Update existing tests if needed
 ```
+````
 
 ### 5. Risk Assessment and Mitigation
 
@@ -206,14 +219,17 @@ Add section for brownfield-specific risks:
 ## Risk Assessment
 
 ### Implementation Risks
+
 - **Primary Risk**: {{main risk to existing system}}
 - **Mitigation**: {{how to address}}
 - **Verification**: {{how to confirm safety}}
 
 ### Rollback Plan
+
 - {{Simple steps to undo changes if needed}}
 
 ### Safety Checks
+
 - [ ] Existing {{feature}} tested before changes
 - [ ] Changes can be feature-flagged or isolated
 - [ ] Rollback procedure documented
@@ -256,6 +272,7 @@ Include header noting documentation context:
 <!-- Context: Brownfield enhancement to {{existing system}} -->
 
 ## Status: Draft
+
 [Rest of story content...]
 ```
 
@@ -276,7 +293,7 @@ Key Integration Points Identified:
 Risks Noted:
 - {{primary risk}}
 
-{{If missing info}}: 
+{{If missing info}}:
 Note: Some technical details were unclear. The story includes exploration tasks to gather needed information during implementation.
 
 Next Steps:
@@ -300,7 +317,8 @@ The brownfield story creation is successful when:
 
 ## Important Notes
 
-- This task is specifically for brownfield projects with non-standard documentation
+- This task is specifically for brownfield projects with non-standard
+  documentation
 - Always prioritize existing system stability over new features
 - When in doubt, add exploration and verification tasks
 - It's better to ask the user for clarification than make assumptions

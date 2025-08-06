@@ -33,16 +33,16 @@ export const createEvaluation = async (
       return res.status(400).json({
         success: false,
         error: 'Validation failed',
-        details: errors.array()
+        details: errors.array(),
       })
     }
 
-    const { 
-      businessIdeaId, 
-      businessIdeaTitle, 
-      businessIdeaDescription, 
+    const {
+      businessIdeaId,
+      businessIdeaTitle,
+      businessIdeaDescription,
       agentTypes = ['market-research'], // Default to market research agent
-      priority = 'normal' 
+      priority = 'normal',
     } = req.body
 
     // Get orchestrator service instance
@@ -54,7 +54,7 @@ export const createEvaluation = async (
       businessIdeaTitle,
       businessIdeaDescription,
       agentTypes: agentTypes as any[], // Cast to AgentType[]
-      priority: priority as any // Cast to EvaluationPriority
+      priority: priority as any, // Cast to EvaluationPriority
     })
 
     // Get current progress
@@ -66,7 +66,7 @@ export const createEvaluation = async (
       status: progress?.status || 'pending',
       createdAt: new Date(),
       updatedAt: new Date(),
-      results: progress?.results || undefined
+      results: progress?.results || undefined,
     }
 
     // Store in memory for API compatibility (will be replaced with database lookup)
@@ -75,7 +75,7 @@ export const createEvaluation = async (
     res.status(201).json({
       success: true,
       data: evaluation,
-      progress: progress
+      progress: progress,
     })
   } catch (error) {
     console.error('Error creating evaluation:', error)
@@ -83,15 +83,11 @@ export const createEvaluation = async (
   }
 }
 
-export const getEvaluations = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const getEvaluations = async (req: Request, res: Response, next: NextFunction) => {
   try {
     res.json({
       success: true,
-      data: evaluations
+      data: evaluations,
     })
   } catch (error) {
     next(error)
@@ -105,23 +101,23 @@ export const getEvaluation = async (
 ) => {
   try {
     const { id } = req.params
-    
+
     // Get orchestrator service instance
     const orchestrator = OrchestratorService.getInstance()
-    
+
     // Get current progress from orchestrator
     const progress = orchestrator.getEvaluationProgress(id)
-    
+
     if (!progress) {
       return res.status(404).json({
         success: false,
-        error: 'Evaluation not found'
+        error: 'Evaluation not found',
       })
     }
 
     // Try to find in memory first (for API compatibility)
     let evaluation = evaluations.find(e => e.id === id)
-    
+
     if (!evaluation) {
       // Create evaluation object from orchestrator progress
       evaluation = {
@@ -130,7 +126,7 @@ export const getEvaluation = async (
         status: progress.status,
         createdAt: new Date(), // This would come from database in real implementation
         updatedAt: new Date(),
-        results: progress.results
+        results: progress.results,
       }
     } else {
       // Update status from orchestrator
@@ -142,7 +138,7 @@ export const getEvaluation = async (
     res.json({
       success: true,
       data: evaluation,
-      progress: progress
+      progress: progress,
     })
   } catch (error) {
     next(error)
@@ -161,7 +157,7 @@ export const deleteEvaluation = async (
     if (index === -1) {
       return res.status(404).json({
         success: false,
-        error: 'Evaluation not found'
+        error: 'Evaluation not found',
       })
     }
 
@@ -169,7 +165,7 @@ export const deleteEvaluation = async (
 
     res.json({
       success: true,
-      message: 'Evaluation deleted successfully'
+      message: 'Evaluation deleted successfully',
     })
   } catch (error) {
     next(error)

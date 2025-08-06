@@ -1,6 +1,8 @@
 # AI-Powered Business Idea Validation Platform
 
-A comprehensive platform that uses AI agents to validate business ideas through market research, competitive analysis, customer research, technical feasibility assessment, and financial analysis.
+A comprehensive platform that uses AI agents to validate business ideas through
+market research, competitive analysis, customer research, technical feasibility
+assessment, and financial analysis.
 
 ## 🏗️ Architecture
 
@@ -46,47 +48,53 @@ ai-validation-platform/
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd ai-validation-platform
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm run install:all
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.template .env
    # Edit .env with your configuration
    ```
 
 4. **Start development services**
+
    ```bash
    # Start databases and external services
    npm run dev:services
-   
+
    # Start mock AI services (for offline development)
    npm run dev:mocks
-   
+
    # Or start everything at once
    npm run dev:all
    ```
 
 5. **Test database connectivity**
+
    ```bash
    npm run test:db
    ```
 
 6. **Start the applications**
+
    ```bash
    # Start frontend (Vue.js) - http://localhost:5173
    npm run dev:web
-   
+
    # Start API server (Express.js) - http://localhost:3000
    npm run dev:api
-   
+
    # Start orchestrator service
    npm run dev:orchestrator
    ```
@@ -96,6 +104,7 @@ ai-validation-platform/
 ### Available Scripts
 
 **Root Level Scripts:**
+
 - `npm run install:all` - Install dependencies for all packages
 - `npm run build` - Build all packages
 - `npm run test` - Run tests for all packages
@@ -103,11 +112,13 @@ ai-validation-platform/
 - `npm run clean` - Clean build artifacts
 
 **Development Scripts:**
+
 - `npm run dev:web` - Start frontend development server
 - `npm run dev:api` - Start API development server
 - `npm run dev:orchestrator` - Start orchestrator development server
 
 **Docker Services:**
+
 - `npm run dev:services` - Start PostgreSQL, Redis, and LocalStack
 - `npm run dev:mocks` - Start mock AI services
 - `npm run dev:all` - Start all Docker services
@@ -115,6 +126,7 @@ ai-validation-platform/
 - `npm run dev:logs` - View Docker service logs
 
 **Testing & Validation:**
+
 - `npm run test:db` - Test database connectivity
 - `npm run test:offline` - Test offline development mode
 - `npm run test:integration` - Run integration tests
@@ -156,6 +168,7 @@ The development environment includes:
 ### Database Schema
 
 Initial development schema includes:
+
 - `users` - User accounts (placeholder)
 - `business_evaluations` - Business idea evaluation records
 - `agent_executions` - AI agent execution tracking
@@ -169,6 +182,7 @@ The project uses a comprehensive testing strategy:
 - **E2E Tests** (10%): Cypress for critical user journeys
 
 Run tests:
+
 ```bash
 npm test                    # All tests
 npm run test:offline        # Offline mode tests
@@ -207,17 +221,20 @@ The platform supports complete offline development using mock services:
 ## 📦 Package Dependencies
 
 ### Frontend (`packages/web`)
+
 - Vue.js 3.4+, Vite 5.0+, TypeScript 5.0+
 - Pinia 2.1+, Vue Router 4.2+
 - Tailwind CSS 3.4+, Headless UI
 - Vitest, Cypress, Chart.js
 
 ### API (`packages/api`)
+
 - Express.js 4.18+, TypeScript 5.0+
 - Security middleware (helmet, cors, rate limiting)
 - Vitest, Supertest
 
 ### Shared (`packages/shared`)
+
 - AWS SDK, credential management
 - Rate limiting, quota monitoring
 - Mock service implementations
@@ -234,6 +251,7 @@ npm run deploy
 ```
 
 Target AWS services:
+
 - ECS for containerized services
 - RDS PostgreSQL for database
 - ElastiCache Redis for caching
@@ -284,7 +302,5 @@ MIT License - see LICENSE file for details
 
 ---
 
-**Development Status**: Active development
-**Last Updated**: January 2025
-**Node.js**: 18+ required
-**Platform**: Cross-platform (Windows, macOS, Linux)
+**Development Status**: Active development **Last Updated**: January 2025
+**Node.js**: 18+ required **Platform**: Cross-platform (Windows, macOS, Linux)

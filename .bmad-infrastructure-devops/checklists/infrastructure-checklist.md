@@ -1,6 +1,10 @@
 # Infrastructure Change Validation Checklist
 
-This checklist serves as a comprehensive framework for validating infrastructure changes before deployment to production. The DevOps/Platform Engineer should systematically work through each item, ensuring the infrastructure is secure, compliant, resilient, and properly implemented according to organizational standards.
+This checklist serves as a comprehensive framework for validating infrastructure
+changes before deployment to production. The DevOps/Platform Engineer should
+systematically work through each item, ensuring the infrastructure is secure,
+compliant, resilient, and properly implemented according to organizational
+standards.
 
 ## 1. SECURITY & COMPLIANCE
 
@@ -274,15 +278,18 @@ This checklist serves as a comprehensive framework for validating infrastructure
 
 ### 11.1 Development Agent Alignment
 
-- [ ] Infrastructure changes support Frontend Dev (Mira) and Fullstack Dev (Enrique) requirements
-- [ ] Backend requirements from Backend Dev (Lily) and Fullstack Dev (Enrique) accommodated
+- [ ] Infrastructure changes support Frontend Dev (Mira) and Fullstack Dev
+      (Enrique) requirements
+- [ ] Backend requirements from Backend Dev (Lily) and Fullstack Dev (Enrique)
+      accommodated
 - [ ] Local development environment compatibility verified for all dev agents
 - [ ] Infrastructure changes support automated testing frameworks
 - [ ] Development agent feedback incorporated into infrastructure design
 
 ### 11.2 Product Alignment
 
-- [ ] Infrastructure changes mapped to PRD requirements maintained by Product Owner
+- [ ] Infrastructure changes mapped to PRD requirements maintained by Product
+      Owner
 - [ ] Non-functional requirements from PRD verified in implementation
 - [ ] Infrastructure capabilities and limitations communicated to Product teams
 - [ ] Infrastructure release timeline aligned with product roadmap
@@ -327,14 +334,16 @@ This checklist serves as a comprehensive framework for validating infrastructure
 ### 13.1 Cluster Configuration & Security
 
 - [ ] Container orchestration platform properly installed and configured
-- [ ] Cluster nodes configured with appropriate resource allocation and security policies
+- [ ] Cluster nodes configured with appropriate resource allocation and security
+      policies
 - [ ] Control plane high availability and security hardening implemented
 - [ ] API server access controls and authentication mechanisms configured
 - [ ] Cluster networking properly configured with security policies
 
 ### 13.2 RBAC & Access Control
 
-- [ ] Role-Based Access Control (RBAC) implemented with least privilege principles
+- [ ] Role-Based Access Control (RBAC) implemented with least privilege
+      principles
 - [ ] Service accounts configured with minimal required permissions
 - [ ] Pod security policies and security contexts properly configured
 - [ ] Network policies implemented for micro-segmentation
@@ -475,7 +484,8 @@ This checklist serves as a comprehensive framework for validating infrastructure
 - [ ] All infrastructure changes tested in non-production environment
 - [ ] Rollback plan documented and tested
 - [ ] Required approvals obtained
-- [ ] Infrastructure changes verified against architectural decisions documented by Architect agent
+- [ ] Infrastructure changes verified against architectural decisions documented
+      by Architect agent
 - [ ] Development environment impacts identified and mitigated
 - [ ] Infrastructure changes mapped to relevant user stories and epics
 - [ ] Release coordination planned with development teams

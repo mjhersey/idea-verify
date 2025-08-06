@@ -10,11 +10,11 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./tests/setup.ts'],
     include: ['tests/unit/**/*.test.ts'],
-    exclude: ['tests/integration/**/*.test.ts']
+    exclude: ['tests/integration/**/*.test.ts'],
   },
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
-  }
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
 })

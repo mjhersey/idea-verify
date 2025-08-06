@@ -2,23 +2,26 @@
 
 ## Purpose
 
-This task maintains the integrity and completeness of the `docs/index.md` file by scanning all documentation files and ensuring they are properly indexed with descriptions. It handles both root-level documents and documents within subfolders, organizing them hierarchically.
+This task maintains the integrity and completeness of the `docs/index.md` file
+by scanning all documentation files and ensuring they are properly indexed with
+descriptions. It handles both root-level documents and documents within
+subfolders, organizing them hierarchically.
 
 ## Task Instructions
 
-You are now operating as a Documentation Indexer. Your goal is to ensure all documentation files are properly cataloged in the central index with proper organization for subfolders.
+You are now operating as a Documentation Indexer. Your goal is to ensure all
+documentation files are properly cataloged in the central index with proper
+organization for subfolders.
 
 ### Required Steps
 
 1. First, locate and scan:
-
    - The `docs/` directory and all subdirectories
    - The existing `docs/index.md` file (create if absent)
    - All markdown (`.md`) and text (`.txt`) files in the documentation structure
    - Note the folder structure for hierarchical organization
 
 2. For the existing `docs/index.md`:
-
    - Parse current entries
    - Note existing file references and descriptions
    - Identify any broken links or missing files
@@ -26,7 +29,6 @@ You are now operating as a Documentation Indexer. Your goal is to ensure all doc
    - Preserve existing folder sections
 
 3. For each documentation file found:
-
    - Extract the title (from first heading or filename)
    - Generate a brief description by analyzing the content
    - Create a relative markdown link to the file
@@ -35,7 +37,6 @@ You are now operating as a Documentation Indexer. Your goal is to ensure all doc
    - If missing or outdated, prepare an update
 
 4. For any missing or non-existent files found in index:
-
    - Present a list of all entries that reference non-existent files
    - For each entry:
      - Show the full entry details (title, path, description)
@@ -88,7 +89,6 @@ Documents within the `another-folder/` directory:
 ### [Nested Document](./another-folder/document.md)
 
 Description of nested document.
-
 ```
 
 ### Index Entry Format
@@ -136,11 +136,8 @@ For each file referenced in the index but not found in the filesystem:
 1. Present the entry:
 
    ```markdown
-   Missing file detected:
-   Title: [Document Title]
-   Path: relative/path/to/file.md
-   Description: Existing description
-   Section: [Root Documents | Folder Name]
+   Missing file detected: Title: [Document Title] Path: relative/path/to/file.md
+   Description: Existing description Section: [Root Documents | Folder Name]
 
    Options:
 
@@ -156,15 +153,18 @@ For each file referenced in the index but not found in the filesystem:
 
 ### Special Cases
 
-1. **Sharded Documents**: If a folder contains an `index.md` file, treat it as a sharded document:
-
+1. **Sharded Documents**: If a folder contains an `index.md` file, treat it as a
+   sharded document:
    - Use the folder's `index.md` title as the section title
    - List the folder's documents as subsections
    - Note in the description that this is a multi-part document
 
-2. **README files**: Convert `README.md` to more descriptive titles based on content
+2. **README files**: Convert `README.md` to more descriptive titles based on
+   content
 
-3. **Nested Subfolders**: For deeply nested folders, maintain the hierarchy but limit to 2 levels in the main index. Deeper structures should have their own index files.
+3. **Nested Subfolders**: For deeply nested folders, maintain the hierarchy but
+   limit to 2 levels in the main index. Deeper structures should have their own
+   index files.
 
 ## Required Input
 
@@ -173,7 +173,9 @@ Please provide:
 1. Location of the `docs/` directory (default: `./docs`)
 2. Confirmation of write access to `docs/index.md`
 3. Any specific categorization preferences
-4. Any files or directories to exclude from indexing (e.g., `.git`, `node_modules`)
+4. Any files or directories to exclude from indexing (e.g., `.git`,
+   `node_modules`)
 5. Whether to include hidden files/folders (starting with `.`)
 
-Would you like to proceed with documentation indexing? Please provide the required input above.
+Would you like to proceed with documentation indexing? Please provide the
+required input above.

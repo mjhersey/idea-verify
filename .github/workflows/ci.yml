@@ -177,7 +177,7 @@ jobs:
           NODE_ENV: test
           DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
           REDIS_URL: redis://localhost:6379
-        continue-on-error: true  # Allow failure in development
+        continue-on-error: true # Allow failure in development
 
   # Build Verification
   build:
@@ -250,7 +250,7 @@ jobs:
         run: npm run test:e2e --workspace=packages/web --if-present
         env:
           NODE_ENV: test
-        continue-on-error: true  # Allow failure in development
+        continue-on-error: true # Allow failure in development
 
   # Final validation
   validate:
@@ -270,11 +270,11 @@ jobs:
             echo "Core validation jobs failed"
             exit 1
           fi
-          
+
           # Optional jobs that can be skipped in development
           integration_result="${{ needs.integration.result }}"
           e2e_result="${{ needs.e2e.result }}"
-          
+
           if [[ "$integration_result" == "failure" && "$e2e_result" == "failure" ]]; then
             echo "Warning: Integration and E2E tests failed - this may be expected in development environment"
             echo "Core validations (security, lint, typecheck, test, build) passed successfully"

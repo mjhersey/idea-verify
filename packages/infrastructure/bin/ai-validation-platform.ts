@@ -1,27 +1,27 @@
 #!/usr/bin/env node
-import 'source-map-support/register';
-import * as cdk from 'aws-cdk-lib';
-import { AiValidationPlatformStack } from '../lib/ai-validation-platform-stack';
-import { EcsStack } from '../lib/ecs-stack';
-import { MonitoringStack } from '../lib/monitoring-stack';
-import { ParameterStoreStack } from '../lib/parameter-store-stack';
-import { SecurityStack } from '../lib/security-stack';
-import { CostOptimizationStack } from '../lib/cost-optimization-stack';
-import { createStandardTags, DEFAULT_STACK_PROPS } from '../lib/common/base-stack-props';
+import 'source-map-support/register'
+import * as cdk from 'aws-cdk-lib'
+import { AiValidationPlatformStack } from '../lib/ai-validation-platform-stack'
+import { EcsStack } from '../lib/ecs-stack'
+import { MonitoringStack } from '../lib/monitoring-stack'
+import { ParameterStoreStack } from '../lib/parameter-store-stack'
+import { SecurityStack } from '../lib/security-stack'
+import { CostOptimizationStack } from '../lib/cost-optimization-stack'
+import { createStandardTags, DEFAULT_STACK_PROPS } from '../lib/common/base-stack-props'
 
-const app = new cdk.App();
+const app = new cdk.App()
 
 // Environment configuration
-const account = process.env.CDK_DEFAULT_ACCOUNT;
-const region = process.env.CDK_DEFAULT_REGION || 'us-east-1';
+const account = process.env.CDK_DEFAULT_ACCOUNT
+const region = process.env.CDK_DEFAULT_REGION || 'us-east-1'
 
 // Development environment parameter store stack
 const devParameterStack = new ParameterStoreStack(app, 'AiValidationParametersDev', {
   env: { account, region },
   environment: 'dev',
   projectName: DEFAULT_STACK_PROPS.projectName,
-  tags: createStandardTags({ environment: 'dev' })
-});
+  tags: createStandardTags({ environment: 'dev' }),
+})
 
 // Development environment infrastructure stack
 const devInfraStack = new AiValidationPlatformStack(app, 'AiValidationPlatformDev', {
@@ -30,11 +30,11 @@ const devInfraStack = new AiValidationPlatformStack(app, 'AiValidationPlatformDe
   tags: {
     Project: 'AI-Validation-Platform',
     Environment: 'dev',
-    Owner: 'DevTeam'
-  }
-});
+    Owner: 'DevTeam',
+  },
+})
 
-devInfraStack.addDependency(devParameterStack);
+devInfraStack.addDependency(devParameterStack)
 
 // Development environment ECS stack
 const devEcsStack = new EcsStack(app, 'AiValidationEcsDev', {
@@ -44,9 +44,9 @@ const devEcsStack = new EcsStack(app, 'AiValidationEcsDev', {
   tags: {
     Project: 'AI-Validation-Platform',
     Environment: 'dev',
-    Owner: 'DevTeam'
-  }
-});
+    Owner: 'DevTeam',
+  },
+})
 
 // Development environment monitoring stack
 const devMonitoringStack = new MonitoringStack(app, 'AiValidationMonitoringDev', {
@@ -56,9 +56,9 @@ const devMonitoringStack = new MonitoringStack(app, 'AiValidationMonitoringDev',
   tags: {
     Project: 'AI-Validation-Platform',
     Environment: 'dev',
-    Owner: 'DevTeam'
-  }
-});
+    Owner: 'DevTeam',
+  },
+})
 
 // Development environment security stack
 new SecurityStack(app, 'AiValidationSecurityDev', {
@@ -69,9 +69,9 @@ new SecurityStack(app, 'AiValidationSecurityDev', {
   tags: {
     Project: 'AI-Validation-Platform',
     Environment: 'dev',
-    Owner: 'DevTeam'
-  }
-});
+    Owner: 'DevTeam',
+  },
+})
 
 // Development environment cost optimization stack
 new CostOptimizationStack(app, 'AiValidationCostOptimizationDev', {
@@ -86,9 +86,9 @@ new CostOptimizationStack(app, 'AiValidationCostOptimizationDev', {
   tags: {
     Project: 'AI-Validation-Platform',
     Environment: 'dev',
-    Owner: 'DevTeam'
-  }
-});
+    Owner: 'DevTeam',
+  },
+})
 
 // Staging environment parameter store stack
 const stagingParameterStack = new ParameterStoreStack(app, 'AiValidationParametersStaging', {
@@ -97,9 +97,9 @@ const stagingParameterStack = new ParameterStoreStack(app, 'AiValidationParamete
   tags: {
     Project: 'AI-Validation-Platform',
     Environment: 'staging',
-    Owner: 'DevTeam'
-  }
-});
+    Owner: 'DevTeam',
+  },
+})
 
 // Staging environment infrastructure stack (for future use)
 const stagingInfraStack = new AiValidationPlatformStack(app, 'AiValidationPlatformStaging', {
@@ -108,11 +108,11 @@ const stagingInfraStack = new AiValidationPlatformStack(app, 'AiValidationPlatfo
   tags: {
     Project: 'AI-Validation-Platform',
     Environment: 'staging',
-    Owner: 'DevTeam'
-  }
-});
+    Owner: 'DevTeam',
+  },
+})
 
-stagingInfraStack.addDependency(stagingParameterStack);
+stagingInfraStack.addDependency(stagingParameterStack)
 
 // Staging environment ECS stack
 const stagingEcsStack = new EcsStack(app, 'AiValidationEcsStaging', {
@@ -122,9 +122,9 @@ const stagingEcsStack = new EcsStack(app, 'AiValidationEcsStaging', {
   tags: {
     Project: 'AI-Validation-Platform',
     Environment: 'staging',
-    Owner: 'DevTeam'
-  }
-});
+    Owner: 'DevTeam',
+  },
+})
 
 // Staging environment security stack
 new SecurityStack(app, 'AiValidationSecurityStaging', {
@@ -135,9 +135,9 @@ new SecurityStack(app, 'AiValidationSecurityStaging', {
   tags: {
     Project: 'AI-Validation-Platform',
     Environment: 'staging',
-    Owner: 'DevTeam'
-  }
-});
+    Owner: 'DevTeam',
+  },
+})
 
 // Staging environment cost optimization stack
 new CostOptimizationStack(app, 'AiValidationCostOptimizationStaging', {
@@ -152,9 +152,9 @@ new CostOptimizationStack(app, 'AiValidationCostOptimizationStaging', {
   tags: {
     Project: 'AI-Validation-Platform',
     Environment: 'staging',
-    Owner: 'DevTeam'
-  }
-});
+    Owner: 'DevTeam',
+  },
+})
 
 // Production environment parameter store stack
 const prodParameterStack = new ParameterStoreStack(app, 'AiValidationParametersProd', {
@@ -163,9 +163,9 @@ const prodParameterStack = new ParameterStoreStack(app, 'AiValidationParametersP
   tags: {
     Project: 'AI-Validation-Platform',
     Environment: 'prod',
-    Owner: 'DevTeam'
-  }
-});
+    Owner: 'DevTeam',
+  },
+})
 
 // Production environment infrastructure stack (for future use)
 const prodInfraStack = new AiValidationPlatformStack(app, 'AiValidationPlatformProd', {
@@ -174,11 +174,11 @@ const prodInfraStack = new AiValidationPlatformStack(app, 'AiValidationPlatformP
   tags: {
     Project: 'AI-Validation-Platform',
     Environment: 'prod',
-    Owner: 'DevTeam'
-  }
-});
+    Owner: 'DevTeam',
+  },
+})
 
-prodInfraStack.addDependency(prodParameterStack);
+prodInfraStack.addDependency(prodParameterStack)
 
 // Production environment ECS stack
 const prodEcsStack = new EcsStack(app, 'AiValidationEcsProd', {
@@ -188,9 +188,9 @@ const prodEcsStack = new EcsStack(app, 'AiValidationEcsProd', {
   tags: {
     Project: 'AI-Validation-Platform',
     Environment: 'prod',
-    Owner: 'DevTeam'
-  }
-});
+    Owner: 'DevTeam',
+  },
+})
 
 // Production environment security stack
 new SecurityStack(app, 'AiValidationSecurityProd', {
@@ -201,9 +201,9 @@ new SecurityStack(app, 'AiValidationSecurityProd', {
   tags: {
     Project: 'AI-Validation-Platform',
     Environment: 'prod',
-    Owner: 'DevTeam'
-  }
-});
+    Owner: 'DevTeam',
+  },
+})
 
 // Production environment cost optimization stack
 new CostOptimizationStack(app, 'AiValidationCostOptimizationProd', {
@@ -218,6 +218,6 @@ new CostOptimizationStack(app, 'AiValidationCostOptimizationProd', {
   tags: {
     Project: 'AI-Validation-Platform',
     Environment: 'prod',
-    Owner: 'DevTeam'
-  }
-});
+    Owner: 'DevTeam',
+  },
+})

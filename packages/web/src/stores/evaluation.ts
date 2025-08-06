@@ -22,11 +22,11 @@ export const useEvaluationStore = defineStore('evaluation', () => {
   const isLoading = ref(false)
 
   const totalEvaluations = computed(() => evaluations.value.length)
-  const completedEvaluations = computed(() => 
-    evaluations.value.filter(e => e.status === 'completed').length
+  const completedEvaluations = computed(
+    () => evaluations.value.filter(e => e.status === 'completed').length
   )
-  const pendingEvaluations = computed(() => 
-    evaluations.value.filter(e => e.status === 'analyzing' || e.status === 'pending').length
+  const pendingEvaluations = computed(
+    () => evaluations.value.filter(e => e.status === 'analyzing' || e.status === 'pending').length
   )
 
   const createEvaluation = (description: string): BusinessIdea => {
@@ -34,12 +34,12 @@ export const useEvaluationStore = defineStore('evaluation', () => {
       id: crypto.randomUUID(),
       description,
       status: 'pending',
-      createdAt: new Date()
+      createdAt: new Date(),
     }
-    
+
     evaluations.value.push(evaluation)
     currentEvaluation.value = evaluation
-    
+
     return evaluation
   }
 
@@ -67,6 +67,6 @@ export const useEvaluationStore = defineStore('evaluation', () => {
     pendingEvaluations,
     createEvaluation,
     updateEvaluationStatus,
-    updateEvaluationResults
+    updateEvaluationResults,
   }
 })

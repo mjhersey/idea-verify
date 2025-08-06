@@ -82,19 +82,19 @@ jobs:
             COMPONENTS="all"
             SHOULD_DEPLOY="false"
           fi
-          
+
           # Determine if approval is required
           if [[ "$ENV" == "prod" ]]; then
             REQUIRES_APPROVAL="true"
           else
             REQUIRES_APPROVAL="false"
           fi
-          
+
           echo "environment=$ENV" >> $GITHUB_OUTPUT
           echo "components=$COMPONENTS" >> $GITHUB_OUTPUT
           echo "should_deploy=$SHOULD_DEPLOY" >> $GITHUB_OUTPUT
           echo "requires_approval=$REQUIRES_APPROVAL" >> $GITHUB_OUTPUT
-          
+
           echo "🎯 Environment: $ENV"
           echo "🔧 Components: $COMPONENTS"
           echo "🚀 Should Deploy: $SHOULD_DEPLOY"
@@ -136,14 +136,14 @@ jobs:
           echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
           sudo apt-get update
           sudo apt-get install trivy
-          
+
           # Install Checkov for infrastructure as code scanning
           pip install checkov
 
       - name: Scan Docker images for vulnerabilities
         run: |
           echo "🔍 Scanning Docker images for vulnerabilities..."
-          
+
           # Scan API Dockerfile
           if [ -f "packages/api/Dockerfile" ]; then
             echo "Scanning API Dockerfile..."
@@ -152,7 +152,7 @@ jobs:
               exit 1
             }
           fi
-          
+
           # Scan Orchestrator Dockerfile
           if [ -f "packages/orchestrator/Dockerfile" ]; then
             echo "Scanning Orchestrator Dockerfile..."
@@ -161,7 +161,7 @@ jobs:
               exit 1
             }
           fi
-          
+
           # Scan Web Dockerfile
           if [ -f "packages/web/Dockerfile" ]; then
             echo "Scanning Web Dockerfile..."
@@ -175,7 +175,7 @@ jobs:
         working-directory: packages/infrastructure
         run: |
           echo "🔍 Scanning Infrastructure as Code for security issues..."
-          
+
           # Scan CDK TypeScript files with Checkov
           checkov -d lib/ --framework cloudformation --output cli --exit-code-skip-results 1 \
             --check CKV_AWS_20,CKV_AWS_23,CKV_AWS_61,CKV_AWS_79,CKV_AWS_144,CKV_AWS_149 \
@@ -183,20 +183,20 @@ jobs:
             echo "⚠️ Critical security issues found in infrastructure code"
             exit 1
           }
-          
+
           echo "✅ Infrastructure security scan completed"
 
       - name: Scan dependencies for vulnerabilities
         run: |
           echo "🔍 Scanning dependencies for vulnerabilities..."
-          
+
           # Scan package.json files
           npm audit --audit-level=high --production || {
             echo "⚠️ High or critical vulnerabilities found in dependencies"
             echo "Run 'npm audit fix' to resolve issues"
             exit 1
           }
-          
+
           # Scan infrastructure dependencies
           cd packages/infrastructure
           npm audit --audit-level=high --production || {
@@ -207,14 +207,14 @@ jobs:
       - name: Check for secrets in code
         run: |
           echo "🔍 Scanning for secrets in codebase..."
-          
+
           # Simple secret scanning (in production, use dedicated tools like GitLeaks or TruffleHog)
           if grep -r -i --include="*.ts" --include="*.js" --include="*.json" --include="*.yml" --include="*.yaml" \
             -E "(password|secret|key|token|credential|api_key|private_key)" . | grep -v -E "(test|example|placeholder|template|description|name|type)"; then
             echo "⚠️ Potential secrets found in codebase. Please review and remove sensitive data."
             exit 1
           fi
-          
+
           echo "✅ No obvious secrets found in codebase"
 
       - name: Generate security report
@@ -304,14 +304,14 @@ jobs:
         working-directory: packages/infrastructure
         run: |
           STACK_NAME="AiValidationParameters${{ needs.determine-deployment.outputs.environment == 'prod' && 'Prod' || (needs.determine-deployment.outputs.environment == 'staging' && 'Staging' || 'Dev') }}"
-          
+
           echo "🚀 Deploying parameter store: $STACK_NAME"
-          
+
           npx cdk deploy $STACK_NAME \
             --context environment=${{ needs.determine-deployment.outputs.environment }} \
             --require-approval never \
             --outputs-file parameters-outputs.json
-          
+
           echo "✅ Parameter store deployment completed"
 
       - name: Upload deployment outputs
@@ -351,14 +351,14 @@ jobs:
         working-directory: packages/infrastructure
         run: |
           STACK_NAME="AiValidationPlatform${{ needs.determine-deployment.outputs.environment == 'prod' && 'Prod' || (needs.determine-deployment.outputs.environment == 'staging' && 'Staging' || 'Dev') }}"
-          
+
           echo "🚀 Deploying core infrastructure: $STACK_NAME"
-          
+
           npx cdk deploy $STACK_NAME \
             --context environment=${{ needs.determine-deployment.outputs.environment }} \
             --require-approval never \
             --outputs-file infrastructure-outputs.json
-          
+
           echo "✅ Core infrastructure deployment completed"
 
       - name: Upload deployment outputs
@@ -398,14 +398,14 @@ jobs:
         working-directory: packages/infrastructure
         run: |
           STACK_NAME="AiValidationEcs${{ needs.determine-deployment.outputs.environment == 'prod' && 'Prod' || (needs.determine-deployment.outputs.environment == 'staging' && 'Staging' || 'Dev') }}"
-          
+
           echo "🚀 Deploying ECS services: $STACK_NAME"
-          
+
           npx cdk deploy $STACK_NAME \
             --context environment=${{ needs.determine-deployment.outputs.environment }} \
             --require-approval never \
             --outputs-file ecs-outputs.json
-          
+
           echo "✅ ECS services deployment completed"
 
       - name: Upload deployment outputs
@@ -445,14 +445,14 @@ jobs:
         working-directory: packages/infrastructure
         run: |
           STACK_NAME="AiValidationMonitoring${{ needs.determine-deployment.outputs.environment == 'prod' && 'Prod' || (needs.determine-deployment.outputs.environment == 'staging' && 'Staging' || 'Dev') }}"
-          
+
           echo "🚀 Deploying monitoring: $STACK_NAME"
-          
+
           npx cdk deploy $STACK_NAME \
             --context environment=${{ needs.determine-deployment.outputs.environment }} \
             --require-approval never \
             --outputs-file monitoring-outputs.json
-          
+
           echo "✅ Monitoring deployment completed"
 
       - name: Upload deployment outputs
@@ -492,14 +492,14 @@ jobs:
         working-directory: packages/infrastructure
         run: |
           STACK_NAME="AiValidationSecurity${{ needs.determine-deployment.outputs.environment == 'prod' && 'Prod' || (needs.determine-deployment.outputs.environment == 'staging' && 'Staging' || 'Dev') }}"
-          
+
           echo "🚀 Deploying security configuration: $STACK_NAME"
-          
+
           npx cdk deploy $STACK_NAME \
             --context environment=${{ needs.determine-deployment.outputs.environment }} \
             --require-approval never \
             --outputs-file security-outputs.json
-          
+
           echo "✅ Security configuration deployment completed"
 
       - name: Upload deployment outputs
@@ -540,7 +540,7 @@ jobs:
           # Get ALB endpoint from deployment outputs
           # For now, use a placeholder
           BASE_URL="https://${{ needs.determine-deployment.outputs.environment }}.aivalidation.com"
-          
+
           node scripts/validate-environment.js \
             ${{ needs.determine-deployment.outputs.environment }} \
             $BASE_URL
@@ -549,7 +549,7 @@ jobs:
         if: needs.determine-deployment.outputs.environment != 'prod'
         env:
           TEST_ENVIRONMENT: ${{ needs.determine-deployment.outputs.environment }}
-          TEST_BASE_URL: "https://${{ needs.determine-deployment.outputs.environment }}.aivalidation.com"
+          TEST_BASE_URL: 'https://${{ needs.determine-deployment.outputs.environment }}.aivalidation.com'
         run: |
           # Run basic smoke tests
           npm run test:integration:api
@@ -557,15 +557,16 @@ jobs:
   deployment-notification:
     name: Send Deployment Notification
     runs-on: ubuntu-latest
-    needs: [
-      determine-deployment,
-      deploy-parameters,
-      deploy-infrastructure,
-      deploy-ecs,
-      deploy-monitoring,
-      deploy-security,
-      post-deployment-tests
-    ]
+    needs:
+      [
+        determine-deployment,
+        deploy-parameters,
+        deploy-infrastructure,
+        deploy-ecs,
+        deploy-monitoring,
+        deploy-security,
+        post-deployment-tests,
+      ]
     if: always() && needs.determine-deployment.outputs.should_deploy == 'true'
     steps:
       - name: Determine deployment status
@@ -578,7 +579,7 @@ jobs:
           MONITORING_STATUS="${{ needs.deploy-monitoring.result }}"
           SECURITY_STATUS="${{ needs.deploy-security.result }}"
           TESTS_STATUS="${{ needs.post-deployment-tests.result }}"
-          
+
           if [[ "$PARAMS_STATUS" == "success" && "$INFRA_STATUS" == "success" && "$ECS_STATUS" == "success" && "$MONITORING_STATUS" == "success" && "$SECURITY_STATUS" == "success" ]]; then
             if [[ "$TESTS_STATUS" == "success" || "$TESTS_STATUS" == "skipped" ]]; then
               echo "status=success" >> $GITHUB_OUTPUT

@@ -2,56 +2,56 @@
  * Authentication service for frontend API interactions
  */
 
-import { axiosInstance } from './api.js';
+import { axiosInstance } from './api.js'
 
 export interface User {
-  id: string;
-  email: string;
-  name: string;
-  created_at: string;
-  updated_at: string;
+  id: string
+  email: string
+  name: string
+  created_at: string
+  updated_at: string
 }
 
 export interface TokenPair {
-  accessToken: string;
-  refreshToken: string;
+  accessToken: string
+  refreshToken: string
 }
 
 export interface AuthResponse {
-  message: string;
-  user: User;
-  tokens: TokenPair;
+  message: string
+  user: User
+  tokens: TokenPair
 }
 
 export interface RegistrationData {
-  email: string;
-  password: string;
-  name: string;
+  email: string
+  password: string
+  name: string
 }
 
 export interface LoginData {
-  email: string;
-  password: string;
+  email: string
+  password: string
 }
 
 export interface ProfileUpdateData {
-  name?: string;
-  email?: string;
+  name?: string
+  email?: string
 }
 
 export class AuthService {
-  private baseUrl = '/api/auth';
+  private baseUrl = '/api/auth'
 
   /**
    * Register a new user account
    */
   async register(data: RegistrationData): Promise<AuthResponse> {
     try {
-      const response = await axiosInstance.post(`${this.baseUrl}/register`, data);
-      return response.data;
+      const response = await axiosInstance.post(`${this.baseUrl}/register`, data)
+      return response.data
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { error?: string } } };
-      throw new Error(err.response?.data?.error || 'Registration failed');
+      const err = error as { response?: { data?: { error?: string } } }
+      throw new Error(err.response?.data?.error || 'Registration failed')
     }
   }
 
@@ -60,11 +60,11 @@ export class AuthService {
    */
   async login(data: LoginData): Promise<AuthResponse> {
     try {
-      const response = await axiosInstance.post(`${this.baseUrl}/login`, data);
-      return response.data;
+      const response = await axiosInstance.post(`${this.baseUrl}/login`, data)
+      return response.data
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { error?: string } } };
-      throw new Error(err.response?.data?.error || 'Login failed');
+      const err = error as { response?: { data?: { error?: string } } }
+      throw new Error(err.response?.data?.error || 'Login failed')
     }
   }
 
@@ -74,12 +74,12 @@ export class AuthService {
   async refreshToken(refreshToken: string): Promise<{ tokens: TokenPair }> {
     try {
       const response = await axiosInstance.post(`${this.baseUrl}/refresh`, {
-        refreshToken
-      });
-      return response.data;
+        refreshToken,
+      })
+      return response.data
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { error?: string } } };
-      throw new Error(err.response?.data?.error || 'Token refresh failed');
+      const err = error as { response?: { data?: { error?: string } } }
+      throw new Error(err.response?.data?.error || 'Token refresh failed')
     }
   }
 
@@ -88,11 +88,11 @@ export class AuthService {
    */
   async getProfile(): Promise<{ user: User }> {
     try {
-      const response = await axiosInstance.get(`${this.baseUrl}/profile`);
-      return response.data;
+      const response = await axiosInstance.get(`${this.baseUrl}/profile`)
+      return response.data
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { error?: string } } };
-      throw new Error(err.response?.data?.error || 'Failed to fetch profile');
+      const err = error as { response?: { data?: { error?: string } } }
+      throw new Error(err.response?.data?.error || 'Failed to fetch profile')
     }
   }
 
@@ -101,11 +101,11 @@ export class AuthService {
    */
   async updateProfile(data: ProfileUpdateData): Promise<{ user: User }> {
     try {
-      const response = await axiosInstance.put(`${this.baseUrl}/profile`, data);
-      return response.data;
+      const response = await axiosInstance.put(`${this.baseUrl}/profile`, data)
+      return response.data
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { error?: string } } };
-      throw new Error(err.response?.data?.error || 'Failed to update profile');
+      const err = error as { response?: { data?: { error?: string } } }
+      throw new Error(err.response?.data?.error || 'Failed to update profile')
     }
   }
 
@@ -115,13 +115,13 @@ export class AuthService {
   async logout(refreshToken?: string): Promise<void> {
     try {
       await axiosInstance.post(`${this.baseUrl}/logout`, {
-        refreshToken
-      });
+        refreshToken,
+      })
     } catch (error: unknown) {
       // Log error but don't throw - logout should succeed even if server call fails
-      const err = error as { response?: { data?: { error?: string } }; message?: string };
+      const err = error as { response?: { data?: { error?: string } }; message?: string }
       // eslint-disable-next-line no-console
-      console.warn('Logout server call failed:', err.response?.data?.error || err.message);
+      console.warn('Logout server call failed:', err.response?.data?.error || err.message)
     }
   }
 
@@ -132,11 +132,11 @@ export class AuthService {
     try {
       await axiosInstance.post('/api/auth/store-tokens', {
         accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken
-      });
+        refreshToken: tokens.refreshToken,
+      })
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { error?: string } }; message?: string };
-      throw new Error(err.response?.data?.error || err.message || 'Failed to store tokens securely');
+      const err = error as { response?: { data?: { error?: string } }; message?: string }
+      throw new Error(err.response?.data?.error || err.message || 'Failed to store tokens securely')
     }
   }
 
@@ -145,10 +145,10 @@ export class AuthService {
    */
   async getAccessToken(): Promise<string | null> {
     try {
-      const response = await axiosInstance.get('/api/auth/access-token');
-      return response.data?.accessToken || null;
+      const response = await axiosInstance.get('/api/auth/access-token')
+      return response.data?.accessToken || null
     } catch {
-      return null;
+      return null
     }
   }
 
@@ -157,10 +157,10 @@ export class AuthService {
    */
   async getRefreshToken(): Promise<string | null> {
     try {
-      const response = await axiosInstance.get('/api/auth/refresh-token');
-      return response.data?.refreshToken || null;
+      const response = await axiosInstance.get('/api/auth/refresh-token')
+      return response.data?.refreshToken || null
     } catch {
-      return null;
+      return null
     }
   }
 
@@ -169,12 +169,12 @@ export class AuthService {
    */
   async clearTokens(): Promise<void> {
     try {
-      await axiosInstance.post('/api/auth/clear-tokens');
+      await axiosInstance.post('/api/auth/clear-tokens')
     } catch (error: unknown) {
       // Log error but don't throw - clearing should succeed even if server call fails
-      const err = error as { response?: { data?: { error?: string } }; message?: string };
+      const err = error as { response?: { data?: { error?: string } }; message?: string }
       // eslint-disable-next-line no-console
-      console.warn('Clear tokens server call failed:', err.response?.data?.error || err.message);
+      console.warn('Clear tokens server call failed:', err.response?.data?.error || err.message)
     }
   }
 
@@ -183,11 +183,11 @@ export class AuthService {
    */
   async hasTokens(): Promise<boolean> {
     try {
-      const accessToken = await this.getAccessToken();
-      const refreshToken = await this.getRefreshToken();
-      return !!(accessToken && refreshToken);
+      const accessToken = await this.getAccessToken()
+      const refreshToken = await this.getRefreshToken()
+      return !!(accessToken && refreshToken)
     } catch {
-      return false;
+      return false
     }
   }
 
@@ -195,16 +195,16 @@ export class AuthService {
    * Set authorization header for axios requests
    */
   setAuthHeader(token: string): void {
-    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`
   }
 
   /**
    * Clear authorization header
    */
   clearAuthHeader(): void {
-    delete axiosInstance.defaults.headers.common['Authorization'];
+    delete axiosInstance.defaults.headers.common['Authorization']
   }
 }
 
 // Export singleton instance
-export const authService = new AuthService();
+export const authService = new AuthService()

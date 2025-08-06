@@ -2,41 +2,41 @@
  * Database Manager - Handles PostgreSQL connections and transactions
  */
 
-import { Pool, PoolClient, PoolConfig } from 'pg';
-import { getEnvironmentConfig } from '@ai-validation/shared';
+import { Pool, PoolClient, PoolConfig } from 'pg'
+import { getEnvironmentConfig } from '@ai-validation/shared'
 
 export interface DatabaseConfig {
-  host: string;
-  port: number;
-  database: string;
-  username: string;
-  password: string;
-  ssl?: boolean;
-  maxConnections?: number;
-  idleTimeoutMillis?: number;
-  connectionTimeoutMillis?: number;
+  host: string
+  port: number
+  database: string
+  username: string
+  password: string
+  ssl?: boolean
+  maxConnections?: number
+  idleTimeoutMillis?: number
+  connectionTimeoutMillis?: number
 }
 
 export class DatabaseManager {
-  private static instance: DatabaseManager;
-  private pool: Pool | null = null;
-  private config: DatabaseConfig;
+  private static instance: DatabaseManager
+  private pool: Pool | null = null
+  private config: DatabaseConfig
 
   private constructor(config?: Partial<DatabaseConfig>) {
-    this.config = this.buildConfig(config);
+    this.config = this.buildConfig(config)
   }
 
   static getInstance(config?: Partial<DatabaseConfig>): DatabaseManager {
     if (!DatabaseManager.instance) {
-      DatabaseManager.instance = new DatabaseManager(config);
+      DatabaseManager.instance = new DatabaseManager(config)
     }
-    return DatabaseManager.instance;
+    return DatabaseManager.instance
   }
 
   private buildConfig(customConfig?: Partial<DatabaseConfig>): DatabaseConfig {
     // Get environment configuration
-    const envConfig = getEnvironmentConfig();
-    
+    const envConfig = getEnvironmentConfig()
+
     // Default configuration for development
     const defaultConfig: DatabaseConfig = {
       host: process.env.DB_HOST || 'localhost',
@@ -47,19 +47,19 @@ export class DatabaseManager {
       ssl: process.env.NODE_ENV === 'production',
       maxConnections: parseInt(process.env.DB_MAX_CONNECTIONS || '20'),
       idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT || '30000'),
-      connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT || '5000')
-    };
+      connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT || '5000'),
+    }
 
     return {
       ...defaultConfig,
-      ...customConfig
-    };
+      ...customConfig,
+    }
   }
 
   async initialize(): Promise<void> {
     if (this.pool) {
-      console.log('Database pool already initialized');
-      return;
+      console.log('Database pool already initialized')
+      return
     }
 
     const poolConfig: PoolConfig = {
@@ -75,125 +75,125 @@ export class DatabaseManager {
       // Application-specific settings
       application_name: 'ai-validation-orchestrator',
       statement_timeout: 30000, // 30 seconds
-      query_timeout: 30000
-    };
+      query_timeout: 30000,
+    }
 
-    this.pool = new Pool(poolConfig);
+    this.pool = new Pool(poolConfig)
 
     // Handle pool events
     this.pool.on('error', (err, client) => {
-      console.error('Unexpected error on idle client', err);
-    });
+      console.error('Unexpected error on idle client', err)
+    })
 
-    this.pool.on('connect', (client) => {
-      console.log('Database client connected');
-    });
+    this.pool.on('connect', client => {
+      console.log('Database client connected')
+    })
 
-    this.pool.on('remove', (client) => {
-      console.log('Database client disconnected');
-    });
+    this.pool.on('remove', client => {
+      console.log('Database client disconnected')
+    })
 
     // Test the connection
     try {
-      const client = await this.pool.connect();
-      await client.query('SELECT NOW()');
-      client.release();
-      console.log('Database connected successfully');
+      const client = await this.pool.connect()
+      await client.query('SELECT NOW()')
+      client.release()
+      console.log('Database connected successfully')
     } catch (error) {
-      console.error('Failed to connect to database:', error);
-      throw error;
+      console.error('Failed to connect to database:', error)
+      throw error
     }
   }
 
   async getClient(): Promise<PoolClient> {
     if (!this.pool) {
-      throw new Error('Database not initialized. Call initialize() first.');
+      throw new Error('Database not initialized. Call initialize() first.')
     }
-    return this.pool.connect();
+    return this.pool.connect()
   }
 
   async query<T = any>(text: string, params?: any[]): Promise<T[]> {
     if (!this.pool) {
-      throw new Error('Database not initialized. Call initialize() first.');
+      throw new Error('Database not initialized. Call initialize() first.')
     }
 
-    const start = Date.now();
+    const start = Date.now()
     try {
-      const result = await this.pool.query(text, params);
-      const duration = Date.now() - start;
-      
+      const result = await this.pool.query(text, params)
+      const duration = Date.now() - start
+
       console.log('Executed query', {
         text: text.substring(0, 100) + (text.length > 100 ? '...' : ''),
         duration: `${duration}ms`,
-        rows: result.rowCount
-      });
-      
-      return result.rows;
+        rows: result.rowCount,
+      })
+
+      return result.rows
     } catch (error) {
       console.error('Database query error:', {
         text: text.substring(0, 100) + (text.length > 100 ? '...' : ''),
-        error: error instanceof Error ? error.message : 'Unknown error'
-      });
-      throw error;
+        error: error instanceof Error ? error.message : 'Unknown error',
+      })
+      throw error
     }
   }
 
   async transaction<T>(callback: (client: PoolClient) => Promise<T>): Promise<T> {
-    const client = await this.getClient();
-    
+    const client = await this.getClient()
+
     try {
-      await client.query('BEGIN');
-      const result = await callback(client);
-      await client.query('COMMIT');
-      return result;
+      await client.query('BEGIN')
+      const result = await callback(client)
+      await client.query('COMMIT')
+      return result
     } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
+      await client.query('ROLLBACK')
+      throw error
     } finally {
-      client.release();
+      client.release()
     }
   }
 
   async healthCheck(): Promise<boolean> {
     try {
-      await this.query('SELECT 1');
-      return true;
+      await this.query('SELECT 1')
+      return true
     } catch (error) {
-      console.error('Database health check failed:', error);
-      return false;
+      console.error('Database health check failed:', error)
+      return false
     }
   }
 
   getStats(): {
-    totalCount: number;
-    idleCount: number;
-    waitingCount: number;
+    totalCount: number
+    idleCount: number
+    waitingCount: number
   } {
     if (!this.pool) {
-      return { totalCount: 0, idleCount: 0, waitingCount: 0 };
+      return { totalCount: 0, idleCount: 0, waitingCount: 0 }
     }
 
     return {
       totalCount: this.pool.totalCount,
       idleCount: this.pool.idleCount,
-      waitingCount: this.pool.waitingCount
-    };
+      waitingCount: this.pool.waitingCount,
+    }
   }
 
   async shutdown(): Promise<void> {
     if (this.pool) {
-      console.log('Shutting down database connections...');
-      await this.pool.end();
-      this.pool = null;
-      console.log('Database connections closed');
+      console.log('Shutting down database connections...')
+      await this.pool.end()
+      this.pool = null
+      console.log('Database connections closed')
     }
   }
 
   // Test utility method to reset for testing
   static resetInstance(): void {
     if (DatabaseManager.instance?.pool) {
-      DatabaseManager.instance.pool.end();
+      DatabaseManager.instance.pool.end()
     }
-    DatabaseManager.instance = null as any;
+    DatabaseManager.instance = null as any
   }
 }

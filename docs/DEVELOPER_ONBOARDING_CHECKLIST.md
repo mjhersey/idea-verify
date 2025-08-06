@@ -293,6 +293,7 @@ git commit -m "test: verify development environment setup"
    - [ ] Commit changes successfully
 
 4. **Stop Services:**
+
    ```bash
    npm run dev:down  # Stop Docker services
    # Stop other terminals manually (Ctrl+C)

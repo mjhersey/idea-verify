@@ -2,15 +2,22 @@
 
 ## Executive Summary
 
-An AI-powered platform that provides comprehensive, real-time evaluation of business ideas through a sophisticated multi-agent system. Users submit their business concepts in plain text and receive detailed validation reports covering market opportunity, competitive landscape, technical feasibility, and financial viability. The platform differentiates itself through iterative refinement, continuous monitoring, and actionable insights that go beyond simple AI queries.
+An AI-powered platform that provides comprehensive, real-time evaluation of
+business ideas through a sophisticated multi-agent system. Users submit their
+business concepts in plain text and receive detailed validation reports covering
+market opportunity, competitive landscape, technical feasibility, and financial
+viability. The platform differentiates itself through iterative refinement,
+continuous monitoring, and actionable insights that go beyond simple AI queries.
 
 ## Problem Statement
 
 **Current State and Pain Points:**
 
 - Entrepreneurs waste months or years pursuing non-viable business ideas
-- Traditional market research is expensive ($10K-50K) and time-consuming (weeks to months)
-- Generic AI tools provide surface-level analysis without real data or actionable insights
+- Traditional market research is expensive ($10K-50K) and time-consuming (weeks
+  to months)
+- Generic AI tools provide surface-level analysis without real data or
+  actionable insights
 - No systematic way to iteratively refine and re-evaluate ideas as they evolve
 
 **Impact of the Problem:**
@@ -23,7 +30,8 @@ An AI-powered platform that provides comprehensive, real-time evaluation of busi
 
 - Consulting firms: Too expensive for early-stage entrepreneurs
 - ChatGPT/Claude: Lack real-time data, structure, and depth
-- Market research tools: Fragment the process, require expertise to use effectively
+- Market research tools: Fragment the process, require expertise to use
+  effectively
 - No solution offers continuous monitoring and iterative refinement
 
 **Urgency:**
@@ -34,12 +42,18 @@ An AI-powered platform that provides comprehensive, real-time evaluation of busi
 
 ## Proposed Solution
 
-A multi-agent AI platform that orchestrates specialized agents to conduct comprehensive business idea validation. The core approach involves:
+A multi-agent AI platform that orchestrates specialized agents to conduct
+comprehensive business idea validation. The core approach involves:
 
-- **Orchestrated Agent System**: A "Venture Analyst" orchestrator manages specialized sub-agents for market research, competitive analysis, customer insights, technical feasibility, and financial projections
-- **Real-time Progressive Analysis**: Users see live progress as agents work, with insights streaming in as discovered
-- **Iterative Refinement**: Ideas can be refined and re-evaluated based on findings, supporting the natural evolution of concepts
-- **Continuous Monitoring**: Track competitive landscape changes and market evolution over time
+- **Orchestrated Agent System**: A "Venture Analyst" orchestrator manages
+  specialized sub-agents for market research, competitive analysis, customer
+  insights, technical feasibility, and financial projections
+- **Real-time Progressive Analysis**: Users see live progress as agents work,
+  with insights streaming in as discovered
+- **Iterative Refinement**: Ideas can be refined and re-evaluated based on
+  findings, supporting the natural evolution of concepts
+- **Continuous Monitoring**: Track competitive landscape changes and market
+  evolution over time
 
 **Key Differentiators:**
 
@@ -52,10 +66,14 @@ A multi-agent AI platform that orchestrates specialized agents to conduct compre
 
 ### Primary User Segment: Aspiring Entrepreneurs
 
-- **Profile**: Individuals with business ideas but limited resources for validation
-- **Current Behavior**: Rely on gut instinct, friends' opinions, or basic Google searches
-- **Pain Points**: Lack structured approach, miss critical factors, waste time on non-viable ideas
-- **Goals**: Validate ideas quickly and affordably before investing significant resources
+- **Profile**: Individuals with business ideas but limited resources for
+  validation
+- **Current Behavior**: Rely on gut instinct, friends' opinions, or basic Google
+  searches
+- **Pain Points**: Lack structured approach, miss critical factors, waste time
+  on non-viable ideas
+- **Goals**: Validate ideas quickly and affordably before investing significant
+  resources
 
 ### Secondary User Segment: Serial Entrepreneurs & Innovators
 
@@ -89,9 +107,11 @@ A multi-agent AI platform that orchestrates specialized agents to conduct compre
 
 ### Key Performance Indicators (KPIs)
 
-- **Evaluation Accuracy**: Track success rate of "GO" recommendations that lead to launched businesses
+- **Evaluation Accuracy**: Track success rate of "GO" recommendations that lead
+  to launched businesses
 - **User Engagement**: Average number of iterations per idea, return user rate
-- **Platform Performance**: Average evaluation completion time, agent success rates
+- **Platform Performance**: Average evaluation completion time, agent success
+  rates
 - **Business Growth**: MRR growth, tier conversion rates, churn rate
 
 ## MVP Scope
@@ -99,10 +119,14 @@ A multi-agent AI platform that orchestrates specialized agents to conduct compre
 ### Core Features (Must Have)
 
 - **Basic Idea Submission**: Simple text input for business idea description
-- **Multi-Agent Evaluation**: Core agents for market research, competitive analysis, customer insights
-- **Real-time Progress Display**: Visual feedback showing agent activity and discoveries
-- **Comprehensive Report**: Structured output with scores, analysis, and recommendations
-- **Free Tier Limitations**: Using only public data sources, basic analysis depth
+- **Multi-Agent Evaluation**: Core agents for market research, competitive
+  analysis, customer insights
+- **Real-time Progress Display**: Visual feedback showing agent activity and
+  discoveries
+- **Comprehensive Report**: Structured output with scores, analysis, and
+  recommendations
+- **Free Tier Limitations**: Using only public data sources, basic analysis
+  depth
 
 ### Out of Scope for MVP
 
@@ -163,7 +187,8 @@ A multi-agent AI platform that orchestrates specialized agents to conduct compre
 
 - **Repository Structure**: Monorepo for MVP, potential microservices later
 - **Service Architecture**: Modular agent system with clear interfaces
-- **Integration Requirements**: Multiple LLM providers, web scraping, public APIs
+- **Integration Requirements**: Multiple LLM providers, web scraping, public
+  APIs
 - **Security/Compliance**: Data privacy, user data protection
 
 ## Constraints & Assumptions
@@ -186,10 +211,14 @@ A multi-agent AI platform that orchestrates specialized agents to conduct compre
 
 ### Key Risks
 
-- **Data Quality**: Free sources may not provide sufficient depth - Impact: Lower evaluation quality
-- **LLM Costs**: Token usage could exceed projections - Impact: Higher operational costs
-- **User Patience**: 30-minute wait might be too long - Impact: High abandonment rates
-- **Competition**: Major players could enter space quickly - Impact: Loss of first-mover advantage
+- **Data Quality**: Free sources may not provide sufficient depth - Impact:
+  Lower evaluation quality
+- **LLM Costs**: Token usage could exceed projections - Impact: Higher
+  operational costs
+- **User Patience**: 30-minute wait might be too long - Impact: High abandonment
+  rates
+- **Competition**: Major players could enter space quickly - Impact: Loss of
+  first-mover advantage
 
 ### Open Questions
 
@@ -217,4 +246,9 @@ A multi-agent AI platform that orchestrates specialized agents to conduct compre
 
 ### PM Handoff
 
-This Project Brief provides the full context for the AI-Powered Business Idea Validation Platform. The vision combines sophisticated AI agent orchestration with user-friendly real-time feedback to democratize business validation. Please start in 'PRD Generation Mode', review the brief thoroughly to work with the user to create the PRD section by section as the template indicates, asking for any necessary clarification or suggesting improvements.
+This Project Brief provides the full context for the AI-Powered Business Idea
+Validation Platform. The vision combines sophisticated AI agent orchestration
+with user-friendly real-time feedback to democratize business validation. Please
+start in 'PRD Generation Mode', review the brief thoroughly to work with the
+user to create the PRD section by section as the template indicates, asking for
+any necessary clarification or suggesting improvements.

@@ -1,6 +1,8 @@
 # review-story
 
-When a developer agent marks a story as "Ready for Review", perform a comprehensive senior developer code review with the ability to refactor and improve code directly.
+When a developer agent marks a story as "Ready for Review", perform a
+comprehensive senior developer code review with the ability to refactor and
+improve code directly.
 
 ## Prerequisites
 
@@ -16,16 +18,21 @@ When a developer agent marks a story as "Ready for Review", perform a comprehens
    - Note any completion notes from the developer
 
 2. **Verify Implementation Against Dev Notes Guidance**
-   - Review the "Dev Notes" section for specific technical guidance provided to the developer
-   - Verify the developer's implementation follows the architectural patterns specified in Dev Notes
+   - Review the "Dev Notes" section for specific technical guidance provided to
+     the developer
+   - Verify the developer's implementation follows the architectural patterns
+     specified in Dev Notes
    - Check that file locations match the project structure guidance in Dev Notes
-   - Confirm any specified libraries, frameworks, or technical approaches were used correctly
-   - Validate that security considerations mentioned in Dev Notes were implemented
+   - Confirm any specified libraries, frameworks, or technical approaches were
+     used correctly
+   - Validate that security considerations mentioned in Dev Notes were
+     implemented
 
 3. **Focus on the File List**
    - Verify all files listed were actually created/modified
    - Check for any missing files that should have been updated
-   - Ensure file locations align with the project structure guidance from Dev Notes
+   - Ensure file locations align with the project structure guidance from Dev
+     Notes
 
 4. **Senior Developer Code Review**
    - Review code with the eye of a senior developer
@@ -40,7 +47,8 @@ When a developer agent marks a story as "Ready for Review", perform a comprehens
      - Best practices and patterns
 
 5. **Active Refactoring**
-   - As a senior developer, you CAN and SHOULD refactor code where improvements are needed
+   - As a senior developer, you CAN and SHOULD refactor code where improvements
+     are needed
    - When refactoring:
      - Make the changes directly in the files
      - Explain WHY you're making the change
@@ -73,48 +81,60 @@ When a developer agent marks a story as "Ready for Review", perform a comprehens
 
 ## Update Story File - QA Results Section ONLY
 
-**CRITICAL**: You are ONLY authorized to update the "QA Results" section of the story file. DO NOT modify any other sections.
+**CRITICAL**: You are ONLY authorized to update the "QA Results" section of the
+story file. DO NOT modify any other sections.
 
-After review and any refactoring, append your results to the story file in the QA Results section:
+After review and any refactoring, append your results to the story file in the
+QA Results section:
 
 ```markdown
 ## QA Results
 
 ### Review Date: [Date]
+
 ### Reviewed By: Quinn (Senior Developer QA)
 
 ### Code Quality Assessment
+
 [Overall assessment of implementation quality]
 
 ### Refactoring Performed
+
 [List any refactoring you performed with explanations]
+
 - **File**: [filename]
   - **Change**: [what was changed]
   - **Why**: [reason for change]
   - **How**: [how it improves the code]
 
 ### Compliance Check
+
 - Coding Standards: [✓/✗] [notes if any]
 - Project Structure: [✓/✗] [notes if any]
 - Testing Strategy: [✓/✗] [notes if any]
 - All ACs Met: [✓/✗] [notes if any]
 
 ### Improvements Checklist
+
 [Check off items you handled yourself, leave unchecked for dev to address]
 
-- [x] Refactored user service for better error handling (services/user.service.ts)
+- [x] Refactored user service for better error handling
+      (services/user.service.ts)
 - [x] Added missing edge case tests (services/user.service.test.ts)
 - [ ] Consider extracting validation logic to separate validator class
 - [ ] Add integration test for error scenarios
 - [ ] Update API documentation for new error codes
 
 ### Security Review
+
 [Any security concerns found and whether addressed]
 
 ### Performance Considerations
+
 [Any performance issues found and whether addressed]
 
 ### Final Status
+
 [✓ Approved - Ready for Done] / [✗ Changes Required - See unchecked items above]
 ```
 

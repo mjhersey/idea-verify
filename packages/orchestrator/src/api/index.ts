@@ -3,14 +3,14 @@
  * Provides HTTP and WebSocket API functionality for the orchestrator
  */
 
-export * from './types.js';
-export { APIRouter } from './router.js';
-export { WebSocketServer } from './websocket.js';
-export { ErrorHandler } from './error-handler.js';
-export { RequestValidator } from './request-validator.js';
+export * from './types.js'
+export { APIRouter } from './router.js'
+export { WebSocketServer } from './websocket.js'
+export { ErrorHandler } from './error-handler.js'
+export { RequestValidator } from './request-validator.js'
 
 // API utilities
-export { formatEvaluationResponse, formatAgentResultResponse } from './utils.js';
+export { formatEvaluationResponse, formatAgentResultResponse } from './utils.js'
 
 // Re-export types for convenience
 export type {
@@ -27,5 +27,5 @@ export type {
   EvaluationFailedEvent,
   SystemHealthEvent,
   EvaluationQueryParams,
-  AgentQueryParams
-} from './types.js';
+  AgentQueryParams,
+} from './types.js'

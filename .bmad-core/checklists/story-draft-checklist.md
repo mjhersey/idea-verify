@@ -1,17 +1,21 @@
 # Story Draft Checklist
 
-The Scrum Master should use this checklist to validate that each story contains sufficient context for a developer agent to implement it successfully, while assuming the dev agent has reasonable capabilities to figure things out.
+The Scrum Master should use this checklist to validate that each story contains
+sufficient context for a developer agent to implement it successfully, while
+assuming the dev agent has reasonable capabilities to figure things out.
 
 [[LLM: INITIALIZATION INSTRUCTIONS - STORY DRAFT VALIDATION
 
 Before proceeding with this checklist, ensure you have access to:
 
-1. The story document being validated (usually in docs/stories/ or provided directly)
+1. The story document being validated (usually in docs/stories/ or provided
+   directly)
 2. The parent epic context
 3. Any referenced architecture or design documents
 4. Previous related stories if this builds on prior work
 
-IMPORTANT: This checklist validates individual stories BEFORE implementation begins.
+IMPORTANT: This checklist validates individual stories BEFORE implementation
+begins.
 
 VALIDATION PRINCIPLES:
 
@@ -76,13 +80,15 @@ Note: We don't need every file listed - just the important ones.]]
 5. Previous story context is summarized if needed]]
 
 - [ ] References to external documents point to specific relevant sections
-- [ ] Critical information from previous stories is summarized (not just referenced)
+- [ ] Critical information from previous stories is summarized (not just
+      referenced)
 - [ ] Context is provided for why references are relevant
 - [ ] References use consistent format (e.g., `docs/filename.md#section`)
 
 ## 4. SELF-CONTAINMENT ASSESSMENT
 
-[[LLM: Stories should be mostly self-contained to avoid context switching. Verify:
+[[LLM: Stories should be mostly self-contained to avoid context switching.
+Verify:
 
 1. Core requirements are in the story, not just in references
 2. Domain terms are explained or obvious from context
@@ -117,19 +123,16 @@ Note: We don't need every file listed - just the important ones.]]
 Generate a concise validation report:
 
 1. Quick Summary
-
    - Story readiness: READY / NEEDS REVISION / BLOCKED
    - Clarity score (1-10)
    - Major gaps identified
 
 2. Fill in the validation table with:
-
    - PASS: Requirements clearly met
    - PARTIAL: Some gaps but workable
    - FAIL: Critical information missing
 
 3. Specific Issues (if any)
-
    - List concrete problems to fix
    - Suggest specific improvements
    - Identify any blocking dependencies
@@ -139,7 +142,9 @@ Generate a concise validation report:
    - What questions would you have?
    - What might cause delays or rework?
 
-Be pragmatic - perfect documentation doesn't exist, but it must be enough to provide the extreme context a dev agent needs to get the work down and not create a mess.]]
+Be pragmatic - perfect documentation doesn't exist, but it must be enough to
+provide the extreme context a dev agent needs to get the work down and not
+create a mess.]]
 
 | Category                             | Status | Issues |
 | ------------------------------------ | ------ | ------ |

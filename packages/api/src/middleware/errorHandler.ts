@@ -5,12 +5,7 @@ export interface ApiError extends Error {
   status?: string
 }
 
-export const errorHandler = (
-  err: ApiError,
-  req: Request,
-  res: Response,
-  _next: NextFunction
-) => {
+export const errorHandler = (err: ApiError, req: Request, res: Response, _next: NextFunction) => {
   const error = { ...err }
   error.message = err.message
 
@@ -25,6 +20,6 @@ export const errorHandler = (
 
   res.status(error.statusCode || 500).json({
     success: false,
-    error: error.message || 'Internal Server Error'
+    error: error.message || 'Internal Server Error',
   })
 }

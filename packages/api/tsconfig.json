@@ -20,16 +20,7 @@
     "composite": true,
     "types": ["node", "vitest"]
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "tests"
-  ],
-  "references": [
-    { "path": "../shared" },
-    { "path": "../orchestrator" }
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "tests"],
+  "references": [{ "path": "../shared" }, { "path": "../orchestrator" }]
 }

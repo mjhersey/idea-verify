@@ -21,11 +21,11 @@ class ErrorReporter {
       propsData: instance?.$props,
       message: error.message,
       stack: error.stack,
-      timestamp: new Date()
+      timestamp: new Date(),
     }
 
     this.errors.push(errorInfo)
-    
+
     // Log to console in development
     if (import.meta.env.DEV) {
       console.group('🚨 Vue Error Boundary')
@@ -35,7 +35,7 @@ class ErrorReporter {
       console.log('Props:', errorInfo.propsData)
       console.groupEnd()
     }
-    
+
     // In production, you might want to send to an error reporting service
     if (import.meta.env.PROD) {
       // Example: Sentry, LogRocket, etc.
@@ -73,7 +73,7 @@ export const errorHandlerPlugin = {
 
     // Provide error reporter globally
     app.provide('errorReporter', errorReporter)
-  }
+  },
 }
 
 export { errorReporter }

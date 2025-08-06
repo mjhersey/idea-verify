@@ -4,31 +4,37 @@
 
 ### Overview
 
-This runbook provides step-by-step procedures for responding to security incidents in the AI Validation Platform. It covers detection, containment, eradication, recovery, and post-incident activities.
+This runbook provides step-by-step procedures for responding to security
+incidents in the AI Validation Platform. It covers detection, containment,
+eradication, recovery, and post-incident activities.
 
 ### Incident Classification
 
 #### Severity Levels
 
 **CRITICAL (P1)**
+
 - Data breach or unauthorized access to sensitive data
 - Complete system compromise
 - Ransomware or destructive attacks
 - Service outage affecting all users
 
 **HIGH (P2)**
+
 - Partial system compromise
 - Unauthorized access to non-sensitive systems
 - Significant performance degradation
 - Malware detection
 
 **MEDIUM (P3)**
+
 - Failed security controls
 - Suspicious activity
 - Minor security policy violations
 - Non-critical service degradation
 
 **LOW (P4)**
+
 - Security awareness issues
 - Minor configuration issues
 - Informational security events
@@ -45,11 +51,11 @@ This runbook provides step-by-step procedures for responding to security inciden
 
 #### Contact Information
 
-| Role | Primary Contact | Backup Contact | Phone | Email |
-|------|----------------|----------------|-------|-------|
-| Incident Commander | [Name] | [Name] | [Phone] | [Email] |
-| Security Lead | [Name] | [Name] | [Phone] | [Email] |
-| Technical Lead | [Name] | [Name] | [Phone] | [Email] |
+| Role               | Primary Contact | Backup Contact | Phone   | Email   |
+| ------------------ | --------------- | -------------- | ------- | ------- |
+| Incident Commander | [Name]          | [Name]         | [Phone] | [Email] |
+| Security Lead      | [Name]          | [Name]         | [Phone] | [Email] |
+| Technical Lead     | [Name]          | [Name]         | [Phone] | [Email] |
 
 ### Phase 1: Detection and Analysis
 
@@ -72,6 +78,7 @@ This runbook provides step-by-step procedures for responding to security inciden
 **Immediate Actions (First 15 minutes)**
 
 1. **Acknowledge the incident**
+
    ```bash
    # Document incident start time
    echo "$(date): Incident detected - [Brief Description]" >> /var/log/incident-$(date +%Y%m%d).log
@@ -101,18 +108,20 @@ This runbook provides step-by-step procedures for responding to security inciden
 **Preserve Evidence**
 
 1. **System Logs**
+
    ```bash
    # Collect ALB logs
    aws logs describe-log-groups --log-group-name-prefix "/aws/applicationelb/"
-   
+
    # Collect application logs
    aws logs describe-log-groups --log-group-name-prefix "/ecs/ai-validation"
-   
+
    # Collect WAF logs
    aws wafv2 get-logging-configuration --resource-arn [WAF-ARN]
    ```
 
 2. **Network Traffic**
+
    ```bash
    # Enable VPC Flow Logs if not already enabled
    aws ec2 create-flow-logs --resource-type VPC --resource-ids [VPC-ID] \
@@ -121,10 +130,11 @@ This runbook provides step-by-step procedures for responding to security inciden
    ```
 
 3. **Database Activity**
+
    ```bash
    # Check database logs
    aws rds describe-db-log-files --db-instance-identifier ai-validation-db-[ENV]
-   
+
    # Download recent logs
    aws rds download-db-log-file-portion --db-instance-identifier ai-validation-db-[ENV] \
      --log-file-name [LOG-FILE] --starting-token 0
@@ -137,6 +147,7 @@ This runbook provides step-by-step procedures for responding to security inciden
 **For Compromised Systems**
 
 1. **Isolate affected systems**
+
    ```bash
    # Update security groups to block traffic
    aws ec2 authorize-security-group-ingress --group-id [SG-ID] \
@@ -144,6 +155,7 @@ This runbook provides step-by-step procedures for responding to security inciden
    ```
 
 2. **Block malicious IPs**
+
    ```bash
    # Add IP to WAF blocked list
    aws wafv2 update-ip-set --scope REGIONAL --id [IP-SET-ID] \
@@ -160,6 +172,7 @@ This runbook provides step-by-step procedures for responding to security inciden
 **For Data Breach**
 
 1. **Stop data access**
+
    ```bash
    # Revoke database access
    aws rds modify-db-instance --db-instance-identifier [DB-ID] \
@@ -192,6 +205,7 @@ This runbook provides step-by-step procedures for responding to security inciden
 #### 3.2 Remove Threats
 
 1. **Malware removal**
+
    ```bash
    # Scan and clean infected systems
    # Replace compromised containers
@@ -200,6 +214,7 @@ This runbook provides step-by-step procedures for responding to security inciden
    ```
 
 2. **Close vulnerabilities**
+
    ```bash
    # Update application configurations
    # Deploy security patches
@@ -217,6 +232,7 @@ This runbook provides step-by-step procedures for responding to security inciden
 #### 4.1 System Restoration
 
 1. **Validate system integrity**
+
    ```bash
    # Run security scans
    # Verify system configurations
@@ -224,6 +240,7 @@ This runbook provides step-by-step procedures for responding to security inciden
    ```
 
 2. **Restore normal operations**
+
    ```bash
    # Gradually restore traffic
    # Monitor for anomalies
@@ -271,19 +288,23 @@ This runbook provides step-by-step procedures for responding to security inciden
 ### Web Application Attack
 
 #### Detection Indicators
+
 - High number of 4xx/5xx errors
 - WAF blocking unusual patterns
 - Unusual SQL queries in logs
 - Unexpected user behavior
 
 #### Response Steps
+
 1. **Enable WAF strict mode**
+
    ```bash
    aws wafv2 update-web-acl --scope REGIONAL --id [WAF-ID] \
      --default-action Block={}
    ```
 
 2. **Analyze attack patterns**
+
    ```bash
    # Review WAF logs
    aws logs filter-log-events --log-group-name [WAF-LOG-GROUP] \
@@ -299,13 +320,16 @@ This runbook provides step-by-step procedures for responding to security inciden
 ### Data Breach
 
 #### Detection Indicators
+
 - Unauthorized database access
 - Unusual data download patterns
 - Failed authentication attempts
 - Data exfiltration alerts
 
 #### Response Steps
+
 1. **Immediate data protection**
+
    ```bash
    # Enable database encryption at rest
    aws rds modify-db-instance --db-instance-identifier [DB-ID] \
@@ -325,18 +349,22 @@ This runbook provides step-by-step procedures for responding to security inciden
 ### DDoS Attack
 
 #### Detection Indicators
+
 - High network traffic
 - Service degradation
 - CloudWatch alarms
 - User complaints
 
 #### Response Steps
+
 1. **Enable AWS Shield Advanced**
+
    ```bash
    aws shield subscribe-to-proactive-engagement
    ```
 
 2. **Scale infrastructure**
+
    ```bash
    # Auto-scaling configuration
    aws application-autoscaling register-scalable-target \
@@ -398,24 +426,28 @@ Contact: support@aivalidation.com
 ## Tools and Resources
 
 ### Monitoring Tools
+
 - AWS CloudWatch
 - AWS WAF Console
 - ECS Service Logs
 - Database Performance Insights
 
 ### Communication Tools
+
 - AWS SNS for alerts
 - Slack incident channel
 - Email distribution lists
 - Emergency contact system
 
 ### Documentation Tools
+
 - Incident tracking system
 - Evidence collection templates
 - Communication templates
 - Post-incident review forms
 
 ### Legal and Compliance
+
 - Data breach notification requirements
 - Industry-specific regulations
 - Customer contract obligations
@@ -424,12 +456,14 @@ Contact: support@aivalidation.com
 ## Training and Exercises
 
 ### Tabletop Exercises
+
 - Quarterly security incident simulations
 - Cross-team coordination practice
 - Communication protocol testing
 - Decision-making scenarios
 
 ### Skills Development
+
 - Incident response training
 - Security tools proficiency
 - Communication skills
@@ -438,12 +472,14 @@ Contact: support@aivalidation.com
 ## Continuous Improvement
 
 ### Metrics and KPIs
+
 - Mean time to detection (MTTD)
 - Mean time to containment (MTTC)
 - Mean time to recovery (MTTR)
 - Incident recurrence rate
 
 ### Regular Reviews
+
 - Monthly procedure updates
 - Quarterly team assessments
 - Annual plan reviews

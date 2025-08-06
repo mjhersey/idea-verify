@@ -3,11 +3,11 @@
  */
 
 // Message types and interfaces
-export * from './message-types.js';
+export * from './message-types.js'
 
 // Message bus implementation
-export { MessageBus } from './message-bus.js';
+export { MessageBus } from './message-bus.js'
 
 // Agent coordination
-export { AgentCoordinator } from './agent-coordinator.js';
-export type { AgentDependency, AgentWorkflow, AgentExecutionState } from './agent-coordinator.js';
+export { AgentCoordinator } from './agent-coordinator.js'
+export type { AgentDependency, AgentWorkflow, AgentExecutionState } from './agent-coordinator.js'

@@ -32,17 +32,17 @@ apiRouter.get('/evaluations/:id/status', async (req, res) => {
   try {
     const { orchestrator } = await initializeOrchestrator()
     const progress = orchestrator.getEvaluationProgress(req.params.id)
-    
+
     if (!progress) {
       return res.status(404).json({ error: 'Evaluation not found' })
     }
-    
+
     res.json(progress)
   } catch (error) {
     console.error('Error getting evaluation status:', error)
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: error instanceof Error ? error.message : 'Unknown error',
     })
   }
 })
@@ -52,17 +52,17 @@ apiRouter.get('/evaluations/:id/result', async (req, res) => {
   try {
     const { orchestrator } = await initializeOrchestrator()
     const result = orchestrator.getEvaluationResult(req.params.id)
-    
+
     if (!result) {
       return res.status(404).json({ error: 'Evaluation result not found' })
     }
-    
+
     res.json(result)
   } catch (error) {
     console.error('Error getting evaluation result:', error)
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: error instanceof Error ? error.message : 'Unknown error',
     })
   }
 })
@@ -74,9 +74,9 @@ apiRouter.get('/status', async (req, res) => {
     res.status(health.status === 'healthy' ? 200 : 503).json(health)
   } catch (error) {
     console.error('Error checking orchestrator health:', error)
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: error instanceof Error ? error.message : 'Unknown error',
     })
   }
 })
@@ -86,9 +86,9 @@ app.use('/api', apiRouter)
 // Error handling middleware
 app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Unhandled error:', error)
-  res.status(500).json({ 
+  res.status(500).json({
     error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+    message: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong',
   })
 })
 
@@ -101,19 +101,19 @@ app.use((req, res) => {
 async function startServer() {
   try {
     console.log('[Orchestrator Server] Initializing orchestrator...')
-    
+
     // Initialize the orchestrator service
     const config = {
-      useMockServices: process.env.NODE_ENV === 'development' && !process.env.REDIS_URL
+      useMockServices: process.env.NODE_ENV === 'development' && !process.env.REDIS_URL,
     }
-    
+
     const { orchestrator, services, shutdown } = await initializeOrchestrator(config)
-    
+
     // Store references for cleanup
     app.locals.orchestrator = orchestrator
     app.locals.services = services
     app.locals.shutdown = shutdown
-    
+
     // Start HTTP server
     const server = app.listen(port, () => {
       console.log(`[Orchestrator Server] Server running on port ${port}`)
@@ -121,11 +121,11 @@ async function startServer() {
       console.log(`[Orchestrator Server] Detailed health: http://localhost:${port}/health/detailed`)
       console.log(`[Orchestrator Server] Service status: http://localhost:${port}/api/status`)
     })
-    
+
     // Graceful shutdown
     const gracefulShutdown = async (signal: string) => {
       console.log(`[Orchestrator Server] Received ${signal}, shutting down gracefully...`)
-      
+
       server.close(async () => {
         try {
           if (app.locals.shutdown) {
@@ -138,20 +138,21 @@ async function startServer() {
           process.exit(1)
         }
       })
-      
+
       // Force close after 10 seconds
       setTimeout(() => {
-        console.error('[Orchestrator Server] Could not close connections in time, forcefully shutting down')
+        console.error(
+          '[Orchestrator Server] Could not close connections in time, forcefully shutting down'
+        )
         process.exit(1)
       }, 10000)
     }
-    
+
     // Handle termination signals
     process.on('SIGTERM', () => gracefulShutdown('SIGTERM'))
     process.on('SIGINT', () => gracefulShutdown('SIGINT'))
-    
+
     return server
-    
   } catch (error) {
     console.error('[Orchestrator Server] Failed to start server:', error)
     process.exit(1)

@@ -1,13 +1,13 @@
-import * as cdk from 'aws-cdk-lib';
+import * as cdk from 'aws-cdk-lib'
 
 /**
  * Common properties for all AI Validation Platform stacks
  */
 export interface BaseStackProps extends cdk.StackProps {
-  environment: string;
-  projectName?: string;
-  costCenter?: string;
-  owner?: string;
+  environment: string
+  projectName?: string
+  costCenter?: string
+  owner?: string
 }
 
 /**
@@ -17,7 +17,7 @@ export const DEFAULT_STACK_PROPS = {
   projectName: 'AI-Validation-Platform',
   costCenter: 'Engineering',
   owner: 'DevTeam',
-};
+}
 
 /**
  * Utility function to create standardized tags
@@ -28,7 +28,7 @@ export function createStandardTags(props: BaseStackProps): Record<string, string
     projectName = DEFAULT_STACK_PROPS.projectName,
     costCenter = DEFAULT_STACK_PROPS.costCenter,
     owner = DEFAULT_STACK_PROPS.owner,
-  } = props;
+  } = props
 
   return {
     Project: projectName,
@@ -37,7 +37,7 @@ export function createStandardTags(props: BaseStackProps): Record<string, string
     Owner: owner,
     ManagedBy: 'CDK',
     CreatedDate: new Date().toISOString().split('T')[0], // YYYY-MM-DD
-  };
+  }
 }
 
 /**
@@ -48,8 +48,8 @@ export function createResourceName(
   environment: string,
   projectName: string = DEFAULT_STACK_PROPS.projectName
 ): string {
-  const normalizedProject = projectName.toLowerCase().replace(/[^a-z0-9-]/g, '-');
-  return `${normalizedProject}-${resourceType}-${environment}`;
+  const normalizedProject = projectName.toLowerCase().replace(/[^a-z0-9-]/g, '-')
+  return `${normalizedProject}-${resourceType}-${environment}`
 }
 
 /**
@@ -60,8 +60,8 @@ export function createStackName(
   environment: string,
   projectName: string = DEFAULT_STACK_PROPS.projectName
 ): string {
-  const capitalizedEnv = environment.charAt(0).toUpperCase() + environment.slice(1);
-  return `${projectName}${stackType}${capitalizedEnv}`;
+  const capitalizedEnv = environment.charAt(0).toUpperCase() + environment.slice(1)
+  return `${projectName}${stackType}${capitalizedEnv}`
 }
 
 /**
@@ -96,7 +96,7 @@ export function getEnvironmentConfig(environment: string) {
       logRetentionDays: 90,
       enablePerformanceInsights: true,
     },
-  };
+  }
 
-  return configs[environment as keyof typeof configs] || configs.dev;
+  return configs[environment as keyof typeof configs] || configs.dev
 }

@@ -4,12 +4,10 @@
       <div class="flex justify-between items-center py-6">
         <div class="flex items-center">
           <router-link to="/" class="flex items-center">
-            <h1 class="text-2xl font-bold text-gray-900">
-              AI Validation
-            </h1>
+            <h1 class="text-2xl font-bold text-gray-900">AI Validation</h1>
           </router-link>
         </div>
-        
+
         <nav class="hidden md:flex space-x-8">
           <router-link
             to="/"
@@ -27,7 +25,7 @@
             Dashboard
           </router-link>
         </nav>
-        
+
         <div class="flex items-center space-x-4">
           <template v-if="authStore.isAuthenticated">
             <span class="text-sm text-gray-700">
@@ -55,7 +53,7 @@
             </router-link>
           </template>
         </div>
-        
+
         <!-- Mobile menu button -->
         <div class="md:hidden">
           <button
@@ -80,7 +78,7 @@
           </button>
         </div>
       </div>
-      
+
       <!-- Mobile menu -->
       <div v-if="mobileMenuOpen" class="md:hidden">
         <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">

@@ -14,7 +14,5 @@
     "declarationMap": true
   },
   "include": ["src/**/*"],
-  "references": [
-    { "path": "../shared" }
-  ]
+  "references": [{ "path": "../shared" }]
 }

@@ -55,10 +55,10 @@ jobs:
         run: |
           SOURCE="${{ github.event.inputs.source_environment }}"
           TARGET="${{ github.event.inputs.target_environment }}"
-          
+
           echo "source_env=$SOURCE" >> $GITHUB_OUTPUT
           echo "target_env=$TARGET" >> $GITHUB_OUTPUT
-          
+
           # Validate promotion paths
           if [[ "$SOURCE" == "dev" && "$TARGET" == "staging" ]]; then
             echo "allowed=true" >> $GITHUB_OUTPUT
@@ -70,7 +70,7 @@ jobs:
             echo "Valid paths: dev → staging, staging → prod"
             exit 1
           fi
-          
+
           echo "✅ Validated promotion path: $SOURCE → $TARGET"
 
   pre-deployment-tests:
@@ -200,27 +200,27 @@ jobs:
         run: |
           SOURCE_ENV="${{ needs.validation.outputs.source_env }}"
           TARGET_ENV="${{ needs.validation.outputs.target_env }}"
-          
+
           # Get latest successful deployment tags from source environment
           API_TAG=$(aws ecr describe-images \
             --repository-name ai-validation-api-$SOURCE_ENV \
             --query 'sort_by(imageDetails,&imagePushedAt)[-1].imageTags[0]' \
             --output text)
-          
+
           ORCHESTRATOR_TAG=$(aws ecr describe-images \
             --repository-name ai-validation-orchestrator-$SOURCE_ENV \
             --query 'sort_by(imageDetails,&imagePushedAt)[-1].imageTags[0]' \
             --output text)
-          
+
           WEB_TAG=$(aws ecr describe-images \
             --repository-name ai-validation-web-$SOURCE_ENV \
             --query 'sort_by(imageDetails,&imagePushedAt)[-1].imageTags[0]' \
             --output text)
-          
+
           echo "api_tag=$API_TAG" >> $GITHUB_OUTPUT
           echo "orchestrator_tag=$ORCHESTRATOR_TAG" >> $GITHUB_OUTPUT
           echo "web_tag=$WEB_TAG" >> $GITHUB_OUTPUT
-          
+
           echo "📋 Promoting images:"
           echo "API: $API_TAG"
           echo "Orchestrator: $ORCHESTRATOR_TAG"
@@ -237,13 +237,13 @@ jobs:
           docker tag $ECR_REGISTRY/ai-validation-api-$SOURCE_ENV:${{ steps.get-tags.outputs.api_tag }} \
             $ECR_REGISTRY/ai-validation-api-$TARGET_ENV:${{ steps.get-tags.outputs.api_tag }}
           docker push $ECR_REGISTRY/ai-validation-api-$TARGET_ENV:${{ steps.get-tags.outputs.api_tag }}
-          
+
           # Orchestrator Service
           docker pull $ECR_REGISTRY/ai-validation-orchestrator-$SOURCE_ENV:${{ steps.get-tags.outputs.orchestrator_tag }}
           docker tag $ECR_REGISTRY/ai-validation-orchestrator-$SOURCE_ENV:${{ steps.get-tags.outputs.orchestrator_tag }} \
             $ECR_REGISTRY/ai-validation-orchestrator-$TARGET_ENV:${{ steps.get-tags.outputs.orchestrator_tag }}
           docker push $ECR_REGISTRY/ai-validation-orchestrator-$TARGET_ENV:${{ steps.get-tags.outputs.orchestrator_tag }}
-          
+
           # Web Service
           docker pull $ECR_REGISTRY/ai-validation-web-$SOURCE_ENV:${{ steps.get-tags.outputs.web_tag }}
           docker tag $ECR_REGISTRY/ai-validation-web-$SOURCE_ENV:${{ steps.get-tags.outputs.web_tag }} \
@@ -260,13 +260,13 @@ jobs:
             --cluster ai-validation-$TARGET_ENV \
             --service ai-validation-api-$TARGET_ENV \
             --force-new-deployment
-          
+
           # Update Orchestrator service
           aws ecs update-service \
             --cluster ai-validation-$TARGET_ENV \
             --service ai-validation-orchestrator-$TARGET_ENV \
             --force-new-deployment
-          
+
           # Update Web service
           aws ecs update-service \
             --cluster ai-validation-$TARGET_ENV \
@@ -293,44 +293,44 @@ jobs:
         run: |
           TARGET_ENV="${{ needs.validation.outputs.target_env }}"
           echo "⏳ Waiting for services in $TARGET_ENV to stabilize..."
-          
+
           # Wait for API service
           aws ecs wait services-stable \
             --cluster ai-validation-$TARGET_ENV \
             --services ai-validation-api-$TARGET_ENV
-          
+
           # Wait for Orchestrator service
           aws ecs wait services-stable \
             --cluster ai-validation-$TARGET_ENV \
             --services ai-validation-orchestrator-$TARGET_ENV
-          
+
           # Wait for Web service
           aws ecs wait services-stable \
             --cluster ai-validation-$TARGET_ENV \
             --services ai-validation-web-$TARGET_ENV
-          
+
           echo "✅ All services are stable"
 
       - name: Run smoke tests
         run: |
           TARGET_ENV="${{ needs.validation.outputs.target_env }}"
-          
+
           # Get ALB endpoint
           ALB_DNS=$(aws elbv2 describe-load-balancers \
             --names ai-validation-alb-$TARGET_ENV \
             --query 'LoadBalancers[0].DNSName' \
             --output text)
-          
+
           echo "🧪 Running smoke tests against: $ALB_DNS"
-          
+
           # Health check
           curl -f "http://$ALB_DNS/health" || exit 1
           echo "✅ Health check passed"
-          
+
           # API health check
           curl -f "http://$ALB_DNS/api/health" || exit 1
           echo "✅ API health check passed"
-          
+
           # Detailed health check
           curl -f "http://$ALB_DNS/api/health/detailed" || exit 1
           echo "✅ Detailed health check passed"
@@ -361,7 +361,7 @@ jobs:
             const status = '${{ steps.status.outputs.status }}';
             const emoji = '${{ steps.status.outputs.emoji }}';
             const message = '${{ steps.status.outputs.message }}';
-            
+
             await github.rest.repos.createDeploymentStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,

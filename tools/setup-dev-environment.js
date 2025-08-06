@@ -5,14 +5,14 @@
  * Creates environment templates and validates configuration
  */
 
-const fs = require('fs');
-const path = require('path');
-const readline = require('readline');
+const fs = require('fs')
+const path = require('path')
+const readline = require('readline')
 
 const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
+  input: process.stdin,
+  output: process.stdout,
+})
 
 const ENV_TEMPLATE = `# AI Validation Platform Environment Configuration
 
@@ -36,7 +36,7 @@ MOCK_DATA_PATH=./data/mock
 # Optional: Local development overrides (DO NOT COMMIT THESE VALUES)
 # OPENAI_API_KEY=your-local-key-for-testing
 # ANTHROPIC_API_KEY=your-local-key-for-testing
-`;
+`
 
 const GITIGNORE_ADDITIONS = `
 # Environment files
@@ -51,58 +51,58 @@ const GITIGNORE_ADDITIONS = `
 
 # Mock data
 data/mock/*.json
-`;
+`
 
 async function askQuestion(question) {
-    return new Promise(resolve => {
-        rl.question(question, answer => {
-            resolve(answer.toLowerCase().trim());
-        });
-    });
+  return new Promise(resolve => {
+    rl.question(question, answer => {
+      resolve(answer.toLowerCase().trim())
+    })
+  })
 }
 
 async function setupEnvironmentFiles() {
-    console.log('🔧 Setting up development environment...\n');
+  console.log('🔧 Setting up development environment...\n')
 
-    // Create .env.template file
-    const envTemplatePath = path.join(process.cwd(), '.env.template');
-    fs.writeFileSync(envTemplatePath, ENV_TEMPLATE);
-    console.log('✅ Created .env.template');
+  // Create .env.template file
+  const envTemplatePath = path.join(process.cwd(), '.env.template')
+  fs.writeFileSync(envTemplatePath, ENV_TEMPLATE)
+  console.log('✅ Created .env.template')
 
-    // Check if .env already exists
-    const envPath = path.join(process.cwd(), '.env');
-    if (!fs.existsSync(envPath)) {
-        const createEnv = await askQuestion('Create .env file from template? (y/n): ');
-        if (createEnv === 'y' || createEnv === 'yes') {
-            fs.writeFileSync(envPath, ENV_TEMPLATE);
-            console.log('✅ Created .env file');
-        }
-    } else {
-        console.log('⚠️  .env file already exists, skipping creation');
+  // Check if .env already exists
+  const envPath = path.join(process.cwd(), '.env')
+  if (!fs.existsSync(envPath)) {
+    const createEnv = await askQuestion('Create .env file from template? (y/n): ')
+    if (createEnv === 'y' || createEnv === 'yes') {
+      fs.writeFileSync(envPath, ENV_TEMPLATE)
+      console.log('✅ Created .env file')
     }
+  } else {
+    console.log('⚠️  .env file already exists, skipping creation')
+  }
 
-    // Update .gitignore
-    const gitignorePath = path.join(process.cwd(), '.gitignore');
-    let gitignoreContent = '';
-    
-    if (fs.existsSync(gitignorePath)) {
-        gitignoreContent = fs.readFileSync(gitignorePath, 'utf8');
-    }
+  // Update .gitignore
+  const gitignorePath = path.join(process.cwd(), '.gitignore')
+  let gitignoreContent = ''
 
-    if (!gitignoreContent.includes('.env')) {
-        fs.appendFileSync(gitignorePath, GITIGNORE_ADDITIONS);
-        console.log('✅ Updated .gitignore with environment file patterns');
-    }
+  if (fs.existsSync(gitignorePath)) {
+    gitignoreContent = fs.readFileSync(gitignorePath, 'utf8')
+  }
 
-    // Create mock data directory
-    const mockDataDir = path.join(process.cwd(), 'data', 'mock');
-    if (!fs.existsSync(mockDataDir)) {
-        fs.mkdirSync(mockDataDir, { recursive: true });
-        console.log('✅ Created mock data directory');
-    }
+  if (!gitignoreContent.includes('.env')) {
+    fs.appendFileSync(gitignorePath, GITIGNORE_ADDITIONS)
+    console.log('✅ Updated .gitignore with environment file patterns')
+  }
 
-    // Create credential handoff guide
-    const handoffGuide = `# Secure Credential Handoff Process
+  // Create mock data directory
+  const mockDataDir = path.join(process.cwd(), 'data', 'mock')
+  if (!fs.existsSync(mockDataDir)) {
+    fs.mkdirSync(mockDataDir, { recursive: true })
+    console.log('✅ Created mock data directory')
+  }
+
+  // Create credential handoff guide
+  const handoffGuide = `# Secure Credential Handoff Process
 
 ## Overview
 This document outlines the secure process for providing external service credentials to the development team.
@@ -160,31 +160,33 @@ If credentials are compromised:
 2. Update AWS Secrets Manager with new credentials
 3. Notify all team members
 4. Review access logs for unauthorized usage
-`;
+`
 
-    const handoffPath = path.join(process.cwd(), 'docs', 'credential-handoff-guide.md');
-    fs.writeFileSync(handoffPath, handoffGuide);
-    console.log('✅ Created credential handoff guide');
+  const handoffPath = path.join(process.cwd(), 'docs', 'credential-handoff-guide.md')
+  fs.writeFileSync(handoffPath, handoffGuide)
+  console.log('✅ Created credential handoff guide')
 
-    console.log('\n🎉 Development environment setup complete!');
-    console.log('\nNext steps:');
-    console.log('1. Review .env.template and customize as needed');
-    console.log('2. Follow docs/credential-handoff-guide.md for secure credential provision');
-    console.log('3. Run "npm run validate:credentials" after receiving credentials');
+  console.log('\n🎉 Development environment setup complete!')
+  console.log('\nNext steps:')
+  console.log('1. Review .env.template and customize as needed')
+  console.log('2. Follow docs/credential-handoff-guide.md for secure credential provision')
+  console.log('3. Run "npm run validate:credentials" after receiving credentials')
 }
 
 // Handle cleanup
 process.on('SIGINT', () => {
-    console.log('\n\nSetup cancelled by user.');
-    rl.close();
-    process.exit(130);
-});
+  console.log('\n\nSetup cancelled by user.')
+  rl.close()
+  process.exit(130)
+})
 
 // Run setup
-setupEnvironmentFiles().catch(error => {
-    console.error('Error during setup:', error);
-    rl.close();
-    process.exit(1);
-}).finally(() => {
-    rl.close();
-});
+setupEnvironmentFiles()
+  .catch(error => {
+    console.error('Error during setup:', error)
+    rl.close()
+    process.exit(1)
+  })
+  .finally(() => {
+    rl.close()
+  })

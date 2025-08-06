@@ -11,11 +11,11 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
     include: ['tests/integration/**/*.test.ts'],
     exclude: ['tests/unit/**/*.test.ts'],
-    testTimeout: 30000 // Longer timeout for integration tests
+    testTimeout: 30000, // Longer timeout for integration tests
   },
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
-  }
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
 })

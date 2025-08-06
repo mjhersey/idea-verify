@@ -3,13 +3,15 @@
     <div class="flex items-start">
       <div class="flex-shrink-0">
         <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          <path
+            fill-rule="evenodd"
+            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+            clip-rule="evenodd"
+          />
         </svg>
       </div>
       <div class="ml-3">
-        <h3 class="text-sm font-medium text-red-800">
-          Something went wrong
-        </h3>
+        <h3 class="text-sm font-medium text-red-800">Something went wrong</h3>
         <p class="mt-1 text-sm text-red-700">
           {{ displayMessage }}
         </p>
@@ -31,7 +33,9 @@
           </div>
         </div>
         <div v-if="showingDetails && error" class="mt-3 p-3 bg-red-100 rounded-md">
-          <pre class="text-xs text-red-800 whitespace-pre-wrap">{{ error.stack || error.message }}</pre>
+          <pre class="text-xs text-red-800 whitespace-pre-wrap">{{
+            error.stack || error.message
+          }}</pre>
         </div>
       </div>
     </div>
@@ -52,7 +56,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   fallbackMessage: 'An unexpected error occurred. Please try again.',
-  showDetails: false
+  showDetails: false,
 })
 
 const hasError = ref(false)
@@ -85,15 +89,15 @@ provide('resetErrorBoundary', reset)
 onErrorCaptured((err: Error, instance, info) => {
   hasError.value = true
   error.value = err
-  
+
   // Set user-friendly message
   displayMessage.value = props.fallbackMessage
-  
+
   // Call custom error handler if provided
   if (props.onError) {
     props.onError(err, instance, info)
   }
-  
+
   // Log error in development
   if (import.meta.env.DEV) {
     console.group('🚨 Error Boundary Caught Error')
@@ -102,7 +106,7 @@ onErrorCaptured((err: Error, instance, info) => {
     console.log('Info:', info)
     console.groupEnd()
   }
-  
+
   // Prevent the error from propagating up
   return false
 })
@@ -110,6 +114,7 @@ onErrorCaptured((err: Error, instance, info) => {
 
 <style scoped>
 .error-boundary {
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
 }
 </style>

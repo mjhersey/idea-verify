@@ -31,7 +31,7 @@ jobs:
       - name: Validate package structure
         run: |
           echo "Checking package structure..."
-          
+
           # Check required packages exist
           required_packages=("shared" "api" "orchestrator" "web" "infrastructure")
           for package in "${required_packages[@]}"; do
@@ -46,7 +46,7 @@ jobs:
       - name: Validate development scripts
         run: |
           echo "Checking development scripts..."
-          
+
           # Check if development scripts exist in package.json
           if npm run | grep -q "dev:web"; then
             echo "✅ Web development script found"
@@ -54,7 +54,7 @@ jobs:
             echo "❌ Missing dev:web script"
             exit 1
           fi
-          
+
           if npm run | grep -q "dev:api"; then
             echo "✅ API development script found"
           else
@@ -65,7 +65,7 @@ jobs:
       - name: Check Docker development setup
         run: |
           echo "Checking Docker configuration..."
-          
+
           if [ -f "docker-compose.yml" ]; then
             echo "✅ Docker Compose configuration found"
             
@@ -80,14 +80,14 @@ jobs:
       - name: Validate environment configuration
         run: |
           echo "Checking environment configuration..."
-          
+
           # Check for environment templates
           if [ -f ".env.example" ] || [ -f ".env.template" ]; then
             echo "✅ Environment template found"
           else
             echo "⚠️ No environment template found"
           fi
-          
+
           # Check for development-specific configs
           if [ -f "packages/shared/src/config" ] || [ -d "tests/config" ]; then
             echo "✅ Configuration directories found"
@@ -98,10 +98,10 @@ jobs:
       - name: Test local build process
         run: |
           echo "Testing local build process..."
-          
+
           # Test building each package
           npm run build 2>&1 | tee build.log
-          
+
           if [ ${PIPESTATUS[0]} -eq 0 ]; then
             echo "✅ All packages built successfully"
           else
@@ -113,10 +113,10 @@ jobs:
       - name: Test development server setup
         run: |
           echo "Testing development server setup..."
-          
+
           # Test if development servers can start (timeout after 30 seconds)
           timeout 30s npm run dev:services || echo "⚠️ Development services might not start properly"
-          
+
           echo "✅ Development environment validation completed"
 
       - name: Generate development status report

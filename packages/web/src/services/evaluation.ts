@@ -38,7 +38,7 @@ export const evaluationService = {
 
   async deleteEvaluation(id: string): Promise<void> {
     await apiClient.delete(`/api/evaluations/${id}`)
-  }
+  },
 }
 
 export default evaluationService

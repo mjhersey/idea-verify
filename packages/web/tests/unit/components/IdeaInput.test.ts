@@ -12,19 +12,19 @@ import { useAuthStore } from '@/stores/auth'
 
 // Mock router
 const mockRouter = {
-  push: vi.fn()
+  push: vi.fn(),
 }
 
 vi.mock('vue-router', () => ({
-  useRouter: () => mockRouter
+  useRouter: () => mockRouter,
 }))
 
 // Mock stores
 vi.mock('@/stores/ideas', () => ({
-  useIdeasStore: vi.fn()
+  useIdeasStore: vi.fn(),
 }))
 vi.mock('@/stores/auth', () => ({
-  useAuthStore: vi.fn()
+  useAuthStore: vi.fn(),
 }))
 
 describe('IdeaInput', () => {
@@ -34,30 +34,29 @@ describe('IdeaInput', () => {
 
   beforeEach(() => {
     setActivePinia(createPinia())
-    
+
     mockIdeasStore = {
-      submitIdea: vi.fn()
+      submitIdea: vi.fn(),
     }
-    
+
     mockAuthStore = {
       isAuthenticated: true,
-      logout: vi.fn()
+      logout: vi.fn(),
     }
-    
     ;(useIdeasStore as any).mockReturnValue(mockIdeasStore)
     ;(useAuthStore as any).mockReturnValue(mockAuthStore)
-    
+
     wrapper = mount(IdeaInput, {
       global: {
         stubs: {
           'router-link': {
-            template: '<a><slot /></a>'
+            template: '<a><slot /></a>',
           },
-          'RouterLink': {
-            template: '<a><slot /></a>'
-          }
-        }
-      }
+          RouterLink: {
+            template: '<a><slot /></a>',
+          },
+        },
+      },
     })
   })
 
@@ -66,7 +65,7 @@ describe('IdeaInput', () => {
       const textarea = wrapper.find('textarea')
       await textarea.setValue('')
       await textarea.trigger('input')
-      
+
       expect(wrapper.text()).toContain('0 / 5000 characters')
     })
 
@@ -74,7 +73,7 @@ describe('IdeaInput', () => {
       const textarea = wrapper.find('textarea')
       await textarea.setValue('Short description')
       await textarea.trigger('input')
-      
+
       expect(wrapper.text()).toContain('more needed')
     })
 
@@ -83,7 +82,7 @@ describe('IdeaInput', () => {
       const validDescription = 'A'.repeat(100) // 100 characters
       await textarea.setValue(validDescription)
       await textarea.trigger('input')
-      
+
       expect(wrapper.text()).toContain('Valid length')
     })
 
@@ -92,7 +91,7 @@ describe('IdeaInput', () => {
       const longDescription = 'A'.repeat(5001)
       await textarea.setValue(longDescription)
       await textarea.trigger('input')
-      
+
       expect(wrapper.find('.text-red-600').exists()).toBe(true)
     })
 
@@ -103,11 +102,12 @@ describe('IdeaInput', () => {
 
     it('should enable submit button when form is valid', async () => {
       const textarea = wrapper.find('textarea')
-      const validDescription = 'This is a valid business idea description that is long enough to pass validation and contains meaningful content about my innovative startup concept.'
+      const validDescription =
+        'This is a valid business idea description that is long enough to pass validation and contains meaningful content about my innovative startup concept.'
       await textarea.setValue(validDescription)
       await textarea.trigger('input')
       await nextTick()
-      
+
       const submitButton = wrapper.find('button[type="submit"]')
       expect(submitButton.attributes('disabled')).toBeUndefined()
     })
@@ -119,7 +119,7 @@ describe('IdeaInput', () => {
       const testText = 'Test description'
       await textarea.setValue(testText)
       await textarea.trigger('input')
-      
+
       expect(wrapper.text()).toContain(`${testText.length} / 5000 characters`)
     })
 
@@ -127,17 +127,18 @@ describe('IdeaInput', () => {
       const textarea = wrapper.find('textarea')
       await textarea.setValue('Short')
       await textarea.trigger('input')
-      
+
       const counter = wrapper.find('.text-red-600')
       expect(counter.exists()).toBe(true)
     })
 
     it('should show green text for valid length', async () => {
       const textarea = wrapper.find('textarea')
-      const validDescription = 'This is a valid business idea description that is long enough to pass validation.'
+      const validDescription =
+        'This is a valid business idea description that is long enough to pass validation.'
       await textarea.setValue(validDescription)
       await textarea.trigger('input')
-      
+
       const validIndicator = wrapper.find('.text-green-600')
       expect(validIndicator.exists()).toBe(true)
     })
@@ -145,105 +146,112 @@ describe('IdeaInput', () => {
 
   describe('Form Submission', () => {
     it('should call submitIdea when form is submitted with valid data', async () => {
-      const validDescription = 'This is a comprehensive business idea description that meets all validation requirements and provides detailed information about the proposed venture.'
-      
+      const validDescription =
+        'This is a comprehensive business idea description that meets all validation requirements and provides detailed information about the proposed venture.'
+
       mockIdeasStore.submitIdea.mockResolvedValue({
         success: true,
         message: 'Success',
         ideaId: 'test-id',
-        evaluationId: 'eval-id'
+        evaluationId: 'eval-id',
       })
-      
+
       const textarea = wrapper.find('textarea')
       await textarea.setValue(validDescription)
       await textarea.trigger('input')
       await nextTick()
-      
+
       const form = wrapper.find('form')
       await form.trigger('submit.prevent')
-      
+
       expect(mockIdeasStore.submitIdea).toHaveBeenCalledWith({
         title: '',
-        description: validDescription
+        description: validDescription,
       })
     })
 
     it('should show loading state during submission', async () => {
-      const validDescription = 'This is a comprehensive business idea description that meets all validation requirements.'
-      
+      const validDescription =
+        'This is a comprehensive business idea description that meets all validation requirements.'
+
       // Mock a slow submission
-      mockIdeasStore.submitIdea.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)))
-      
+      mockIdeasStore.submitIdea.mockImplementation(
+        () => new Promise(resolve => setTimeout(resolve, 100))
+      )
+
       const textarea = wrapper.find('textarea')
       await textarea.setValue(validDescription)
       await textarea.trigger('input')
       await nextTick()
-      
+
       const form = wrapper.find('form')
       form.trigger('submit.prevent')
       await nextTick()
-      
+
       expect(wrapper.text()).toContain('Submitting...')
-      
+
       const submitButton = wrapper.find('button[type="submit"]')
       expect(submitButton.attributes('disabled')).toBeDefined()
     })
 
     it('should show success message on successful submission', async () => {
-      const validDescription = 'This is a comprehensive business idea description that meets all validation requirements.'
-      
+      const validDescription =
+        'This is a comprehensive business idea description that meets all validation requirements.'
+
       mockIdeasStore.submitIdea.mockResolvedValue({
         success: true,
         message: 'Success message',
-        ideaId: 'test-id'
+        ideaId: 'test-id',
       })
-      
+
       const textarea = wrapper.find('textarea')
       await textarea.setValue(validDescription)
       await textarea.trigger('input')
       await nextTick()
-      
+
       const form = wrapper.find('form')
       await form.trigger('submit.prevent')
       await nextTick()
-      
+
       expect(wrapper.text()).toContain('Your business idea has been submitted successfully!')
     })
 
     it('should show error message on submission failure', async () => {
-      const validDescription = 'This is a comprehensive business idea description that meets all validation requirements.'
-      
+      const validDescription =
+        'This is a comprehensive business idea description that meets all validation requirements.'
+
       mockIdeasStore.submitIdea.mockResolvedValue({
         success: false,
-        message: 'Submission failed'
+        message: 'Submission failed',
       })
-      
+
       const textarea = wrapper.find('textarea')
       await textarea.setValue(validDescription)
       await textarea.trigger('input')
       await nextTick()
-      
+
       const form = wrapper.find('form')
       await form.trigger('submit.prevent')
       await nextTick()
-      
+
       expect(wrapper.text()).toContain('Submission failed')
     })
 
     it('should redirect to login if user is not authenticated', async () => {
       mockAuthStore.isAuthenticated = false
-      
-      const validDescription = 'This is a comprehensive business idea description that meets all validation requirements.'
-      
+
+      const validDescription =
+        'This is a comprehensive business idea description that meets all validation requirements.'
+
       const textarea = wrapper.find('textarea')
       await textarea.setValue(validDescription)
       await textarea.trigger('input')
       await nextTick()
-      
+
       const form = wrapper.find('form')
       await form.trigger('submit.prevent')
       await nextTick()
-      
+
       expect(wrapper.text()).toContain('Please log in to submit your business idea')
       expect(mockRouter.push).toHaveBeenCalledWith('/login')
     })
@@ -251,25 +259,27 @@ describe('IdeaInput', () => {
 
   describe('Input Sanitization', () => {
     it('should sanitize HTML input', async () => {
-      const maliciousInput = '<script>alert("xss")</script>This is a business idea that has enough characters to pass validation and contains malicious HTML content that should be sanitized.'
-      
+      const maliciousInput =
+        '<script>alert("xss")</script>This is a business idea that has enough characters to pass validation and contains malicious HTML content that should be sanitized.'
+
       mockIdeasStore.submitIdea.mockResolvedValue({
         success: true,
-        message: 'Success'
+        message: 'Success',
       })
-      
+
       const textarea = wrapper.find('textarea')
       await textarea.setValue(maliciousInput)
       await textarea.trigger('input')
       await nextTick()
-      
+
       const form = wrapper.find('form')
       await form.trigger('submit.prevent')
       await nextTick()
-      
+
       expect(mockIdeasStore.submitIdea).toHaveBeenCalledWith({
         title: '',
-        description: 'This is a business idea that has enough characters to pass validation and contains malicious HTML content that should be sanitized.' // HTML tags should be stripped
+        description:
+          'This is a business idea that has enough characters to pass validation and contains malicious HTML content that should be sanitized.', // HTML tags should be stripped
       })
     })
   })
@@ -277,29 +287,30 @@ describe('IdeaInput', () => {
   describe('Auto-redirect', () => {
     it('should auto-redirect to evaluation results after successful submission', async () => {
       vi.useFakeTimers()
-      
-      const validDescription = 'This is a comprehensive business idea description that meets all validation requirements.'
-      
+
+      const validDescription =
+        'This is a comprehensive business idea description that meets all validation requirements.'
+
       mockIdeasStore.submitIdea.mockResolvedValue({
         success: true,
         message: 'Success',
-        evaluationId: 'eval-123'
+        evaluationId: 'eval-123',
       })
-      
+
       const textarea = wrapper.find('textarea')
       await textarea.setValue(validDescription)
       await textarea.trigger('input')
       await nextTick()
-      
+
       const form = wrapper.find('form')
       await form.trigger('submit.prevent')
       await nextTick()
-      
+
       // Fast-forward time
       vi.advanceTimersByTime(3000)
-      
+
       expect(mockRouter.push).toHaveBeenCalledWith('/evaluation/eval-123')
-      
+
       vi.useRealTimers()
     })
   })

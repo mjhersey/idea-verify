@@ -1,14 +1,18 @@
 # Epic 4: Basic User Management (MVP Scope)
 
-**Epic Goal**: Provide essential user account features and evaluation history for MVP launch, focusing on core functionality needed to satisfy functional requirements FR5 and FR9.
+**Epic Goal**: Provide essential user account features and evaluation history
+for MVP launch, focusing on core functionality needed to satisfy functional
+requirements FR5 and FR9.
 
-**MVP Scope Notes:** This epic has been streamlined for MVP delivery. Advanced features (preferences, sophisticated iteration, billing flows) have been deferred to Post-MVP Epic 6 to accelerate time-to-market by ~2 weeks while retaining all core value delivery.
+**MVP Scope Notes:** This epic has been streamlined for MVP delivery. Advanced
+features (preferences, sophisticated iteration, billing flows) have been
+deferred to Post-MVP Epic 6 to accelerate time-to-market by ~2 weeks while
+retaining all core value delivery.
 
 ## Story 4.1: Basic User Dashboard
 
-**As a user,**
-**I want to see all my past evaluations,**
-**so that I can track my ideas and access previous results.**
+**As a user,** **I want to see all my past evaluations,** **so that I can track
+my ideas and access previous results.**
 
 **Acceptance Criteria:**
 
@@ -18,30 +22,31 @@
 4. Simple status indicators (Pending, In Progress, Completed, Failed)
 5. Basic pagination for users with many evaluations
 
-**Dependencies:** Requires Epic 1 Story 1.3 for user authentication and Epic 3 Story 3.5 for results data.
+**Dependencies:** Requires Epic 1 Story 1.3 for user authentication and Epic 3
+Story 3.5 for results data.
 
 ## Story 4.2: Simple Idea Re-evaluation
 
-**As a user,**
-**I want to modify and re-evaluate my business idea,**
-**so that I can improve its viability based on feedback.**
+**As a user,** **I want to modify and re-evaluate my business idea,** **so that
+I can improve its viability based on feedback.**
 
 **Acceptance Criteria:**
 
 1. "Modify & Re-evaluate" button visible on completed evaluation results
 2. Simple text area pre-populated with original idea description
-3. Character limit validation (50-5000 characters) consistent with original submission
+3. Character limit validation (50-5000 characters) consistent with original
+   submission
 4. Submit button to start new evaluation with modified idea
 5. Clear link between original evaluation and re-evaluation in dashboard
 6. Ability to view both evaluations separately
 
-**Dependencies:** Requires Story 4.1 for dashboard integration and Epic 1 Story 1.4 for idea submission API.
+**Dependencies:** Requires Story 4.1 for dashboard integration and Epic 1 Story
+1.4 for idea submission API.
 
 ## Story 4.3: Basic Usage Limits & Tracking
 
-**As a user,**
-**I want to understand my current usage limits,**
-**so that I know how many evaluations I have remaining.**
+**As a user,** **I want to understand my current usage limits,** **so that I
+know how many evaluations I have remaining.**
 
 **Acceptance Criteria:**
 
@@ -52,7 +57,8 @@
 5. Provide contact information (email) for upgrade requests
 6. Simple admin interface to adjust user limits manually
 
-**Dependencies:** Requires Epic 1 Story 1.3 for user tracking and Story 4.1 for dashboard display.
+**Dependencies:** Requires Epic 1 Story 1.3 for user tracking and Story 4.1 for
+dashboard display.
 
 ---
 
@@ -165,7 +171,8 @@ Limit Reached → Modal: "Upgrade for Unlimited Evaluations"
 ✅ **Usage tracking active** - Clear limits display and enforcement  
 ✅ **Admin tools available** - Basic user management capabilities  
 ✅ **Upgrade path clear** - Contact process for limit increases  
-✅ **FR5 & FR9 satisfied** - Functional requirements for iteration and evaluation history
+✅ **FR5 & FR9 satisfied** - Functional requirements for iteration and
+evaluation history
 
 **Success Metrics:**
 

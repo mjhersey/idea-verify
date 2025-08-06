@@ -3,103 +3,99 @@
  * Implements comprehensive trend analysis including web scraping, sentiment analysis, and PESTEL framework
  */
 
-import {
-  MarketTrend,
-  DataSource,
-  MarketSizingRequest
-} from '../schemas/market-research-types.js';
-import { DataSourceManager } from '../data-sources/data-source-manager.js';
+import { MarketTrend, DataSource, MarketSizingRequest } from '../schemas/market-research-types.js'
+import { DataSourceManager } from '../data-sources/data-source-manager.js'
 
 export interface TrendAnalysisConfig {
-  enableWebScraping: boolean;
-  enableSentimentAnalysis: boolean;
-  enableSocialMediaMonitoring: boolean;
-  enableRegulatoryAnalysis: boolean;
-  enableTechnologyTrendAnalysis: boolean;
-  dataSources: string[];
-  timeHorizon: number; // months
+  enableWebScraping: boolean
+  enableSentimentAnalysis: boolean
+  enableSocialMediaMonitoring: boolean
+  enableRegulatoryAnalysis: boolean
+  enableTechnologyTrendAnalysis: boolean
+  dataSources: string[]
+  timeHorizon: number // months
 }
 
 export interface NewsItem {
-  title: string;
-  content: string;
-  source: string;
-  publishedDate: Date;
-  sentiment: 'positive' | 'negative' | 'neutral';
-  confidence: number;
-  relevanceScore: number;
-  keywords: string[];
+  title: string
+  content: string
+  source: string
+  publishedDate: Date
+  sentiment: 'positive' | 'negative' | 'neutral'
+  confidence: number
+  relevanceScore: number
+  keywords: string[]
 }
 
 export interface SocialMediaTrend {
-  platform: string;
-  trend: string;
-  volume: number;
-  sentiment: 'positive' | 'negative' | 'neutral';
-  engagement: number;
-  timeframe: string;
-  geography?: string;
+  platform: string
+  trend: string
+  volume: number
+  sentiment: 'positive' | 'negative' | 'neutral'
+  engagement: number
+  timeframe: string
+  geography?: string
 }
 
 export interface RegulatoryInsight {
-  type: 'legislation' | 'policy' | 'regulation';
-  title: string;
-  description: string;
-  impact: 'positive' | 'negative' | 'neutral';
-  severity: 'low' | 'medium' | 'high';
-  implementationDate?: Date;
-  jurisdiction: string;
-  source: string;
+  type: 'legislation' | 'policy' | 'regulation'
+  title: string
+  description: string
+  impact: 'positive' | 'negative' | 'neutral'
+  severity: 'low' | 'medium' | 'high'
+  implementationDate?: Date
+  jurisdiction: string
+  source: string
 }
 
 export interface TechnologyTrend {
-  technology: string;
-  maturityLevel: 'emerging' | 'developing' | 'mature' | 'declining';
-  adoptionRate: number; // 0-100
-  disruptionPotential: number; // 0-100
-  relevanceToIdea: number; // 0-100
-  keyPlayers: string[];
-  timeToMainstream: number; // years
+  technology: string
+  maturityLevel: 'emerging' | 'developing' | 'mature' | 'declining'
+  adoptionRate: number // 0-100
+  disruptionPotential: number // 0-100
+  relevanceToIdea: number // 0-100
+  keyPlayers: string[]
+  timeToMainstream: number // years
 }
 
 export interface PESTELAnalysis {
   political: {
-    factors: string[];
-    impact: number; // -100 to 100
-    confidence: number;
-  };
+    factors: string[]
+    impact: number // -100 to 100
+    confidence: number
+  }
   economic: {
-    factors: string[];
-    impact: number;
-    confidence: number;
-  };
+    factors: string[]
+    impact: number
+    confidence: number
+  }
   social: {
-    factors: string[];
-    impact: number;
-    confidence: number;
-  };
+    factors: string[]
+    impact: number
+    confidence: number
+  }
   technological: {
-    factors: string[];
-    impact: number;
-    confidence: number;
-  };
+    factors: string[]
+    impact: number
+    confidence: number
+  }
   environmental: {
-    factors: string[];
-    impact: number;
-    confidence: number;
-  };
+    factors: string[]
+    impact: number
+    confidence: number
+  }
   legal: {
-    factors: string[];
-    impact: number;
-    confidence: number;
-  };
+    factors: string[]
+    impact: number
+    confidence: number
+  }
 }
 
 export class TrendAnalyzer {
-  private config: TrendAnalysisConfig;
-  private dataSourceManager: DataSourceManager;
-  private readonly maxRetries = 3;
-  private readonly requestDelay = 1000; // 1 second between requests
+  private config: TrendAnalysisConfig
+  private dataSourceManager: DataSourceManager
+  private readonly maxRetries = 3
+  private readonly requestDelay = 1000 // 1 second between requests
 
   constructor(config: Partial<TrendAnalysisConfig> = {}) {
     this.config = {
@@ -113,12 +109,12 @@ export class TrendAnalyzer {
         'news-sources',
         'government-data',
         'tech-blogs',
-        'research-papers'
+        'research-papers',
       ],
       timeHorizon: 12,
-      ...config
-    };
-    
+      ...config,
+    }
+
     this.dataSourceManager = new DataSourceManager({
       enableWebScraping: this.config.enableWebScraping,
       enableCaching: true,
@@ -128,86 +124,85 @@ export class TrendAnalyzer {
           primary: ['reuters', 'bloomberg'],
           fallback: ['general-news'],
           timeout: 3000, // Reduced timeout for testing
-          minQuality: 60
+          minQuality: 60,
         },
         reports: {
           primary: ['gartner'],
           fallback: ['industry-associations'],
           timeout: 3000,
-          minQuality: 70
+          minQuality: 70,
         },
         government: {
           primary: ['census'],
           fallback: [],
           timeout: 2000,
-          minQuality: 80
+          minQuality: 80,
         },
         social: {
           primary: [],
           fallback: ['social-scraping'],
           timeout: 2000,
-          minQuality: 50
+          minQuality: 50,
         },
         financial: {
           primary: ['yahoo-finance'],
           fallback: [],
           timeout: 2000,
-          minQuality: 60
-        }
-      }
-    });
+          minQuality: 60,
+        },
+      },
+    })
   }
 
   /**
    * Analyze comprehensive market trends for a business idea
    */
   async analyzeMarketTrends(request: MarketSizingRequest): Promise<MarketTrend[]> {
-    const trends: MarketTrend[] = [];
+    const trends: MarketTrend[] = []
 
     try {
       // Parallel execution of different trend analysis methods
-      const analysisPromises = [];
+      const analysisPromises = []
 
       if (this.config.enableWebScraping) {
-        analysisPromises.push(this.analyzeNewsAndReports(request));
+        analysisPromises.push(this.analyzeNewsAndReports(request))
       }
 
       if (this.config.enableSentimentAnalysis) {
-        analysisPromises.push(this.analyzeSentimentTrends(request));
+        analysisPromises.push(this.analyzeSentimentTrends(request))
       }
 
       if (this.config.enableSocialMediaMonitoring) {
-        analysisPromises.push(this.analyzeSocialMediaTrends(request));
+        analysisPromises.push(this.analyzeSocialMediaTrends(request))
       }
 
       if (this.config.enableRegulatoryAnalysis) {
-        analysisPromises.push(this.analyzeRegulatoryTrends(request));
+        analysisPromises.push(this.analyzeRegulatoryTrends(request))
       }
 
       if (this.config.enableTechnologyTrendAnalysis) {
-        analysisPromises.push(this.analyzeTechnologyTrends(request));
+        analysisPromises.push(this.analyzeTechnologyTrends(request))
       }
 
       // Execute PESTEL analysis
-      analysisPromises.push(this.performPESTELAnalysis(request));
+      analysisPromises.push(this.performPESTELAnalysis(request))
 
-      const results = await Promise.allSettled(analysisPromises);
-      
+      const results = await Promise.allSettled(analysisPromises)
+
       // Combine all successful results
       results.forEach((result, index) => {
         if (result.status === 'fulfilled' && result.value) {
-          trends.push(...result.value);
+          trends.push(...result.value)
         } else if (result.status === 'rejected') {
-          console.warn(`Trend analysis method ${index} failed:`, result.reason);
+          console.warn(`Trend analysis method ${index} failed:`, result.reason)
         }
-      });
+      })
 
       // Sort trends by confidence and relevance
-      return this.prioritizeTrends(trends);
-
+      return this.prioritizeTrends(trends)
     } catch (error) {
-      console.error('Error in trend analysis:', error);
-      return this.getFallbackTrends(request);
+      console.error('Error in trend analysis:', error)
+      return this.getFallbackTrends(request)
     }
   }
 
@@ -217,15 +212,15 @@ export class TrendAnalyzer {
   private async analyzeNewsAndReports(request: MarketSizingRequest): Promise<MarketTrend[]> {
     try {
       // Use DataSourceManager to collect real data with timeout
-      const dataPromise = this.dataSourceManager.collectMarketData(request);
-      const timeoutPromise = new Promise<any>((_, reject) => 
+      const dataPromise = this.dataSourceManager.collectMarketData(request)
+      const timeoutPromise = new Promise<any>((_, reject) =>
         setTimeout(() => reject(new Error('Data collection timeout')), 2000)
-      );
-      
-      const marketData = await Promise.race([dataPromise, timeoutPromise]);
-      
+      )
+
+      const marketData = await Promise.race([dataPromise, timeoutPromise])
+
       // Process news data
-      const newsItems: NewsItem[] = [];
+      const newsItems: NewsItem[] = []
       marketData.news.forEach(result => {
         if (result.data && result.quality > 60) {
           newsItems.push({
@@ -236,10 +231,10 @@ export class TrendAnalyzer {
             sentiment: result.data.sentiment || 'neutral',
             confidence: result.quality,
             relevanceScore: Math.min(result.quality + 10, 100),
-            keywords: result.data.tags || result.data.keywords || ['market', 'analysis']
-          });
+            keywords: result.data.tags || result.data.keywords || ['market', 'analysis'],
+          })
         }
-      });
+      })
 
       // Process reports data
       marketData.reports.forEach(result => {
@@ -252,20 +247,20 @@ export class TrendAnalyzer {
             sentiment: 'positive',
             confidence: result.quality,
             relevanceScore: result.quality,
-            keywords: result.data.keyTrends || ['industry', 'report', 'analysis']
-          });
+            keywords: result.data.keyTrends || ['industry', 'report', 'analysis'],
+          })
         }
-      });
+      })
 
       // Fallback to mock data if no real data collected
       if (newsItems.length === 0) {
-        newsItems.push(...this.getMockNewsItems());
+        newsItems.push(...this.getMockNewsItems())
       }
 
-      return this.convertNewsToTrends(newsItems, request);
+      return this.convertNewsToTrends(newsItems, request)
     } catch (error) {
-      console.warn('Error analyzing news and reports:', error);
-      return this.convertNewsToTrends(this.getMockNewsItems(), request);
+      console.warn('Error analyzing news and reports:', error)
+      return this.convertNewsToTrends(this.getMockNewsItems(), request)
     }
   }
 
@@ -282,7 +277,7 @@ export class TrendAnalyzer {
         sentiment: 'positive',
         confidence: 85,
         relevanceScore: 90,
-        keywords: ['AI', 'education', 'growth', 'personalization']
+        keywords: ['AI', 'education', 'growth', 'personalization'],
       },
       {
         title: 'Privacy Concerns Rise Over Student Data Collection',
@@ -292,9 +287,9 @@ export class TrendAnalyzer {
         sentiment: 'negative',
         confidence: 78,
         relevanceScore: 70,
-        keywords: ['privacy', 'data', 'student', 'regulation']
-      }
-    ];
+        keywords: ['privacy', 'data', 'student', 'regulation'],
+      },
+    ]
   }
 
   /**
@@ -302,29 +297,32 @@ export class TrendAnalyzer {
    */
   private async analyzeSentimentTrends(request: MarketSizingRequest): Promise<MarketTrend[]> {
     // Mock sentiment analysis - in production, this would use NLP APIs
-    const category = request.businessIdea.category || 'technology';
-    
+    const category = request.businessIdea.category || 'technology'
+
     const sentimentTrends: MarketTrend[] = [
       {
         trend: 'Positive Consumer Sentiment Toward AI',
-        description: 'Growing acceptance and enthusiasm for AI-powered solutions across demographics',
+        description:
+          'Growing acceptance and enthusiasm for AI-powered solutions across demographics',
         impact: 'positive',
         magnitude: 'high',
         confidence: 82,
-        sources: [{
-          name: 'Consumer Sentiment Survey 2024',
-          type: 'survey',
-          credibility: 85,
-          recency: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-          accessDate: new Date(),
-          sampleSize: 10000
-        }],
+        sources: [
+          {
+            name: 'Consumer Sentiment Survey 2024',
+            type: 'survey',
+            credibility: 85,
+            recency: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+            accessDate: new Date(),
+            sampleSize: 10000,
+          },
+        ],
         timeframe: '2024-2025',
-        relatedTrends: ['AI Adoption', 'Technology Acceptance']
-      }
-    ];
+        relatedTrends: ['AI Adoption', 'Technology Acceptance'],
+      },
+    ]
 
-    return sentimentTrends;
+    return sentimentTrends
   }
 
   /**
@@ -339,19 +337,21 @@ export class TrendAnalyzer {
         impact: 'positive',
         magnitude: 'medium',
         confidence: 70,
-        sources: [{
-          name: 'Social Media Analytics Dashboard',
-          type: 'web-scraping',
-          credibility: 75,
-          recency: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-          accessDate: new Date()
-        }],
+        sources: [
+          {
+            name: 'Social Media Analytics Dashboard',
+            type: 'web-scraping',
+            credibility: 75,
+            recency: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+            accessDate: new Date(),
+          },
+        ],
         timeframe: '2024',
-        relatedTrends: ['Social Media Engagement', 'Educational Technology']
-      }
-    ];
+        relatedTrends: ['Social Media Engagement', 'Educational Technology'],
+      },
+    ]
 
-    return trends;
+    return trends
   }
 
   /**
@@ -368,7 +368,7 @@ export class TrendAnalyzer {
         severity: 'medium',
         implementationDate: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000),
         jurisdiction: 'United States',
-        source: 'Federal Trade Commission'
+        source: 'Federal Trade Commission',
       },
       {
         type: 'policy',
@@ -378,11 +378,11 @@ export class TrendAnalyzer {
         severity: 'high',
         implementationDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000),
         jurisdiction: 'United States',
-        source: 'Department of Education'
-      }
-    ];
+        source: 'Department of Education',
+      },
+    ]
 
-    return this.convertRegulatoryToTrends(regulatoryInsights);
+    return this.convertRegulatoryToTrends(regulatoryInsights)
   }
 
   /**
@@ -398,7 +398,7 @@ export class TrendAnalyzer {
         disruptionPotential: 85,
         relevanceToIdea: 95,
         keyPlayers: ['OpenAI', 'Google', 'Microsoft'],
-        timeToMainstream: 2
+        timeToMainstream: 2,
       },
       {
         technology: 'Adaptive Learning Algorithms',
@@ -407,54 +407,58 @@ export class TrendAnalyzer {
         disruptionPotential: 70,
         relevanceToIdea: 90,
         keyPlayers: ['Carnegie Learning', 'Knewton', 'DreamBox'],
-        timeToMainstream: 1
-      }
-    ];
+        timeToMainstream: 1,
+      },
+    ]
 
-    return this.convertTechnologyToTrends(techTrends);
+    return this.convertTechnologyToTrends(techTrends)
   }
 
   /**
    * Perform PESTEL analysis
    */
   private async performPESTELAnalysis(request: MarketSizingRequest): Promise<MarketTrend[]> {
-    const category = request.businessIdea.category || 'technology';
-    
+    const category = request.businessIdea.category || 'technology'
+
     // Mock PESTEL analysis - in production, this would be more comprehensive
     const pestelAnalysis: PESTELAnalysis = {
       political: {
-        factors: ['Education policy changes', 'Government AI initiatives', 'International relations'],
+        factors: [
+          'Education policy changes',
+          'Government AI initiatives',
+          'International relations',
+        ],
         impact: 15,
-        confidence: 75
+        confidence: 75,
       },
       economic: {
         factors: ['Economic growth', 'Education spending', 'Technology investment'],
         impact: 25,
-        confidence: 80
+        confidence: 80,
       },
       social: {
         factors: ['Digital literacy trends', 'Learning preferences', 'Demographic shifts'],
         impact: 30,
-        confidence: 85
+        confidence: 85,
       },
       technological: {
         factors: ['AI advancement', 'Internet connectivity', 'Device accessibility'],
         impact: 45,
-        confidence: 90
+        confidence: 90,
       },
       environmental: {
         factors: ['Sustainability concerns', 'Remote learning adoption', 'Digital footprint'],
         impact: 10,
-        confidence: 70
+        confidence: 70,
       },
       legal: {
         factors: ['Data protection laws', 'Accessibility requirements', 'IP regulations'],
         impact: -10,
-        confidence: 80
-      }
-    };
+        confidence: 80,
+      },
+    }
 
-    return this.convertPESTELToTrends(pestelAnalysis);
+    return this.convertPESTELToTrends(pestelAnalysis)
   }
 
   /**
@@ -467,17 +471,19 @@ export class TrendAnalyzer {
       impact: item.sentiment,
       magnitude: item.relevanceScore > 80 ? 'high' : item.relevanceScore > 60 ? 'medium' : 'low',
       confidence: item.confidence,
-      sources: [{
-        name: item.source,
-        type: 'news' as const,
-        credibility: 75,
-        recency: item.publishedDate,
-        accessDate: new Date(),
-        url: `https://example.com/news/${encodeURIComponent(item.title)}`
-      }],
+      sources: [
+        {
+          name: item.source,
+          type: 'news' as const,
+          credibility: 75,
+          recency: item.publishedDate,
+          accessDate: new Date(),
+          url: `https://example.com/news/${encodeURIComponent(item.title)}`,
+        },
+      ],
       timeframe: this.getTimeframeFromDate(item.publishedDate),
-      relatedTrends: item.keywords
-    }));
+      relatedTrends: item.keywords,
+    }))
   }
 
   /**
@@ -490,17 +496,20 @@ export class TrendAnalyzer {
       impact: insight.impact,
       magnitude: insight.severity,
       confidence: 85,
-      sources: [{
-        name: insight.source,
-        type: 'government-data' as const,
-        credibility: 95,
-        recency: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-        accessDate: new Date()
-      }],
-      timeframe: insight.implementationDate ? 
-        insight.implementationDate.getFullYear().toString() : '2024-2025',
-      relatedTrends: [insight.type, 'regulation', 'policy']
-    }));
+      sources: [
+        {
+          name: insight.source,
+          type: 'government-data' as const,
+          credibility: 95,
+          recency: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+          accessDate: new Date(),
+        },
+      ],
+      timeframe: insight.implementationDate
+        ? insight.implementationDate.getFullYear().toString()
+        : '2024-2025',
+      relatedTrends: [insight.type, 'regulation', 'policy'],
+    }))
   }
 
   /**
@@ -513,46 +522,51 @@ export class TrendAnalyzer {
       impact: tech.disruptionPotential > 70 ? 'positive' : 'neutral',
       magnitude: tech.relevanceToIdea > 80 ? 'high' : tech.relevanceToIdea > 60 ? 'medium' : 'low',
       confidence: 80,
-      sources: [{
-        name: 'Technology Trend Analysis',
-        type: 'research-firm' as const,
-        credibility: 85,
-        recency: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
-        accessDate: new Date()
-      }],
+      sources: [
+        {
+          name: 'Technology Trend Analysis',
+          type: 'research-firm' as const,
+          credibility: 85,
+          recency: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
+          accessDate: new Date(),
+        },
+      ],
       timeframe: `2024-${2024 + tech.timeToMainstream}`,
-      relatedTrends: [tech.technology, 'innovation', 'technology']
-    }));
+      relatedTrends: [tech.technology, 'innovation', 'technology'],
+    }))
   }
 
   /**
    * Convert PESTEL analysis to market trends
    */
   private convertPESTELToTrends(pestel: PESTELAnalysis): MarketTrend[] {
-    const trends: MarketTrend[] = [];
+    const trends: MarketTrend[] = []
 
     Object.entries(pestel).forEach(([category, analysis]) => {
-      if (Math.abs(analysis.impact) > 20) { // Only include significant impacts
+      if (Math.abs(analysis.impact) > 20) {
+        // Only include significant impacts
         trends.push({
           trend: `${category.charAt(0).toUpperCase() + category.slice(1)} Factors Impact`,
           description: `${category} factors showing ${analysis.impact > 0 ? 'positive' : 'negative'} impact on market conditions`,
           impact: analysis.impact > 0 ? 'positive' : 'negative',
           magnitude: Math.abs(analysis.impact) > 30 ? 'high' : 'medium',
           confidence: analysis.confidence,
-          sources: [{
-            name: 'PESTEL Analysis Framework',
-            type: 'research-firm' as const,
-            credibility: 80,
-            recency: new Date(),
-            accessDate: new Date()
-          }],
+          sources: [
+            {
+              name: 'PESTEL Analysis Framework',
+              type: 'research-firm' as const,
+              credibility: 80,
+              recency: new Date(),
+              accessDate: new Date(),
+            },
+          ],
           timeframe: '2024-2025',
-          relatedTrends: ['PESTEL', category, 'macro-environment']
-        });
+          relatedTrends: ['PESTEL', category, 'macro-environment'],
+        })
       }
-    });
+    })
 
-    return trends;
+    return trends
   }
 
   /**
@@ -564,27 +578,31 @@ export class TrendAnalyzer {
         // Sort by magnitude first, then confidence
         const magnitudeScore = (trend: MarketTrend) => {
           switch (trend.magnitude) {
-            case 'high': return 3;
-            case 'medium': return 2;
-            case 'low': return 1;
-            default: return 0;
+            case 'high':
+              return 3
+            case 'medium':
+              return 2
+            case 'low':
+              return 1
+            default:
+              return 0
           }
-        };
-        
-        const scoreA = magnitudeScore(a) * 100 + a.confidence;
-        const scoreB = magnitudeScore(b) * 100 + b.confidence;
-        
-        return scoreB - scoreA;
+        }
+
+        const scoreA = magnitudeScore(a) * 100 + a.confidence
+        const scoreB = magnitudeScore(b) * 100 + b.confidence
+
+        return scoreB - scoreA
       })
-      .slice(0, 10); // Limit to top 10 trends
+      .slice(0, 10) // Limit to top 10 trends
   }
 
   /**
    * Get fallback trends if analysis fails
    */
   private getFallbackTrends(request: MarketSizingRequest): MarketTrend[] {
-    const category = request.businessIdea.category || 'technology';
-    
+    const category = request.businessIdea.category || 'technology'
+
     return [
       {
         trend: 'Digital Transformation Acceleration',
@@ -592,17 +610,19 @@ export class TrendAnalyzer {
         impact: 'positive',
         magnitude: 'high',
         confidence: 70,
-        sources: [{
-          name: 'Fallback Analysis',
-          type: 'research-firm',
-          credibility: 60,
-          recency: new Date(),
-          accessDate: new Date()
-        }],
+        sources: [
+          {
+            name: 'Fallback Analysis',
+            type: 'research-firm',
+            credibility: 60,
+            recency: new Date(),
+            accessDate: new Date(),
+          },
+        ],
         timeframe: '2024-2025',
-        relatedTrends: ['digitization', 'technology']
-      }
-    ];
+        relatedTrends: ['digitization', 'technology'],
+      },
+    ]
   }
 
   /**
@@ -610,22 +630,22 @@ export class TrendAnalyzer {
    */
   private extractTrendFromNews(news: NewsItem): string {
     // Simple trend extraction based on title
-    return news.title.length > 50 ? news.title.substring(0, 50) + '...' : news.title;
+    return news.title.length > 50 ? news.title.substring(0, 50) + '...' : news.title
   }
 
   private getTimeframeFromDate(date: Date): string {
-    const currentYear = new Date().getFullYear();
-    const newsYear = date.getFullYear();
-    
-    if (newsYear === currentYear) return currentYear.toString();
-    return `${newsYear}-${currentYear}`;
+    const currentYear = new Date().getFullYear()
+    const newsYear = date.getFullYear()
+
+    if (newsYear === currentYear) return currentYear.toString()
+    return `${newsYear}-${currentYear}`
   }
 
   /**
    * Rate limiting for API calls
    */
   private async rateLimitedRequest<T>(operation: () => Promise<T>): Promise<T> {
-    await new Promise(resolve => setTimeout(resolve, this.requestDelay));
-    return operation();
+    await new Promise(resolve => setTimeout(resolve, this.requestDelay))
+    return operation()
   }
 }

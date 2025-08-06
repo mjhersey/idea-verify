@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
@@ -10,7 +10,7 @@ export default defineConfig({
       '**/dist/**',
       '**/cypress/**',
       '**/.{idea,git,cache,output,temp}/**',
-      '**/integration/**' // Skip integration tests that require database
-    ]
+      '**/integration/**', // Skip integration tests that require database
+    ],
   },
-});
+})

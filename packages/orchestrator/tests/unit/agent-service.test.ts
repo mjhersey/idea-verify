@@ -2,57 +2,57 @@
  * Unit tests for Agent Service
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AgentService } from '../../src/agents/agent-service.js';
-import { AgentRequest, AgentExecutionContext } from '../../src/agents/types.js';
+import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { AgentService } from '../../src/agents/agent-service.js'
+import { AgentRequest, AgentExecutionContext } from '../../src/agents/types.js'
 
 // Mock AgentFactory
 vi.mock('../../src/agents/agent-factory.js', () => ({
   AgentFactory: {
     isAgentSupported: vi.fn(),
     getAgent: vi.fn(),
-    getAvailableAgentTypes: vi.fn(() => ['market-research'])
-  }
-}));
+    getAvailableAgentTypes: vi.fn(() => ['market-research']),
+  },
+}))
 
 describe('AgentService', () => {
-  let agentService: AgentService;
-  let mockRequest: AgentRequest;
-  let mockContext: AgentExecutionContext;
+  let agentService: AgentService
+  let mockRequest: AgentRequest
+  let mockContext: AgentExecutionContext
 
   beforeEach(() => {
-    agentService = AgentService.getInstance();
-    
+    agentService = AgentService.getInstance()
+
     mockRequest = {
       businessIdea: {
         id: 'idea-123',
         title: 'AI-Powered Fitness Tracking App',
-        description: 'A mobile app that uses AI to provide personalized fitness recommendations'
+        description: 'A mobile app that uses AI to provide personalized fitness recommendations',
       },
-      analysisType: 'market_size'
-    };
+      analysisType: 'market_size',
+    }
 
     mockContext = {
       evaluationId: 'eval-123',
       correlationId: 'corr-123',
-      timestamp: new Date()
-    };
-  });
+      timestamp: new Date(),
+    }
+  })
 
   describe('singleton pattern', () => {
     it('should return the same instance', () => {
-      const instance1 = AgentService.getInstance();
-      const instance2 = AgentService.getInstance();
-      expect(instance1).toBe(instance2);
-    });
-  });
+      const instance1 = AgentService.getInstance()
+      const instance2 = AgentService.getInstance()
+      expect(instance1).toBe(instance2)
+    })
+  })
 
   describe('executeAgent', () => {
     it('should execute supported agent successfully', async () => {
-      const { AgentFactory } = await import('../../src/agents/agent-factory.js');
-      
-      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true);
-      
+      const { AgentFactory } = await import('../../src/agents/agent-factory.js')
+
+      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true)
+
       const mockAgent = {
         execute: vi.fn().mockResolvedValue({
           agentType: 'market-research',
@@ -62,51 +62,48 @@ describe('AgentService', () => {
           metadata: {
             processingTime: 1000,
             model: 'gpt-4',
-            retryCount: 0
+            retryCount: 0,
           },
-          rawData: { test: 'data' }
-        })
-      };
-      
-      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any);
+          rawData: { test: 'data' },
+        }),
+      }
 
-      const result = await agentService.executeAgent(
-        'market-research',
-        mockRequest,
-        mockContext
-      );
+      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any)
 
-      expect(result.success).toBe(true);
-      expect(result.response).toBeDefined();
-      expect(result.response!.score).toBe(85);
-      expect(result.response!.confidence).toBe('high');
-      expect(result.retryCount).toBe(0);
-      expect(mockAgent.execute).toHaveBeenCalledWith(mockRequest, mockContext);
-    });
+      const result = await agentService.executeAgent('market-research', mockRequest, mockContext)
+
+      expect(result.success).toBe(true)
+      expect(result.response).toBeDefined()
+      expect(result.response!.score).toBe(85)
+      expect(result.response!.confidence).toBe('high')
+      expect(result.retryCount).toBe(0)
+      expect(mockAgent.execute).toHaveBeenCalledWith(mockRequest, mockContext)
+    })
 
     it('should handle unsupported agent type', async () => {
-      const { AgentFactory } = await import('../../src/agents/agent-factory.js');
-      
-      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(false);
+      const { AgentFactory } = await import('../../src/agents/agent-factory.js')
+
+      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(false)
 
       const result = await agentService.executeAgent(
         'unsupported-agent' as any,
         mockRequest,
         mockContext
-      );
+      )
 
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('not supported');
-      expect(result.retryCount).toBe(0);
-    });
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('not supported')
+      expect(result.retryCount).toBe(0)
+    })
 
     it('should retry on agent failure', async () => {
-      const { AgentFactory } = await import('../../src/agents/agent-factory.js');
-      
-      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true);
-      
+      const { AgentFactory } = await import('../../src/agents/agent-factory.js')
+
+      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true)
+
       const mockAgent = {
-        execute: vi.fn()
+        execute: vi
+          .fn()
           .mockRejectedValueOnce(new Error('Temporary failure'))
           .mockResolvedValueOnce({
             agentType: 'market-research',
@@ -116,79 +113,71 @@ describe('AgentService', () => {
             metadata: {
               processingTime: 1500,
               model: 'gpt-4',
-              retryCount: 1
+              retryCount: 1,
             },
-            rawData: { test: 'data' }
-          })
-      };
-      
-      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any);
+            rawData: { test: 'data' },
+          }),
+      }
 
-      const result = await agentService.executeAgent(
-        'market-research',
-        mockRequest,
-        mockContext,
-        { maxRetries: 2 }
-      );
+      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any)
 
-      expect(result.success).toBe(true);
-      expect(result.retryCount).toBe(1);
-      expect(mockAgent.execute).toHaveBeenCalledTimes(2);
-    });
+      const result = await agentService.executeAgent('market-research', mockRequest, mockContext, {
+        maxRetries: 2,
+      })
+
+      expect(result.success).toBe(true)
+      expect(result.retryCount).toBe(1)
+      expect(mockAgent.execute).toHaveBeenCalledTimes(2)
+    })
 
     it('should fail after max retries', async () => {
-      const { AgentFactory } = await import('../../src/agents/agent-factory.js');
-      
-      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true);
-      
+      const { AgentFactory } = await import('../../src/agents/agent-factory.js')
+
+      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true)
+
       const mockAgent = {
-        execute: vi.fn().mockRejectedValue(new Error('Persistent failure'))
-      };
-      
-      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any);
+        execute: vi.fn().mockRejectedValue(new Error('Persistent failure')),
+      }
 
-      const result = await agentService.executeAgent(
-        'market-research',
-        mockRequest,
-        mockContext,
-        { maxRetries: 1 }
-      );
+      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any)
 
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('Persistent failure');
-      expect(result.retryCount).toBe(1);
-      expect(mockAgent.execute).toHaveBeenCalledTimes(2); // Initial + 1 retry
-    });
+      const result = await agentService.executeAgent('market-research', mockRequest, mockContext, {
+        maxRetries: 1,
+      })
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('Persistent failure')
+      expect(result.retryCount).toBe(1)
+      expect(mockAgent.execute).toHaveBeenCalledTimes(2) // Initial + 1 retry
+    })
 
     it('should handle timeout', async () => {
-      const { AgentFactory } = await import('../../src/agents/agent-factory.js');
-      
-      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true);
-      
+      const { AgentFactory } = await import('../../src/agents/agent-factory.js')
+
+      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true)
+
       const mockAgent = {
-        execute: vi.fn().mockImplementation(() => 
-          new Promise(resolve => setTimeout(resolve, 2000))
-        )
-      };
-      
-      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any);
+        execute: vi
+          .fn()
+          .mockImplementation(() => new Promise(resolve => setTimeout(resolve, 2000))),
+      }
 
-      const result = await agentService.executeAgent(
-        'market-research',
-        mockRequest,
-        mockContext,
-        { timeout: 100, maxRetries: 0 }
-      );
+      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any)
 
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('timed out');
-    }, 10000);
+      const result = await agentService.executeAgent('market-research', mockRequest, mockContext, {
+        timeout: 100,
+        maxRetries: 0,
+      })
+
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('timed out')
+    }, 10000)
 
     it('should validate agent response', async () => {
-      const { AgentFactory } = await import('../../src/agents/agent-factory.js');
-      
-      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true);
-      
+      const { AgentFactory } = await import('../../src/agents/agent-factory.js')
+
+      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true)
+
       const mockAgent = {
         execute: vi.fn().mockResolvedValue({
           agentType: 'market-research',
@@ -196,29 +185,25 @@ describe('AgentService', () => {
           insights: ['Test'],
           confidence: 'high',
           metadata: { processingTime: 1000, model: 'test', retryCount: 0 },
-          rawData: {}
-        })
-      };
-      
-      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any);
+          rawData: {},
+        }),
+      }
 
-      const result = await agentService.executeAgent(
-        'market-research',
-        mockRequest,
-        mockContext
-      );
+      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any)
 
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('score must be a number between 0 and 100');
-    }, 10000);
-  });
+      const result = await agentService.executeAgent('market-research', mockRequest, mockContext)
+
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('score must be a number between 0 and 100')
+    }, 10000)
+  })
 
   describe('executeMultipleAgents', () => {
     it('should execute multiple agents successfully', async () => {
-      const { AgentFactory } = await import('../../src/agents/agent-factory.js');
-      
-      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true);
-      
+      const { AgentFactory } = await import('../../src/agents/agent-factory.js')
+
+      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true)
+
       const mockAgent = {
         execute: vi.fn().mockResolvedValue({
           agentType: 'market-research',
@@ -228,160 +213,150 @@ describe('AgentService', () => {
           metadata: {
             processingTime: 1000,
             model: 'gpt-4',
-            retryCount: 0
+            retryCount: 0,
           },
-          rawData: { test: 'data' }
-        })
-      };
-      
-      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any);
+          rawData: { test: 'data' },
+        }),
+      }
+
+      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any)
 
       const agentRequests = [
         { agentType: 'market-research' as const, request: mockRequest },
-        { agentType: 'market-research' as const, request: mockRequest }
-      ];
+        { agentType: 'market-research' as const, request: mockRequest },
+      ]
 
-      const results = await agentService.executeMultipleAgents(
-        agentRequests,
-        mockContext
-      );
+      const results = await agentService.executeMultipleAgents(agentRequests, mockContext)
 
-      expect(results).toHaveLength(2);
-      expect(results.every(r => r.success)).toBe(true);
-      expect(mockAgent.execute).toHaveBeenCalledTimes(2);
-    });
+      expect(results).toHaveLength(2)
+      expect(results.every(r => r.success)).toBe(true)
+      expect(mockAgent.execute).toHaveBeenCalledTimes(2)
+    })
 
     it('should handle partial failures in multiple agents', async () => {
-      const { AgentFactory } = await import('../../src/agents/agent-factory.js');
-      
-      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true);
-      
+      const { AgentFactory } = await import('../../src/agents/agent-factory.js')
+
+      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true)
+
       const mockAgent = {
-        execute: vi.fn()
+        execute: vi
+          .fn()
           .mockResolvedValueOnce({
             agentType: 'market-research',
             score: 80,
             insights: ['Success'],
             confidence: 'high' as const,
             metadata: { processingTime: 1000, model: 'gpt-4', retryCount: 0 },
-            rawData: {}
+            rawData: {},
           })
-          .mockRejectedValueOnce(new Error('Second agent failed'))
-      };
-      
-      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any);
+          .mockRejectedValueOnce(new Error('Second agent failed')),
+      }
+
+      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any)
 
       const agentRequests = [
         { agentType: 'market-research' as const, request: mockRequest },
-        { agentType: 'market-research' as const, request: mockRequest }
-      ];
+        { agentType: 'market-research' as const, request: mockRequest },
+      ]
 
-      const results = await agentService.executeMultipleAgents(
-        agentRequests,
-        mockContext,
-        { maxRetries: 0 }
-      );
+      const results = await agentService.executeMultipleAgents(agentRequests, mockContext, {
+        maxRetries: 0,
+      })
 
-      expect(results).toHaveLength(2);
-      expect(results[0].success).toBe(true);
-      expect(results[1].success).toBe(false);
-      expect(results[1].error).toBe('Second agent failed');
-    }, 10000);
+      expect(results).toHaveLength(2)
+      expect(results[0].success).toBe(true)
+      expect(results[1].success).toBe(false)
+      expect(results[1].error).toBe('Second agent failed')
+    }, 10000)
 
     it('should respect concurrency limits', async () => {
-      const { AgentFactory } = await import('../../src/agents/agent-factory.js');
-      
-      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true);
-      
-      let concurrentExecutions = 0;
-      let maxConcurrentExecutions = 0;
-      
+      const { AgentFactory } = await import('../../src/agents/agent-factory.js')
+
+      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true)
+
+      let concurrentExecutions = 0
+      let maxConcurrentExecutions = 0
+
       const mockAgent = {
         execute: vi.fn().mockImplementation(async () => {
-          concurrentExecutions++;
-          maxConcurrentExecutions = Math.max(maxConcurrentExecutions, concurrentExecutions);
-          
-          await new Promise(resolve => setTimeout(resolve, 100));
-          
-          concurrentExecutions--;
-          
+          concurrentExecutions++
+          maxConcurrentExecutions = Math.max(maxConcurrentExecutions, concurrentExecutions)
+
+          await new Promise(resolve => setTimeout(resolve, 100))
+
+          concurrentExecutions--
+
           return {
             agentType: 'market-research',
             score: 80,
             insights: ['Success'],
             confidence: 'high' as const,
             metadata: { processingTime: 100, model: 'gpt-4', retryCount: 0 },
-            rawData: {}
-          };
-        })
-      };
-      
-      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any);
+            rawData: {},
+          }
+        }),
+      }
 
-      const agentRequests = Array(5).fill(null).map(() => ({
-        agentType: 'market-research' as const,
-        request: mockRequest
-      }));
+      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any)
 
-      await agentService.executeMultipleAgents(
-        agentRequests,
-        mockContext,
-        { concurrency: 2 }
-      );
+      const agentRequests = Array(5)
+        .fill(null)
+        .map(() => ({
+          agentType: 'market-research' as const,
+          request: mockRequest,
+        }))
 
-      expect(maxConcurrentExecutions).toBeLessThanOrEqual(2);
-    });
-  });
+      await agentService.executeMultipleAgents(agentRequests, mockContext, { concurrency: 2 })
+
+      expect(maxConcurrentExecutions).toBeLessThanOrEqual(2)
+    })
+  })
 
   describe('getAvailableAgents', () => {
     it('should return available agent information', async () => {
-      const { AgentFactory } = await import('../../src/agents/agent-factory.js');
-      
+      const { AgentFactory } = await import('../../src/agents/agent-factory.js')
+
       const mockAgent = {
         getName: () => 'Market Research Agent',
-        getDescription: () => 'Analyzes market opportunities'
-      };
-      
-      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any);
+        getDescription: () => 'Analyzes market opportunities',
+      }
 
-      const agents = agentService.getAvailableAgents();
+      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any)
 
-      expect(agents).toHaveLength(1);
+      const agents = agentService.getAvailableAgents()
+
+      expect(agents).toHaveLength(1)
       expect(agents[0]).toEqual({
         type: 'market-research',
         name: 'Market Research Agent',
-        description: 'Analyzes market opportunities'
-      });
-    });
-  });
+        description: 'Analyzes market opportunities',
+      })
+    })
+  })
 
   describe('response validation', () => {
     it('should reject null response', async () => {
-      const { AgentFactory } = await import('../../src/agents/agent-factory.js');
-      
-      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true);
-      
+      const { AgentFactory } = await import('../../src/agents/agent-factory.js')
+
+      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true)
+
       const mockAgent = {
-        execute: vi.fn().mockResolvedValue(null)
-      };
-      
-      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any);
+        execute: vi.fn().mockResolvedValue(null),
+      }
 
-      const result = await agentService.executeAgent(
-        'market-research',
-        mockRequest,
-        mockContext
-      );
+      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any)
 
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('null or undefined');
-    }, 10000);
+      const result = await agentService.executeAgent('market-research', mockRequest, mockContext)
+
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('null or undefined')
+    }, 10000)
 
     it('should reject invalid score range', async () => {
-      const { AgentFactory } = await import('../../src/agents/agent-factory.js');
-      
-      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true);
-      
+      const { AgentFactory } = await import('../../src/agents/agent-factory.js')
+
+      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true)
+
       const mockAgent = {
         execute: vi.fn().mockResolvedValue({
           agentType: 'market-research',
@@ -389,27 +364,23 @@ describe('AgentService', () => {
           insights: ['Test'],
           confidence: 'high',
           metadata: { processingTime: 1000, model: 'test', retryCount: 0 },
-          rawData: {}
-        })
-      };
-      
-      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any);
+          rawData: {},
+        }),
+      }
 
-      const result = await agentService.executeAgent(
-        'market-research',
-        mockRequest,
-        mockContext
-      );
+      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any)
 
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('score must be a number between 0 and 100');
-    }, 10000);
+      const result = await agentService.executeAgent('market-research', mockRequest, mockContext)
+
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('score must be a number between 0 and 100')
+    }, 10000)
 
     it('should reject invalid insights format', async () => {
-      const { AgentFactory } = await import('../../src/agents/agent-factory.js');
-      
-      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true);
-      
+      const { AgentFactory } = await import('../../src/agents/agent-factory.js')
+
+      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true)
+
       const mockAgent = {
         execute: vi.fn().mockResolvedValue({
           agentType: 'market-research',
@@ -417,27 +388,23 @@ describe('AgentService', () => {
           insights: 'not an array', // Invalid insights
           confidence: 'high',
           metadata: { processingTime: 1000, model: 'test', retryCount: 0 },
-          rawData: {}
-        })
-      };
-      
-      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any);
+          rawData: {},
+        }),
+      }
 
-      const result = await agentService.executeAgent(
-        'market-research',
-        mockRequest,
-        mockContext
-      );
+      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any)
 
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('insights must be an array');
-    }, 10000);
+      const result = await agentService.executeAgent('market-research', mockRequest, mockContext)
+
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('insights must be an array')
+    }, 10000)
 
     it('should reject invalid confidence values', async () => {
-      const { AgentFactory } = await import('../../src/agents/agent-factory.js');
-      
-      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true);
-      
+      const { AgentFactory } = await import('../../src/agents/agent-factory.js')
+
+      vi.mocked(AgentFactory.isAgentSupported).mockReturnValue(true)
+
       const mockAgent = {
         execute: vi.fn().mockResolvedValue({
           agentType: 'market-research',
@@ -445,20 +412,16 @@ describe('AgentService', () => {
           insights: ['Test'],
           confidence: 'invalid', // Invalid confidence
           metadata: { processingTime: 1000, model: 'test', retryCount: 0 },
-          rawData: {}
-        })
-      };
-      
-      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any);
+          rawData: {},
+        }),
+      }
 
-      const result = await agentService.executeAgent(
-        'market-research',
-        mockRequest,
-        mockContext
-      );
+      vi.mocked(AgentFactory.getAgent).mockReturnValue(mockAgent as any)
 
-      expect(result.success).toBe(false);
-      expect(result.error).toContain('confidence must be high, medium, or low');
-    }, 10000);
-  });
-});
+      const result = await agentService.executeAgent('market-research', mockRequest, mockContext)
+
+      expect(result.success).toBe(false)
+      expect(result.error).toContain('confidence must be high, medium, or low')
+    }, 10000)
+  })
+})

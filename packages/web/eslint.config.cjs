@@ -1,4 +1,4 @@
-const sharedConfig = require('../shared/eslint.config.shared.js');
+const sharedConfig = require('../shared/eslint.config.shared.js')
 
 module.exports = [
   ...sharedConfig,
@@ -27,7 +27,7 @@ module.exports = [
       },
     },
     plugins: {
-      'vue': require('eslint-plugin-vue'),
+      vue: require('eslint-plugin-vue'),
     },
     rules: {
       ...require('eslint-plugin-vue').configs['vue3-recommended'].rules,
@@ -58,7 +58,12 @@ module.exports = [
     },
   },
   {
-    files: ['*.config.{ts,js}', 'vite.config.{ts,js}', 'vitest.config.{ts,js}', 'cypress.config.{ts,js}'],
+    files: [
+      '*.config.{ts,js}',
+      'vite.config.{ts,js}',
+      'vitest.config.{ts,js}',
+      'cypress.config.{ts,js}',
+    ],
     languageOptions: {
       globals: {
         // Node.js globals for config files
@@ -98,4 +103,4 @@ module.exports = [
       },
     },
   },
-];
+]

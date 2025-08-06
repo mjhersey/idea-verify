@@ -3,40 +3,40 @@
  * Manages all mock services for local development
  */
 
-import { MockOpenAIService } from './openai/mock-openai-service.js';
-import { MockAnthropicService } from './anthropic/mock-anthropic-service.js';
+import { MockOpenAIService } from './openai/mock-openai-service.js'
+import { MockAnthropicService } from './anthropic/mock-anthropic-service.js'
 
 export interface MockServicesConfig {
   openai: {
-    port: number;
+    port: number
     rateLimits?: {
-      requestsPerMinute: number;
-      tokensPerMinute: number;
-    };
-  };
+      requestsPerMinute: number
+      tokensPerMinute: number
+    }
+  }
   anthropic: {
-    port: number;
+    port: number
     rateLimits?: {
-      requestsPerMinute: number;
-      tokensPerMinute: number;
-    };
-  };
+      requestsPerMinute: number
+      tokensPerMinute: number
+    }
+  }
   localstack: {
-    endpoint: string;
-    services: string[];
-  };
+    endpoint: string
+    services: string[]
+  }
 }
 
 export class MockServiceManager {
-  private openaiService: MockOpenAIService;
-  private anthropicService: MockAnthropicService;
-  private config: MockServicesConfig;
-  private isRunning = false;
+  private openaiService: MockOpenAIService
+  private anthropicService: MockAnthropicService
+  private config: MockServicesConfig
+  private isRunning = false
 
   constructor(config: MockServicesConfig) {
-    this.config = config;
-    this.openaiService = new MockOpenAIService(config.openai);
-    this.anthropicService = new MockAnthropicService(config.anthropic);
+    this.config = config
+    this.openaiService = new MockOpenAIService(config.openai)
+    this.anthropicService = new MockAnthropicService(config.anthropic)
   }
 
   /**
@@ -44,28 +44,25 @@ export class MockServiceManager {
    */
   async startAll(): Promise<void> {
     if (this.isRunning) {
-      console.log('Mock services are already running');
-      return;
+      console.log('Mock services are already running')
+      return
     }
 
-    console.log('🔧 Starting mock services...');
+    console.log('🔧 Starting mock services...')
 
     try {
       // Start services in parallel
-      await Promise.all([
-        this.openaiService.start(),
-        this.anthropicService.start()
-      ]);
+      await Promise.all([this.openaiService.start(), this.anthropicService.start()])
 
-      this.isRunning = true;
-      console.log('✅ All mock services started successfully');
-      console.log(`   - OpenAI API: http://localhost:${this.config.openai.port}`);
-      console.log(`   - Anthropic API: http://localhost:${this.config.anthropic.port}`);
-      console.log(`   - LocalStack: ${this.config.localstack.endpoint}`);
+      this.isRunning = true
+      console.log('✅ All mock services started successfully')
+      console.log(`   - OpenAI API: http://localhost:${this.config.openai.port}`)
+      console.log(`   - Anthropic API: http://localhost:${this.config.anthropic.port}`)
+      console.log(`   - LocalStack: ${this.config.localstack.endpoint}`)
     } catch (error) {
-      console.error('❌ Failed to start mock services:', error);
-      await this.stopAll();
-      throw error;
+      console.error('❌ Failed to start mock services:', error)
+      await this.stopAll()
+      throw error
     }
   }
 
@@ -74,35 +71,32 @@ export class MockServiceManager {
    */
   async stopAll(): Promise<void> {
     if (!this.isRunning) {
-      return;
+      return
     }
 
-    console.log('🛑 Stopping mock services...');
+    console.log('🛑 Stopping mock services...')
 
     try {
-      await Promise.all([
-        this.openaiService.stop(),
-        this.anthropicService.stop()
-      ]);
+      await Promise.all([this.openaiService.stop(), this.anthropicService.stop()])
 
-      this.isRunning = false;
-      console.log('✅ All mock services stopped');
+      this.isRunning = false
+      console.log('✅ All mock services stopped')
     } catch (error) {
-      console.error('❌ Error stopping mock services:', error);
-      throw error;
+      console.error('❌ Error stopping mock services:', error)
+      throw error
     }
   }
 
   /**
    * Get service status
    */
-  getStatus(): { 
-    isRunning: boolean; 
+  getStatus(): {
+    isRunning: boolean
     services: {
-      openai: { port: number; url: string; healthCheck: string };
-      anthropic: { port: number; url: string; healthCheck: string };
-      localstack: { endpoint: string; services: string[] };
-    };
+      openai: { port: number; url: string; healthCheck: string }
+      anthropic: { port: number; url: string; healthCheck: string }
+      localstack: { endpoint: string; services: string[] }
+    }
   } {
     return {
       isRunning: this.isRunning,
@@ -110,19 +104,19 @@ export class MockServiceManager {
         openai: {
           port: this.config.openai.port,
           url: `http://localhost:${this.config.openai.port}`,
-          healthCheck: `http://localhost:${this.config.openai.port}/health`
+          healthCheck: `http://localhost:${this.config.openai.port}/health`,
         },
         anthropic: {
           port: this.config.anthropic.port,
           url: `http://localhost:${this.config.anthropic.port}`,
-          healthCheck: `http://localhost:${this.config.anthropic.port}/health`
+          healthCheck: `http://localhost:${this.config.anthropic.port}/health`,
         },
         localstack: {
           endpoint: this.config.localstack.endpoint,
-          services: this.config.localstack.services
-        }
-      }
-    };
+          services: this.config.localstack.services,
+        },
+      },
+    }
   }
 
   /**
@@ -130,39 +124,39 @@ export class MockServiceManager {
    */
   async validateServices(): Promise<boolean> {
     if (!this.isRunning) {
-      return false;
+      return false
     }
 
     try {
-      const status = this.getStatus();
-      
+      const status = this.getStatus()
+
       // Test OpenAI mock
-      const openaiResponse = await fetch(status.services.openai.healthCheck);
+      const openaiResponse = await fetch(status.services.openai.healthCheck)
       if (!openaiResponse.ok) {
-        throw new Error(`OpenAI mock service not responding: ${openaiResponse.status}`);
+        throw new Error(`OpenAI mock service not responding: ${openaiResponse.status}`)
       }
 
       // Test Anthropic mock (health endpoint on different port)
-      const anthropicHealthResponse = await fetch(status.services.anthropic.healthCheck);
+      const anthropicHealthResponse = await fetch(status.services.anthropic.healthCheck)
       if (!anthropicHealthResponse.ok) {
-        throw new Error(`Anthropic mock service not responding: ${anthropicHealthResponse.status}`);
+        throw new Error(`Anthropic mock service not responding: ${anthropicHealthResponse.status}`)
       }
 
       // Test LocalStack (basic health check)
       try {
-        const localstackResponse = await fetch(`${this.config.localstack.endpoint}/health`);
+        const localstackResponse = await fetch(`${this.config.localstack.endpoint}/health`)
         if (!localstackResponse.ok) {
-          console.warn('LocalStack health check failed - may need to start with Docker Compose');
+          console.warn('LocalStack health check failed - may need to start with Docker Compose')
         }
       } catch (error) {
-        console.warn('LocalStack not accessible - may need to start with Docker Compose');
+        console.warn('LocalStack not accessible - may need to start with Docker Compose')
       }
 
-      console.log('✅ All mock services validated successfully');
-      return true;
+      console.log('✅ All mock services validated successfully')
+      return true
     } catch (error) {
-      console.error('❌ Mock service validation failed:', error);
-      return false;
+      console.error('❌ Mock service validation failed:', error)
+      return false
     }
   }
 }

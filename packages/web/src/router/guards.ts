@@ -2,8 +2,8 @@
  * Router guards for authentication and authorization
  */
 
-import type { NavigationGuardNext, RouteLocationNormalized } from 'vue-router';
-import { useAuthStore } from '../stores/auth.js';
+import type { NavigationGuardNext, RouteLocationNormalized } from 'vue-router'
+import { useAuthStore } from '../stores/auth.js'
 
 /**
  * Authentication guard - requires user to be logged in
@@ -13,18 +13,18 @@ export const authGuard = (
   from: RouteLocationNormalized,
   next: NavigationGuardNext
 ): void => {
-  const authStore = useAuthStore();
+  const authStore = useAuthStore()
 
   if (!authStore.isAuthenticated) {
     // Store intended destination for redirect after login
     next({
       path: '/login',
-      query: { redirect: to.fullPath }
-    });
+      query: { redirect: to.fullPath },
+    })
   } else {
-    next();
+    next()
   }
-};
+}
 
 /**
  * Guest guard - redirects authenticated users away from auth pages
@@ -34,15 +34,15 @@ export const guestGuard = (
   from: RouteLocationNormalized,
   next: NavigationGuardNext
 ): void => {
-  const authStore = useAuthStore();
+  const authStore = useAuthStore()
 
   if (authStore.isAuthenticated) {
     // Redirect to dashboard if already authenticated
-    next('/dashboard');
+    next('/dashboard')
   } else {
-    next();
+    next()
   }
-};
+}
 
 /**
  * Optional auth guard - sets user context if available but doesn't require authentication
@@ -53,8 +53,8 @@ export const optionalAuthGuard = (
   next: NavigationGuardNext
 ): void => {
   // Always allow navigation, auth is optional
-  next();
-};
+  next()
+}
 
 /**
  * Admin guard - requires admin role (for future use)
@@ -64,19 +64,19 @@ export const adminGuard = (
   from: RouteLocationNormalized,
   next: NavigationGuardNext
 ): void => {
-  const authStore = useAuthStore();
+  const authStore = useAuthStore()
 
   if (!authStore.isAuthenticated) {
     next({
       path: '/login',
-      query: { redirect: to.fullPath }
-    });
+      query: { redirect: to.fullPath },
+    })
   } else {
     // For now, all authenticated users are considered admins
     // In the future, check user.role === 'admin'
-    next();
+    next()
   }
-};
+}
 
 /**
  * Route meta interface for TypeScript
@@ -84,10 +84,10 @@ export const adminGuard = (
 declare module 'vue-router' {
   // eslint-disable-next-line no-unused-vars
   interface RouteMeta {
-    requiresAuth?: boolean;
-    requiresGuest?: boolean;
-    requiresAdmin?: boolean;
-    title?: string;
+    requiresAuth?: boolean
+    requiresGuest?: boolean
+    requiresAdmin?: boolean
+    title?: string
   }
 }
 
@@ -99,28 +99,28 @@ export const globalGuard = (
   from: RouteLocationNormalized,
   next: NavigationGuardNext
 ): void => {
-  const authStore = useAuthStore();
+  const authStore = useAuthStore()
 
   // Set page title if provided in route meta
   if (to.meta.title) {
-    document.title = `${to.meta.title} - AI Validation Platform`;
+    document.title = `${to.meta.title} - AI Validation Platform`
   } else {
-    document.title = 'AI Validation Platform';
+    document.title = 'AI Validation Platform'
   }
 
   // Check authentication requirements
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next({
       path: '/login',
-      query: { redirect: to.fullPath }
-    });
-    return;
+      query: { redirect: to.fullPath },
+    })
+    return
   }
 
   // Check guest requirements (redirect if authenticated)
   if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    next('/dashboard');
-    return;
+    next('/dashboard')
+    return
   }
 
   // Check admin requirements
@@ -128,13 +128,13 @@ export const globalGuard = (
     if (!authStore.isAuthenticated) {
       next({
         path: '/login',
-        query: { redirect: to.fullPath }
-      });
-      return;
+        query: { redirect: to.fullPath },
+      })
+      return
     }
     // For now, all authenticated users have admin access
     // In the future, check user role here
   }
 
-  next();
-};
+  next()
+}

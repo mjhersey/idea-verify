@@ -1,77 +1,75 @@
-import * as cdk from 'aws-cdk-lib';
-import * as budgets from 'aws-cdk-lib/aws-budgets';
-import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
-import * as applicationautoscaling from 'aws-cdk-lib/aws-applicationautoscaling';
-import * as ecs from 'aws-cdk-lib/aws-ecs';
-import * as sns from 'aws-cdk-lib/aws-sns';
-import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
-import * as events from 'aws-cdk-lib/aws-events';
-import * as targets from 'aws-cdk-lib/aws-events-targets';
-import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as iam from 'aws-cdk-lib/aws-iam';
-import { Construct } from 'constructs';
+import * as cdk from 'aws-cdk-lib'
+import * as budgets from 'aws-cdk-lib/aws-budgets'
+import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
+import * as applicationautoscaling from 'aws-cdk-lib/aws-applicationautoscaling'
+import * as ecs from 'aws-cdk-lib/aws-ecs'
+import * as sns from 'aws-cdk-lib/aws-sns'
+import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions'
+import * as events from 'aws-cdk-lib/aws-events'
+import * as targets from 'aws-cdk-lib/aws-events-targets'
+import * as lambda from 'aws-cdk-lib/aws-lambda'
+import * as iam from 'aws-cdk-lib/aws-iam'
+import { Construct } from 'constructs'
 
 interface CostOptimizationStackProps extends cdk.StackProps {
-  environment: string;
-  ecsCluster: ecs.ICluster;
+  environment: string
+  ecsCluster: ecs.ICluster
   ecsServices: {
-    api: ecs.IService;
-    orchestrator: ecs.IService;
-    web: ecs.IService;
-  };
+    api: ecs.IService
+    orchestrator: ecs.IService
+    web: ecs.IService
+  }
 }
 
 export class CostOptimizationStack extends cdk.Stack {
-  public readonly costTopic: sns.ITopic;
-  public readonly budgetAlarms: budgets.CfnBudget[];
-  public readonly autoScalingPolicies: applicationautoscaling.ScalableTarget[];
+  public readonly costTopic: sns.ITopic
+  public readonly budgetAlarms: budgets.CfnBudget[]
+  public readonly autoScalingPolicies: applicationautoscaling.ScalableTarget[]
 
   constructor(scope: Construct, id: string, props: CostOptimizationStackProps) {
-    super(scope, id, props);
+    super(scope, id, props)
 
-    const { environment, ecsCluster, ecsServices } = props;
+    const { environment, ecsCluster, ecsServices } = props
 
     // Create SNS topic for cost alerts
     this.costTopic = new sns.Topic(this, 'CostAlertsTopic', {
       topicName: `ai-validation-cost-alerts-${environment}`,
       displayName: `AI Validation Cost Alerts (${environment.toUpperCase()})`,
-    });
+    })
 
     // Add email subscription for cost alerts
-    this.costTopic.addSubscription(
-      new snsSubscriptions.EmailSubscription('admin@company.com')
-    );
+    this.costTopic.addSubscription(new snsSubscriptions.EmailSubscription('admin@company.com'))
 
     // Create budget alarms
-    this.budgetAlarms = this.createBudgetAlarms(environment);
+    this.budgetAlarms = this.createBudgetAlarms(environment)
 
     // Configure auto-scaling for cost optimization
-    this.autoScalingPolicies = this.configureAutoScaling(ecsServices, environment);
+    this.autoScalingPolicies = this.configureAutoScaling(ecsServices, environment)
 
     // Create cost monitoring dashboard
-    this.createCostDashboard(environment);
+    this.createCostDashboard(environment)
 
     // Create scheduled scaling
-    this.createScheduledScaling(ecsServices, environment);
+    this.createScheduledScaling(ecsServices, environment)
 
     // Create cost optimization Lambda functions
-    this.createCostOptimizationFunctions(environment);
+    this.createCostOptimizationFunctions(environment)
 
     // Add comprehensive resource tagging
-    this.addResourceTags(environment);
+    this.addResourceTags(environment)
   }
 
   private createBudgetAlarms(environment: string): budgets.CfnBudget[] {
-    const budgets: budgets.CfnBudget[] = [];
+    const budgets: budgets.CfnBudget[] = []
 
     // Environment-specific budget limits
     const budgetLimits = {
       dev: { monthly: 50, quarterly: 150 },
       staging: { monthly: 100, quarterly: 300 },
-      prod: { monthly: 500, quarterly: 1500 }
-    };
+      prod: { monthly: 500, quarterly: 1500 },
+    }
 
-    const limits = budgetLimits[environment as keyof typeof budgetLimits] || budgetLimits.dev;
+    const limits = budgetLimits[environment as keyof typeof budgetLimits] || budgetLimits.dev
 
     // Monthly budget
     const monthlyBudget = new budgets.CfnBudget(this, 'MonthlyBudget', {
@@ -118,12 +116,12 @@ export class CostOptimizationStack extends cdk.Stack {
           ],
         },
       ],
-    });
+    })
 
-    budgets.push(monthlyBudget);
+    budgets.push(monthlyBudget)
 
     // Service-specific budgets
-    const services = ['api', 'orchestrator', 'web'];
+    const services = ['api', 'orchestrator', 'web']
     services.forEach(service => {
       const serviceBudget = new budgets.CfnBudget(this, `${service}Budget`, {
         budget: {
@@ -155,85 +153,103 @@ export class CostOptimizationStack extends cdk.Stack {
             ],
           },
         ],
-      });
+      })
 
-      budgets.push(serviceBudget);
-    });
+      budgets.push(serviceBudget)
+    })
 
-    return budgets;
+    return budgets
   }
 
   private configureAutoScaling(
     services: { api: ecs.IService; orchestrator: ecs.IService; web: ecs.IService },
     environment: string
   ): applicationautoscaling.ScalableTarget[] {
-    const scalableTargets: applicationautoscaling.ScalableTarget[] = [];
+    const scalableTargets: applicationautoscaling.ScalableTarget[] = []
 
     // Environment-specific scaling configuration
     const scalingConfig = {
       dev: { min: 1, max: 2 },
       staging: { min: 1, max: 4 },
-      prod: { min: 2, max: 10 }
-    };
+      prod: { min: 2, max: 10 },
+    }
 
-    const config = scalingConfig[environment as keyof typeof scalingConfig] || scalingConfig.dev;
+    const config = scalingConfig[environment as keyof typeof scalingConfig] || scalingConfig.dev
 
     // Configure scaling for each service
     Object.entries(services).forEach(([serviceName, service]) => {
-      const scalableTarget = new applicationautoscaling.ScalableTarget(this, `${serviceName}ScalableTarget`, {
-        serviceNamespace: applicationautoscaling.ServiceNamespace.ECS,
-        scalableDimension: 'ecs:service:DesiredCount',
-        resourceId: `service/${service.cluster.clusterName}/${service.serviceName}`,
-        minCapacity: config.min,
-        maxCapacity: config.max,
-      });
+      const scalableTarget = new applicationautoscaling.ScalableTarget(
+        this,
+        `${serviceName}ScalableTarget`,
+        {
+          serviceNamespace: applicationautoscaling.ServiceNamespace.ECS,
+          scalableDimension: 'ecs:service:DesiredCount',
+          resourceId: `service/${service.cluster.clusterName}/${service.serviceName}`,
+          minCapacity: config.min,
+          maxCapacity: config.max,
+        }
+      )
 
       // CPU-based scaling policy
-      const cpuScaling = new applicationautoscaling.TargetTrackingScalingPolicy(this, `${serviceName}CpuScaling`, {
-        scalingTarget: scalableTarget,
-        targetValue: 70,
-        predefinedMetric: applicationautoscaling.PredefinedMetric.ECS_SERVICE_AVERAGE_CPU_UTILIZATION,
-        scaleInCooldown: cdk.Duration.minutes(5),
-        scaleOutCooldown: cdk.Duration.minutes(2),
-      });
+      const cpuScaling = new applicationautoscaling.TargetTrackingScalingPolicy(
+        this,
+        `${serviceName}CpuScaling`,
+        {
+          scalingTarget: scalableTarget,
+          targetValue: 70,
+          predefinedMetric:
+            applicationautoscaling.PredefinedMetric.ECS_SERVICE_AVERAGE_CPU_UTILIZATION,
+          scaleInCooldown: cdk.Duration.minutes(5),
+          scaleOutCooldown: cdk.Duration.minutes(2),
+        }
+      )
 
       // Memory-based scaling policy
-      const memoryScaling = new applicationautoscaling.TargetTrackingScalingPolicy(this, `${serviceName}MemoryScaling`, {
-        scalingTarget: scalableTarget,
-        targetValue: 80,
-        predefinedMetric: applicationautoscaling.PredefinedMetric.ECS_SERVICE_AVERAGE_MEMORY_UTILIZATION,
-        scaleInCooldown: cdk.Duration.minutes(5),
-        scaleOutCooldown: cdk.Duration.minutes(2),
-      });
+      const memoryScaling = new applicationautoscaling.TargetTrackingScalingPolicy(
+        this,
+        `${serviceName}MemoryScaling`,
+        {
+          scalingTarget: scalableTarget,
+          targetValue: 80,
+          predefinedMetric:
+            applicationautoscaling.PredefinedMetric.ECS_SERVICE_AVERAGE_MEMORY_UTILIZATION,
+          scaleInCooldown: cdk.Duration.minutes(5),
+          scaleOutCooldown: cdk.Duration.minutes(2),
+        }
+      )
 
       // Request-based scaling for API service
       if (serviceName === 'api') {
-        const requestScaling = new applicationautoscaling.TargetTrackingScalingPolicy(this, 'ApiRequestScaling', {
-          scalingTarget: scalableTarget,
-          targetValue: 1000, // Target 1000 requests per minute per task
-          customMetric: new cloudwatch.Metric({
-            namespace: 'AWS/ApplicationELB',
-            metricName: 'RequestCountPerTarget',
-            dimensionsMap: {
-              TargetGroup: `targetgroup/ai-validation-api-tg-${environment}/*`,
-            },
-            statistic: 'Sum',
-          }),
-          scaleInCooldown: cdk.Duration.minutes(10), // Longer cooldown for request-based scaling
-          scaleOutCooldown: cdk.Duration.minutes(3),
-        });
+        const requestScaling = new applicationautoscaling.TargetTrackingScalingPolicy(
+          this,
+          'ApiRequestScaling',
+          {
+            scalingTarget: scalableTarget,
+            targetValue: 1000, // Target 1000 requests per minute per task
+            customMetric: new cloudwatch.Metric({
+              namespace: 'AWS/ApplicationELB',
+              metricName: 'RequestCountPerTarget',
+              dimensionsMap: {
+                TargetGroup: `targetgroup/ai-validation-api-tg-${environment}/*`,
+              },
+              statistic: 'Sum',
+            }),
+            scaleInCooldown: cdk.Duration.minutes(10), // Longer cooldown for request-based scaling
+            scaleOutCooldown: cdk.Duration.minutes(3),
+          }
+        )
       }
 
-      scalableTargets.push(scalableTarget);
-    });
+      scalableTargets.push(scalableTarget)
+    })
 
-    return scalableTargets;
+    return scalableTargets
   }
 
   private createCostDashboard(environment: string): void {
     const dashboard = new cloudwatch.Dashboard(this, 'CostDashboard', {
       dashboardName: `ai-validation-cost-${environment}`,
-    });
+    })
 
     // Cost metrics widget
     const costWidget = new cloudwatch.GraphWidget({
@@ -251,7 +267,7 @@ export class CostOptimizationStack extends cdk.Stack {
           period: cdk.Duration.hours(24),
         }),
       ],
-    });
+    })
 
     // Resource utilization widget
     const utilizationWidget = new cloudwatch.GraphWidget({
@@ -276,7 +292,7 @@ export class CostOptimizationStack extends cdk.Stack {
           statistic: 'Average',
         }),
       ],
-    });
+    })
 
     // Task count widget
     const taskCountWidget = new cloudwatch.GraphWidget({
@@ -312,7 +328,7 @@ export class CostOptimizationStack extends cdk.Stack {
           statistic: 'Average',
         }),
       ],
-    });
+    })
 
     // Cost allocation widget
     const costAllocationWidget = new cloudwatch.SingleValueWidget({
@@ -348,10 +364,10 @@ export class CostOptimizationStack extends cdk.Stack {
           statistic: 'Sum',
         }),
       ],
-    });
+    })
 
-    dashboard.addWidgets(costWidget, utilizationWidget);
-    dashboard.addWidgets(taskCountWidget, costAllocationWidget);
+    dashboard.addWidgets(costWidget, utilizationWidget)
+    dashboard.addWidgets(taskCountWidget, costAllocationWidget)
   }
 
   private createScheduledScaling(
@@ -360,7 +376,7 @@ export class CostOptimizationStack extends cdk.Stack {
   ): void {
     // Only implement scheduled scaling for production
     if (environment !== 'prod') {
-      return;
+      return
     }
 
     // Create scheduled scaling rules
@@ -389,7 +405,7 @@ export class CostOptimizationStack extends cdk.Stack {
         minCapacity: 2,
         maxCapacity: 8,
       },
-    ];
+    ]
 
     // Create Lambda function for scheduled scaling
     const scalingFunction = new lambda.Function(this, 'ScheduledScalingFunction', {
@@ -421,7 +437,7 @@ export class CostOptimizationStack extends cdk.Stack {
         };
       `),
       timeout: cdk.Duration.minutes(1),
-    });
+    })
 
     // Grant permissions to update auto-scaling
     scalingFunction.addToRolePolicy(
@@ -435,7 +451,7 @@ export class CostOptimizationStack extends cdk.Stack {
         ],
         resources: ['*'],
       })
-    );
+    )
 
     // Create EventBridge rules for each schedule
     schedules.forEach(schedule => {
@@ -443,7 +459,7 @@ export class CostOptimizationStack extends cdk.Stack {
         const rule = new events.Rule(this, `${schedule.name}${serviceName}Rule`, {
           schedule: schedule.schedule,
           description: `Scheduled scaling for ${serviceName} service`,
-        });
+        })
 
         rule.addTarget(
           new targets.LambdaFunction(scalingFunction, {
@@ -453,9 +469,9 @@ export class CostOptimizationStack extends cdk.Stack {
               maxCapacity: schedule.maxCapacity,
             }),
           })
-        );
-      });
-    });
+        )
+      })
+    })
   }
 
   private createCostOptimizationFunctions(environment: string): void {
@@ -532,28 +548,24 @@ def handler(event, context):
         raise e
       `),
       timeout: cdk.Duration.minutes(5),
-    });
+    })
 
     // Grant permissions for cost analysis
     costAnalysisFunction.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
-        actions: [
-          'ce:GetCostAndUsage',
-          'ce:GetUsageReport',
-          'cloudwatch:PutMetricData',
-        ],
+        actions: ['ce:GetCostAndUsage', 'ce:GetUsageReport', 'cloudwatch:PutMetricData'],
         resources: ['*'],
       })
-    );
+    )
 
     // Schedule cost analysis to run daily
     const costAnalysisRule = new events.Rule(this, 'CostAnalysisRule', {
       schedule: events.Schedule.cron({ hour: '6', minute: '0' }), // 6 AM UTC daily
       description: 'Daily cost analysis for AI Validation Platform',
-    });
+    })
 
-    costAnalysisRule.addTarget(new targets.LambdaFunction(costAnalysisFunction));
+    costAnalysisRule.addTarget(new targets.LambdaFunction(costAnalysisFunction))
 
     // Right-sizing recommendations function
     const rightsizingFunction = new lambda.Function(this, 'RightsizingFunction', {
@@ -704,7 +716,7 @@ def handler(event, context):
     }
       `),
       timeout: cdk.Duration.minutes(10),
-    });
+    })
 
     // Grant permissions for right-sizing analysis
     rightsizingFunction.addToRolePolicy(
@@ -718,15 +730,15 @@ def handler(event, context):
         ],
         resources: ['*'],
       })
-    );
+    )
 
     // Schedule right-sizing analysis to run weekly
     const rightsizingRule = new events.Rule(this, 'RightsizingRule', {
       schedule: events.Schedule.cron({ hour: '9', minute: '0', weekDay: 'MON' }), // Monday 9 AM UTC
       description: 'Weekly right-sizing analysis for AI Validation Platform',
-    });
+    })
 
-    rightsizingRule.addTarget(new targets.LambdaFunction(rightsizingFunction));
+    rightsizingRule.addTarget(new targets.LambdaFunction(rightsizingFunction))
   }
 
   private addResourceTags(environment: string): void {
@@ -740,22 +752,22 @@ def handler(event, context):
       Monitoring: 'Enabled',
       CreatedBy: 'CDK',
       LastModified: new Date().toISOString().split('T')[0],
-    };
+    }
 
     // Apply tags to stack
     Object.entries(commonTags).forEach(([key, value]) => {
-      cdk.Tags.of(this).add(key, value);
-    });
+      cdk.Tags.of(this).add(key, value)
+    })
 
     // Service-specific tags
     const serviceSpecificTags = {
       Service: 'cost-optimization',
       Component: 'monitoring',
       Purpose: 'cost-tracking-and-optimization',
-    };
+    }
 
     Object.entries(serviceSpecificTags).forEach(([key, value]) => {
-      cdk.Tags.of(this).add(key, value);
-    });
+      cdk.Tags.of(this).add(key, value)
+    })
   }
 }

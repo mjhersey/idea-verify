@@ -10,9 +10,9 @@ describe('Evaluation Store', () => {
   it('should create a new evaluation', () => {
     const store = useEvaluationStore()
     const description = 'Test business idea'
-    
+
     const evaluation = store.createEvaluation(description)
-    
+
     expect(evaluation.description).toBe(description)
     expect(evaluation.status).toBe('pending')
     expect(store.evaluations).toHaveLength(1)
@@ -22,9 +22,9 @@ describe('Evaluation Store', () => {
   it('should update evaluation status', () => {
     const store = useEvaluationStore()
     const evaluation = store.createEvaluation('Test idea')
-    
+
     store.updateEvaluationStatus(evaluation.id, 'analyzing')
-    
+
     expect(evaluation.status).toBe('analyzing')
   })
 })

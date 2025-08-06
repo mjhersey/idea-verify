@@ -1,14 +1,14 @@
-import { createServer } from 'http';
-import app from './app.js';
-import { initializeWebSocketServer } from './websocket/websocket-server.js';
+import { createServer } from 'http'
+import app from './app.js'
+import { initializeWebSocketServer } from './websocket/websocket-server.js'
 
 const PORT = process.env.PORT || 3000
 
 // Create HTTP server
-const httpServer = createServer(app);
+const httpServer = createServer(app)
 
 // Initialize WebSocket server
-const wsServer = initializeWebSocketServer(httpServer);
+const wsServer = initializeWebSocketServer(httpServer)
 
 const server = httpServer.listen(PORT, () => {
   console.log(`🚀 API server running on port ${PORT}`)
@@ -20,7 +20,7 @@ const server = httpServer.listen(PORT, () => {
 // Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('SIGTERM received, shutting down gracefully')
-  wsServer.shutdown();
+  wsServer.shutdown()
   server.close(() => {
     console.log('Process terminated')
   })
@@ -28,7 +28,7 @@ process.on('SIGTERM', () => {
 
 process.on('SIGINT', () => {
   console.log('SIGINT received, shutting down gracefully')
-  wsServer.shutdown();
+  wsServer.shutdown()
   server.close(() => {
     console.log('Process terminated')
   })

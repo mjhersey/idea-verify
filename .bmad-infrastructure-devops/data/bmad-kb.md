@@ -2,7 +2,10 @@
 
 ## Overview
 
-The BMad Infrastructure DevOps expansion pack extends the BMad Method framework with comprehensive infrastructure and DevOps capabilities. It enables teams to design, implement, validate, and maintain modern cloud-native infrastructure alongside their application development efforts.
+The BMad Infrastructure DevOps expansion pack extends the BMad Method framework
+with comprehensive infrastructure and DevOps capabilities. It enables teams to
+design, implement, validate, and maintain modern cloud-native infrastructure
+alongside their application development efforts.
 
 **Version**: 1.7.0  
 **BMad Compatibility**: v4+  
@@ -10,7 +13,8 @@ The BMad Infrastructure DevOps expansion pack extends the BMad Method framework 
 
 ## Core Purpose
 
-This expansion pack addresses the critical need for systematic infrastructure planning and implementation in modern software projects. It provides:
+This expansion pack addresses the critical need for systematic infrastructure
+planning and implementation in modern software projects. It provides:
 
 - Structured approach to infrastructure architecture design
 - Platform engineering implementation guidance
@@ -23,12 +27,16 @@ This expansion pack addresses the critical need for systematic infrastructure pl
 Use the BMad Infrastructure DevOps expansion pack when your project involves:
 
 - **Cloud Infrastructure Design**: AWS, Azure, GCP, or multi-cloud architectures
-- **Kubernetes and Container Orchestration**: Container platform design and implementation
+- **Kubernetes and Container Orchestration**: Container platform design and
+  implementation
 - **Infrastructure as Code**: Terraform, CloudFormation, Pulumi implementations
 - **GitOps Workflows**: ArgoCD, Flux, or similar continuous deployment patterns
-- **Platform Engineering**: Building internal developer platforms and self-service capabilities
-- **Service Mesh Implementation**: Istio, Linkerd, or similar service mesh architectures
-- **DevOps Transformation**: Establishing or improving DevOps practices and culture
+- **Platform Engineering**: Building internal developer platforms and
+  self-service capabilities
+- **Service Mesh Implementation**: Istio, Linkerd, or similar service mesh
+  architectures
+- **DevOps Transformation**: Establishing or improving DevOps practices and
+  culture
 
 ## Key Components
 
@@ -52,7 +60,8 @@ Use the BMad Infrastructure DevOps expansion pack when your project involves:
 - `*chat-mode` - Interactive conversation mode for infrastructure discussions
 - `*create-doc` - Generate infrastructure documentation from templates
 - `*review-infrastructure` - Conduct systematic infrastructure review
-- `*validate-infrastructure` - Validate infrastructure against comprehensive checklist
+- `*validate-infrastructure` - Validate infrastructure against comprehensive
+  checklist
 - `*checklist` - Access the 16-section infrastructure validation checklist
 - `*exit` - Return to normal context
 
@@ -129,29 +138,40 @@ A comprehensive 16-section checklist covering:
 11. BMad Integration - Agent support, workflow alignment
 12. Architecture Documentation - Diagrams, decisions, maintenance
 
-**Platform Engineering (Sections 13-16)**: 13. Container Platform - Kubernetes setup, RBAC, networking 14. GitOps Workflows - Repository structure, deployment patterns 15. Service Mesh - Traffic management, security, observability 16. Developer Experience - Self-service, documentation, tooling
+**Platform Engineering (Sections 13-16)**: 13. Container Platform - Kubernetes
+setup, RBAC, networking 14. GitOps Workflows - Repository structure, deployment
+patterns 15. Service Mesh - Traffic management, security, observability 16.
+Developer Experience - Self-service, documentation, tooling
 
 ## Integration with BMad Flow
 
 ### Workflow Integration Points
 
-1. **After Architecture Phase**: Infrastructure design begins after application architecture is defined
-2. **Parallel to Development**: Infrastructure implementation runs alongside application development
-3. **Before Production**: Infrastructure validation gates before production deployment
+1. **After Architecture Phase**: Infrastructure design begins after application
+   architecture is defined
+2. **Parallel to Development**: Infrastructure implementation runs alongside
+   application development
+3. **Before Production**: Infrastructure validation gates before production
+   deployment
 4. **Continuous Operation**: Ongoing infrastructure reviews and improvements
 
 ### Agent Collaboration
 
-- **With Architect (Sage)**: Joint planning sessions, design reviews, architectural alignment
-- **With Developer (Blake)**: Platform capabilities, development environment setup
-- **With Product Manager (Finley)**: Infrastructure requirements, cost considerations
-- **With Creator Agents**: Infrastructure for creative workflows and asset management
+- **With Architect (Sage)**: Joint planning sessions, design reviews,
+  architectural alignment
+- **With Developer (Blake)**: Platform capabilities, development environment
+  setup
+- **With Product Manager (Finley)**: Infrastructure requirements, cost
+  considerations
+- **With Creator Agents**: Infrastructure for creative workflows and asset
+  management
 
 ## Best Practices
 
 ### Infrastructure Design
 
-1. **Start with Requirements**: Understand application needs before designing infrastructure
+1. **Start with Requirements**: Understand application needs before designing
+   infrastructure
 2. **Design for Scale**: Plan for 10x growth from day one
 3. **Security First**: Implement defense in depth at every layer
 4. **Cost Awareness**: Balance performance with budget constraints
@@ -159,7 +179,8 @@ A comprehensive 16-section checklist covering:
 
 ### Implementation Approach
 
-1. **Incremental Rollout**: Deploy infrastructure in stages with validation gates
+1. **Incremental Rollout**: Deploy infrastructure in stages with validation
+   gates
 2. **Automation Focus**: Automate repetitive tasks and deployments
 3. **Testing Strategy**: Include infrastructure testing in CI/CD pipelines
 4. **Monitoring Setup**: Implement observability before production
@@ -247,17 +268,14 @@ A comprehensive 16-section checklist covering:
 ### Common Issues
 
 1. **Infrastructure Drift**
-
    - Solution: Implement drift detection in IaC pipelines
    - Prevention: Restrict manual changes, enforce GitOps
 
 2. **Cost Overruns**
-
    - Solution: Implement cost monitoring and alerts
    - Prevention: Resource tagging, budget limits
 
 3. **Performance Problems**
-
    - Solution: Review monitoring data, scale resources
    - Prevention: Load testing, capacity planning
 
@@ -303,6 +321,11 @@ A comprehensive 16-section checklist covering:
 
 ## Conclusion
 
-The BMad Infrastructure DevOps expansion pack provides a comprehensive framework for modern infrastructure and platform engineering. By following its structured approach and leveraging the provided tools and templates, teams can build reliable, scalable, and secure infrastructure that accelerates application delivery while maintaining operational excellence.
+The BMad Infrastructure DevOps expansion pack provides a comprehensive framework
+for modern infrastructure and platform engineering. By following its structured
+approach and leveraging the provided tools and templates, teams can build
+reliable, scalable, and secure infrastructure that accelerates application
+delivery while maintaining operational excellence.
 
-For support and updates, refer to the main BMad Method documentation or contact the BMad community.
+For support and updates, refer to the main BMad Method documentation or contact
+the BMad community.

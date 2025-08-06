@@ -1,12 +1,14 @@
 # Epic 2: Multi-Agent Orchestration & Real-time UI
 
-**Epic Goal**: Implement the complete multi-agent evaluation system with parallel processing and real-time progress visualization. This epic delivers the core value proposition of comprehensive, transparent business analysis.
+**Epic Goal**: Implement the complete multi-agent evaluation system with
+parallel processing and real-time progress visualization. This epic delivers the
+core value proposition of comprehensive, transparent business analysis.
 
 ## Story 2.1: Agent Framework & Orchestration
 
-**As a system architect,**
-**I want to implement the complete agent orchestration framework,**
-**so that multiple specialized agents can work together to evaluate ideas.**
+**As a system architect,** **I want to implement the complete agent
+orchestration framework,** **so that multiple specialized agents can work
+together to evaluate ideas.**
 
 **Acceptance Criteria:**
 
@@ -22,9 +24,8 @@
 
 ## Story 2.2: Market Research Agent
 
-**As a user,**
-**I want comprehensive market analysis of my idea,**
-**so that I understand the market opportunity and size.**
+**As a user,** **I want comprehensive market analysis of my idea,** **so that I
+understand the market opportunity and size.**
 
 **Acceptance Criteria:**
 
@@ -39,9 +40,8 @@
 
 ## Story 2.3: Competitive Analysis Agent
 
-**As a user,**
-**I want to understand my competition,**
-**so that I can identify differentiation opportunities.**
+**As a user,** **I want to understand my competition,** **so that I can identify
+differentiation opportunities.**
 
 **Acceptance Criteria:**
 
@@ -56,9 +56,8 @@
 
 ## Story 2.4: Customer Research Agent
 
-**As a user,**
-**I want to validate that customers need my solution,**
-**so that I can confirm product-market fit potential.**
+**As a user,** **I want to validate that customers need my solution,** **so that
+I can confirm product-market fit potential.**
 
 **Acceptance Criteria:**
 
@@ -73,9 +72,8 @@
 
 ## Story 2.5: WebSocket Integration & Real-time Updates
 
-**As a user,**
-**I want to see live progress of my evaluation,**
-**so that I know what's happening and when it will complete.**
+**As a user,** **I want to see live progress of my evaluation,** **so that I
+know what's happening and when it will complete.**
 
 **Acceptance Criteria:**
 
@@ -90,9 +88,8 @@
 
 ## Story 2.6: Real-time Progress Dashboard UI
 
-**As a user,**
-**I want a visual dashboard showing evaluation progress,**
-**so that I can follow along with the analysis.**
+**As a user,** **I want a visual dashboard showing evaluation progress,** **so
+that I can follow along with the analysis.**
 
 **Acceptance Criteria:**
 
@@ -104,18 +101,18 @@
 6. Smooth animations and transitions
 7. Mobile-responsive layout
 
-**Dependencies:** Requires Story 2.1 for agent framework and Story 2.5 for WebSocket integration.
+**Dependencies:** Requires Story 2.1 for agent framework and Story 2.5 for
+WebSocket integration.
 
 ## Story 2.7: Basic API Documentation for Frontend Integration
 
-**As a frontend developer,**
-**I want comprehensive API documentation for integration,**
-**so that I can effectively build the user interface and connect to backend services.**
+**As a frontend developer,** **I want comprehensive API documentation for
+integration,** **so that I can effectively build the user interface and connect
+to backend services.**
 
 **Acceptance Criteria:**
 
 1. **Core API Endpoints Documented:**
-
    - Authentication endpoints (login, register, token refresh)
    - Idea submission API (POST /api/ideas)
    - Evaluation status API (GET /api/evaluations/{id})
@@ -123,21 +120,18 @@
    - User dashboard API (GET /api/user/evaluations)
 
 2. **WebSocket Event Documentation:**
-
    - Connection establishment and authentication
    - Real-time event schemas (agent_progress, new_insight, evaluation_complete)
    - Error event handling and reconnection procedures
    - Message format specifications with examples
 
 3. **Request/Response Schemas:**
-
    - TypeScript interfaces for all API models
    - Request body schemas with validation rules
    - Response body schemas with example data
    - Error response formats and status codes
 
 4. **Integration Examples:**
-
    - Code samples for common API interactions
    - WebSocket connection and event handling examples
    - Authentication flow implementation guide
@@ -149,15 +143,19 @@
    - Mock data examples for frontend development
    - Local development environment API endpoints
 
-**Dependencies:** Requires Stories 2.1-2.5 for API implementation and Epic 1 Story 1.3 for authentication endpoints.
+**Dependencies:** Requires Stories 2.1-2.5 for API implementation and Epic 1
+Story 1.3 for authentication endpoints.
 
 ---
 
 ## Epic 2 Definition of Done
 
-✅ **Multi-agent system operational** - 4+ specialized agents working in parallel  
-✅ **Real-time progress visualization** - Live updates via WebSockets with fallbacks  
-✅ **Comprehensive market intelligence** - Market, competitive, and customer analysis  
+✅ **Multi-agent system operational** - 4+ specialized agents working in
+parallel  
+✅ **Real-time progress visualization** - Live updates via WebSockets with
+fallbacks  
+✅ **Comprehensive market intelligence** - Market, competitive, and customer
+analysis  
 ✅ **Robust orchestration** - Error handling, retries, health monitoring  
 ✅ **Frontend-backend integration** - Complete API documentation and examples  
 ✅ **Performance targets met** - Full evaluation completes within 30 minutes

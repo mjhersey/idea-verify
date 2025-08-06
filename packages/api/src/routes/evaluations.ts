@@ -1,9 +1,9 @@
 import { Router } from 'express'
-import { 
-  createEvaluation, 
-  getEvaluations, 
-  getEvaluation, 
-  deleteEvaluation 
+import {
+  createEvaluation,
+  getEvaluations,
+  getEvaluation,
+  deleteEvaluation,
 } from '../controllers/evaluations.js'
 
 const router = Router()

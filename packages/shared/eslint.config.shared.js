@@ -1,6 +1,6 @@
-const js = require('@eslint/js');
-const typescript = require('@typescript-eslint/eslint-plugin');
-const tsParser = require('@typescript-eslint/parser');
+const js = require('@eslint/js')
+const typescript = require('@typescript-eslint/eslint-plugin')
+const tsParser = require('@typescript-eslint/parser')
 
 module.exports = [
   js.configs.recommended,
@@ -66,4 +66,4 @@ module.exports = [
       // Completely disable linting for JS files too
     },
   },
-];
+]

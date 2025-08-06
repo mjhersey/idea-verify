@@ -1,34 +1,34 @@
-import * as cdk from 'aws-cdk-lib';
-import * as wafv2 from 'aws-cdk-lib/aws-wafv2';
-import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as iam from 'aws-cdk-lib/aws-iam';
-import * as events from 'aws-cdk-lib/aws-events';
-import * as targets from 'aws-cdk-lib/aws-events-targets';
-import * as logs from 'aws-cdk-lib/aws-logs';
-import { Construct } from 'constructs';
+import * as cdk from 'aws-cdk-lib'
+import * as wafv2 from 'aws-cdk-lib/aws-wafv2'
+import * as lambda from 'aws-cdk-lib/aws-lambda'
+import * as iam from 'aws-cdk-lib/aws-iam'
+import * as events from 'aws-cdk-lib/aws-events'
+import * as targets from 'aws-cdk-lib/aws-events-targets'
+import * as logs from 'aws-cdk-lib/aws-logs'
+import { Construct } from 'constructs'
 
 export interface WAFIPManagementProps extends cdk.StackProps {
-  environment: string;
+  environment: string
 }
 
 export class WAFIPManagement extends Construct {
-  public readonly blockedIpSet: wafv2.CfnIPSet;
-  public readonly suspiciousIpSet: wafv2.CfnIPSet;
-  public readonly ipManagementFunction: lambda.Function;
+  public readonly blockedIpSet: wafv2.CfnIPSet
+  public readonly suspiciousIpSet: wafv2.CfnIPSet
+  public readonly ipManagementFunction: lambda.Function
 
   constructor(scope: Construct, id: string, props: WAFIPManagementProps) {
-    super(scope, id);
+    super(scope, id)
 
-    const { environment } = props;
+    const { environment } = props
 
     // Create IP sets for different threat levels
-    this.createIPSets(environment);
-    
+    this.createIPSets(environment)
+
     // Create Lambda function for automated IP management
-    this.createIPManagementFunction(environment);
-    
+    this.createIPManagementFunction(environment)
+
     // Set up automated threat intelligence updates
-    this.setupThreatIntelligenceUpdates(environment);
+    this.setupThreatIntelligenceUpdates(environment)
   }
 
   private createIPSets(environment: string): void {
@@ -39,22 +39,22 @@ export class WAFIPManagement extends Construct {
       ipAddressVersion: 'IPV4',
       addresses: this.getKnownBadIps(),
       description: 'IP addresses that are permanently blocked',
-    });
+    })
 
     // Suspicious IP set for temporary blocking
-    this.suspiciousIpSet = new wafv2.CfnIPSet(this, 'SuspiciousIPSet', {  
+    this.suspiciousIpSet = new wafv2.CfnIPSet(this, 'SuspiciousIPSet', {
       name: `ai-validation-suspicious-ips-${environment}`,
       scope: 'REGIONAL',
       ipAddressVersion: 'IPV4',
       addresses: [],
       description: 'IP addresses under temporary restriction',
-    });
+    })
 
     // Add tags
-    cdk.Tags.of(this.blockedIpSet).add('ManagedBy', 'CDK');
-    cdk.Tags.of(this.blockedIpSet).add('Environment', environment);
-    cdk.Tags.of(this.suspiciousIpSet).add('ManagedBy', 'CDK');
-    cdk.Tags.of(this.suspiciousIpSet).add('Environment', environment);
+    cdk.Tags.of(this.blockedIpSet).add('ManagedBy', 'CDK')
+    cdk.Tags.of(this.blockedIpSet).add('Environment', environment)
+    cdk.Tags.of(this.suspiciousIpSet).add('ManagedBy', 'CDK')
+    cdk.Tags.of(this.suspiciousIpSet).add('Environment', environment)
   }
 
   private createIPManagementFunction(environment: string): void {
@@ -62,7 +62,7 @@ export class WAFIPManagement extends Construct {
     const logGroup = new logs.LogGroup(this, 'IPManagementLogGroup', {
       logGroupName: `/aws/lambda/ai-validation-ip-management-${environment}`,
       retention: logs.RetentionDays.ONE_MONTH,
-    });
+    })
 
     // Create the Lambda function
     this.ipManagementFunction = new lambda.Function(this, 'IPManagementFunction', {
@@ -335,49 +335,46 @@ def remove_ip_from_set(ip: str, set_type: str):
     }
       `),
       environment: {
-        'BLOCKED_IP_SET_ID': this.blockedIpSet.attrId,
-        'SUSPICIOUS_IP_SET_ID': this.suspiciousIpSet.attrId,
-        'ENVIRONMENT': environment,
+        BLOCKED_IP_SET_ID: this.blockedIpSet.attrId,
+        SUSPICIOUS_IP_SET_ID: this.suspiciousIpSet.attrId,
+        ENVIRONMENT: environment,
       },
       timeout: cdk.Duration.minutes(5),
       memorySize: 256,
       logGroup: logGroup,
-    });
+    })
 
     // Grant permissions to manage WAF IP sets
-    this.ipManagementFunction.addToRolePolicy(new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: [
-        'wafv2:GetIPSet',
-        'wafv2:UpdateIPSet',
-        'wafv2:ListIPSets',
-      ],
-      resources: [
-        this.blockedIpSet.attrArn,
-        this.suspiciousIpSet.attrArn,
-      ],
-    }));
+    this.ipManagementFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['wafv2:GetIPSet', 'wafv2:UpdateIPSet', 'wafv2:ListIPSets'],
+        resources: [this.blockedIpSet.attrArn, this.suspiciousIpSet.attrArn],
+      })
+    )
 
     // Grant permissions to read WAF logs
-    this.ipManagementFunction.addToRolePolicy(new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: [
-        'logs:DescribeLogGroups',
-        'logs:DescribeLogStreams',
-        'logs:GetLogEvents',
-        'logs:FilterLogEvents',
-      ],
-      resources: [`arn:aws:logs:*:*:log-group:/aws/wafv2/*`],
-    }));
+    this.ipManagementFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          'logs:DescribeLogGroups',
+          'logs:DescribeLogStreams',
+          'logs:GetLogEvents',
+          'logs:FilterLogEvents',
+        ],
+        resources: [`arn:aws:logs:*:*:log-group:/aws/wafv2/*`],
+      })
+    )
 
     // Grant permissions to write CloudWatch metrics
-    this.ipManagementFunction.addToRolePolicy(new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: [
-        'cloudwatch:PutMetricData',
-      ],
-      resources: ['*'],
-    }));
+    this.ipManagementFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['cloudwatch:PutMetricData'],
+        resources: ['*'],
+      })
+    )
   }
 
   private setupThreatIntelligenceUpdates(environment: string): void {
@@ -385,37 +382,43 @@ def remove_ip_from_set(ip: str, set_type: str):
     const threatIntelRule = new events.Rule(this, 'ThreatIntelligenceUpdateRule', {
       schedule: events.Schedule.rate(cdk.Duration.hours(6)), // Update every 6 hours
       description: 'Update threat intelligence feeds',
-    });
+    })
 
-    threatIntelRule.addTarget(new targets.LambdaFunction(this.ipManagementFunction, {
-      event: events.RuleTargetInput.fromObject({
-        operation: 'update_threat_intelligence'
-      }),
-    }));
+    threatIntelRule.addTarget(
+      new targets.LambdaFunction(this.ipManagementFunction, {
+        event: events.RuleTargetInput.fromObject({
+          operation: 'update_threat_intelligence',
+        }),
+      })
+    )
 
     // Schedule log analysis
     const logAnalysisRule = new events.Rule(this, 'LogAnalysisRule', {
       schedule: events.Schedule.rate(cdk.Duration.hours(1)), // Analyze logs hourly
       description: 'Analyze WAF logs for suspicious patterns',
-    });
+    })
 
-    logAnalysisRule.addTarget(new targets.LambdaFunction(this.ipManagementFunction, {
-      event: events.RuleTargetInput.fromObject({
-        operation: 'analyze_logs'
-      }),
-    }));
+    logAnalysisRule.addTarget(
+      new targets.LambdaFunction(this.ipManagementFunction, {
+        event: events.RuleTargetInput.fromObject({
+          operation: 'analyze_logs',
+        }),
+      })
+    )
 
     // Schedule cleanup of temporary blocks
     const cleanupRule = new events.Rule(this, 'CleanupRule', {
       schedule: events.Schedule.rate(cdk.Duration.hours(24)), // Daily cleanup
       description: 'Clean up temporary IP blocks',
-    });
+    })
 
-    cleanupRule.addTarget(new targets.LambdaFunction(this.ipManagementFunction, {
-      event: events.RuleTargetInput.fromObject({
-        operation: 'cleanup_temporary_blocks'
-      }),
-    }));
+    cleanupRule.addTarget(
+      new targets.LambdaFunction(this.ipManagementFunction, {
+        event: events.RuleTargetInput.fromObject({
+          operation: 'cleanup_temporary_blocks',
+        }),
+      })
+    )
   }
 
   private getKnownBadIps(): string[] {
@@ -423,17 +426,17 @@ def remove_ip_from_set(ip: str, set_type: str):
     return [
       // Known scanning/attack sources
       '192.168.1.100', // Example - replace with real malicious IPs
-      '10.0.0.100',    // Example internal test IP
+      '10.0.0.100', // Example internal test IP
       // Add more known bad IPs here
-    ];
+    ]
   }
 
   // Public methods for integration with SecurityStack
   public getBlockedIpSetArn(): string {
-    return this.blockedIpSet.attrArn;
+    return this.blockedIpSet.attrArn
   }
 
   public getSuspiciousIpSetArn(): string {
-    return this.suspiciousIpSet.attrArn;
+    return this.suspiciousIpSet.attrArn
   }
 }

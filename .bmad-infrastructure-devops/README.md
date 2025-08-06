@@ -2,11 +2,16 @@
 
 ## Overview
 
-This expansion pack extends BMad Method with comprehensive infrastructure and DevOps capabilities. It's designed for teams that need to define, implement, and manage cloud infrastructure alongside their application development.
+This expansion pack extends BMad Method with comprehensive infrastructure and
+DevOps capabilities. It's designed for teams that need to define, implement, and
+manage cloud infrastructure alongside their application development.
 
 ## Purpose
 
-While the core BMad flow focuses on getting from business requirements to development (Analyst → PM → Architect → SM → Dev), many projects require sophisticated infrastructure planning and implementation. This expansion pack adds:
+While the core BMad flow focuses on getting from business requirements to
+development (Analyst → PM → Architect → SM → Dev), many projects require
+sophisticated infrastructure planning and implementation. This expansion pack
+adds:
 
 - Infrastructure architecture design capabilities
 - Platform engineering implementation workflows
@@ -40,8 +45,10 @@ Install this expansion pack when your project requires:
 
 ### Templates
 
-- `infrastructure-architecture-tmpl.md` - Infrastructure architecture design template
-- `infrastructure-platform-from-arch-tmpl.md` - Platform implementation from architecture template
+- `infrastructure-architecture-tmpl.md` - Infrastructure architecture design
+  template
+- `infrastructure-platform-from-arch-tmpl.md` - Platform implementation from
+  architecture template
 
 ### Tasks
 
@@ -50,15 +57,19 @@ Install this expansion pack when your project requires:
 
 ### Checklists
 
-- `infrastructure-checklist.md` - Comprehensive 16-section infrastructure validation checklist
+- `infrastructure-checklist.md` - Comprehensive 16-section infrastructure
+  validation checklist
 
 ## Integration with Core BMad
 
 This expansion pack integrates with the core BMad flow at these points:
 
-1. **After Architecture Phase**: The Architect can trigger infrastructure architecture design
-2. **Parallel to Development**: Infrastructure implementation can proceed alongside application development
-3. **Before Deployment**: Infrastructure must be validated before application deployment
+1. **After Architecture Phase**: The Architect can trigger infrastructure
+   architecture design
+2. **Parallel to Development**: Infrastructure implementation can proceed
+   alongside application development
+3. **Before Deployment**: Infrastructure must be validated before application
+   deployment
 
 ## Installation
 
@@ -143,5 +154,4 @@ You can customize this expansion pack by:
 
 ---
 
-_Version: 1.0_
-_Compatible with: BMad Method v4_
+_Version: 1.0_ _Compatible with: BMad Method v4_

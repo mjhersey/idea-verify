@@ -14,13 +14,13 @@ vi.mock('@/services/ideas', () => ({
     submitIdea: vi.fn(),
     getUserIdeas: vi.fn(),
     getIdeaById: vi.fn(),
-    validateIdeaSubmission: vi.fn()
-  }
+    validateIdeaSubmission: vi.fn(),
+  },
 }))
 vi.mock('@/services/evaluation', () => ({
   evaluationService: {
-    submitEvaluation: vi.fn()
-  }
+    submitEvaluation: vi.fn(),
+  },
 }))
 
 describe('Ideas Store', () => {
@@ -44,25 +44,26 @@ describe('Ideas Store', () => {
           status: 'submitted' as const,
           user_id: 'user-123',
           created_at: new Date(),
-          updated_at: new Date()
-        }
+          updated_at: new Date(),
+        },
       }
 
       const mockEvaluationResponse = {
         id: 'eval-123',
-        status: 'pending' as const
+        status: 'pending' as const,
       }
 
       vi.mocked(ideasService.validateIdeaSubmission).mockReturnValue({
         isValid: true,
-        errors: []
+        errors: [],
       })
       vi.mocked(ideasService.submitIdea).mockResolvedValue(mockIdeaResponse)
       vi.mocked(evaluationService.submitEvaluation).mockResolvedValue(mockEvaluationResponse)
 
       const result = await store.submitIdea({
         title: 'Test Idea',
-        description: 'Test description that is long enough to meet validation requirements and provides comprehensive details about the business concept.'
+        description:
+          'Test description that is long enough to meet validation requirements and provides comprehensive details about the business concept.',
       })
 
       expect(result.success).toBe(true)
@@ -75,11 +76,11 @@ describe('Ideas Store', () => {
     it('should handle validation errors', async () => {
       vi.mocked(ideasService.validateIdeaSubmission).mockReturnValue({
         isValid: false,
-        errors: ['Description must be at least 50 characters']
+        errors: ['Description must be at least 50 characters'],
       })
-      
+
       const result = await store.submitIdea({
-        description: 'Short' // Too short
+        description: 'Short', // Too short
       })
 
       expect(result.success).toBe(false)
@@ -89,15 +90,16 @@ describe('Ideas Store', () => {
     it('should handle API errors', async () => {
       vi.mocked(ideasService.validateIdeaSubmission).mockReturnValue({
         isValid: true,
-        errors: []
+        errors: [],
       })
       vi.mocked(ideasService.submitIdea).mockResolvedValue({
         success: false,
-        message: 'Server error'
+        message: 'Server error',
       })
 
       const result = await store.submitIdea({
-        description: 'This is a valid description that meets all length requirements and contains meaningful content about a business idea.'
+        description:
+          'This is a valid description that meets all length requirements and contains meaningful content about a business idea.',
       })
 
       expect(result.success).toBe(false)
@@ -115,19 +117,22 @@ describe('Ideas Store', () => {
           status: 'submitted' as const,
           user_id: 'user-123',
           created_at: new Date(),
-          updated_at: new Date()
-        }
+          updated_at: new Date(),
+        },
       }
 
       vi.mocked(ideasService.validateIdeaSubmission).mockReturnValue({
         isValid: true,
-        errors: []
+        errors: [],
       })
       vi.mocked(ideasService.submitIdea).mockResolvedValue(mockIdeaResponse)
-      vi.mocked(evaluationService.submitEvaluation).mockRejectedValue(new Error('Evaluation failed'))
+      vi.mocked(evaluationService.submitEvaluation).mockRejectedValue(
+        new Error('Evaluation failed')
+      )
 
       const result = await store.submitIdea({
-        description: 'This is a valid description that meets all length requirements and contains meaningful content about a business idea.'
+        description:
+          'This is a valid description that meets all length requirements and contains meaningful content about a business idea.',
       })
 
       // Should still succeed even if evaluation fails
@@ -147,7 +152,7 @@ describe('Ideas Store', () => {
           status: 'submitted' as const,
           user_id: 'user-123',
           created_at: new Date(),
-          updated_at: new Date()
+          updated_at: new Date(),
         },
         {
           id: 'idea-2',
@@ -156,8 +161,8 @@ describe('Ideas Store', () => {
           status: 'completed' as const,
           user_id: 'user-123',
           created_at: new Date(),
-          updated_at: new Date()
-        }
+          updated_at: new Date(),
+        },
       ]
 
       const mockResponse = {
@@ -168,8 +173,8 @@ describe('Ideas Store', () => {
           total: 2,
           totalPages: 1,
           hasNext: false,
-          hasPrevious: false
-        }
+          hasPrevious: false,
+        },
       }
 
       vi.mocked(ideasService.getUserIdeas).mockResolvedValue(mockResponse)
@@ -200,7 +205,7 @@ describe('Ideas Store', () => {
         status: 'submitted' as const,
         user_id: 'user-123',
         created_at: new Date(),
-        updated_at: new Date()
+        updated_at: new Date(),
       }
 
       vi.mocked(ideasService.getIdeaById).mockResolvedValue(mockIdea)
@@ -220,7 +225,7 @@ describe('Ideas Store', () => {
         status: 'submitted' as const,
         user_id: 'user-123',
         created_at: new Date(),
-        updated_at: new Date()
+        updated_at: new Date(),
       }
 
       // Add idea to cache
@@ -245,7 +250,7 @@ describe('Ideas Store', () => {
           status: 'submitted',
           user_id: 'user-123',
           created_at: new Date('2024-01-01'),
-          updated_at: new Date('2024-01-01')
+          updated_at: new Date('2024-01-01'),
         },
         {
           id: 'idea-2',
@@ -254,8 +259,8 @@ describe('Ideas Store', () => {
           status: 'completed',
           user_id: 'user-123',
           created_at: new Date('2024-01-02'),
-          updated_at: new Date('2024-01-02')
-        }
+          updated_at: new Date('2024-01-02'),
+        },
       ]
     })
 
@@ -289,8 +294,8 @@ describe('Ideas Store', () => {
             status: 'submitted' as const,
             user_id: 'user-123',
             created_at: new Date(),
-            updated_at: new Date()
-          }
+            updated_at: new Date(),
+          },
         ],
         pagination: {
           page: 2,
@@ -298,8 +303,8 @@ describe('Ideas Store', () => {
           total: 3,
           totalPages: 1,
           hasNext: false,
-          hasPrevious: true
-        }
+          hasPrevious: true,
+        },
       }
 
       vi.mocked(ideasService.getUserIdeas).mockResolvedValue(mockResponse)

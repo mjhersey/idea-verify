@@ -1,6 +1,7 @@
 # GitHub Actions Workflows Guide
 
-This document explains the GitHub Actions workflows configured for the AI Validation Platform.
+This document explains the GitHub Actions workflows configured for the AI
+Validation Platform.
 
 ## Workflow Overview
 
@@ -9,10 +10,12 @@ This document explains the GitHub Actions workflows configured for the AI Valida
 **Purpose**: Continuous Integration for code quality and testing
 
 **Triggers**:
+
 - Push to `main` or `develop` branches
 - Pull requests to `main` or `develop` branches
 
 **Jobs**:
+
 - **Security & Dependencies**: Audits for vulnerabilities
 - **Lint & Format**: Code style and formatting checks
 - **TypeScript**: Type checking and compilation
@@ -20,9 +23,11 @@ This document explains the GitHub Actions workflows configured for the AI Valida
 - **Integration Tests**: Database and service integration (conditional)
 - **Build Verification**: Ensures all packages build correctly
 - **E2E Tests**: End-to-end testing (conditional)
-- **Final Validation**: Comprehensive validation with development-friendly error handling
+- **Final Validation**: Comprehensive validation with development-friendly error
+  handling
 
 **Development Environment Behavior**:
+
 - Core jobs (security, lint, typecheck, test, build) must pass
 - Integration and E2E tests allow failures in development environments
 - Use commit message flags to control behavior:
@@ -34,15 +39,18 @@ This document explains the GitHub Actions workflows configured for the AI Valida
 **Purpose**: Deploy AWS infrastructure using CDK
 
 **Triggers**:
+
 - Manual workflow dispatch (workflow_dispatch)
 - Push to `main` branch with infrastructure changes
 - Pull requests with infrastructure changes (validation only)
 
 **Environment Handling**:
+
 - **Development**: Skips deployment if AWS credentials not configured
 - **Staging/Production**: Requires proper AWS credentials and approvals
 
 **Development Behavior**:
+
 - Infrastructure validation always runs (CDK synth)
 - Actual deployment skipped gracefully if AWS credentials missing
 - Shows helpful messages explaining development environment expectations
@@ -52,6 +60,7 @@ This document explains the GitHub Actions workflows configured for the AI Valida
 **Purpose**: Validate development environment setup
 
 **Features**:
+
 - Package structure validation
 - Development script availability
 - Docker configuration checks
@@ -65,7 +74,7 @@ This document explains the GitHub Actions workflows configured for the AI Valida
 
 When you push commits to GitHub from a development environment:
 
-1. **✅ Will Pass**: 
+1. **✅ Will Pass**:
    - Security audits
    - Linting and formatting
    - TypeScript compilation
@@ -78,7 +87,7 @@ When you push commits to GitHub from a development environment:
    - E2E tests (no deployed services)
    - Infrastructure deployment (no AWS credentials)
 
-3. **✅ Final Status**: 
+3. **✅ Final Status**:
    - Workflow completes successfully
    - Shows warnings for expected failures
    - Confirms core development requirements met
@@ -133,6 +142,7 @@ For staging/production deployment:
 ### Workflow Summaries
 
 Each workflow generates summaries showing:
+
 - Job status and results
 - Development environment compatibility
 - Deployment status and next steps
@@ -143,6 +153,7 @@ Each workflow generates summaries showing:
 ### Build Failures
 
 1. **Dependency Issues**:
+
    ```bash
    npm run install:all
    npm run clean
@@ -150,6 +161,7 @@ Each workflow generates summaries showing:
    ```
 
 2. **Type Errors**:
+
    ```bash
    npm run typecheck --workspace=packages/api
    ```
@@ -163,19 +175,23 @@ Each workflow generates summaries showing:
 ### Integration Test Failures
 
 Expected in development environment:
+
 - No deployed database
 - No deployed Redis
 - No deployed API services
 
-**Solution**: Add `[skip integration]` to commit message or configure local services
+**Solution**: Add `[skip integration]` to commit message or configure local
+services
 
 ### Infrastructure Deployment Issues
 
 **Development Environment**:
+
 - Expected behavior - no AWS credentials configured
 - Workflow will skip deployment and show informational message
 
 **Production Environment**:
+
 - Check AWS credentials configuration
 - Verify IAM permissions
 - Check CloudFormation stack status
@@ -185,6 +201,7 @@ Expected in development environment:
 ### Commit Messages
 
 Use conventional commit format:
+
 ```
 type(scope): description [flags]
 
@@ -212,6 +229,7 @@ docs(readme): update installation instructions
 ### Workflow Notifications
 
 Configure GitHub notifications for:
+
 - Workflow failures
 - Deployment completions
 - Security alerts
@@ -219,6 +237,7 @@ Configure GitHub notifications for:
 ### Integration with External Tools
 
 Workflows integrate with:
+
 - Codecov for coverage reporting
 - Security scanning tools
 - AWS CloudWatch for deployment monitoring

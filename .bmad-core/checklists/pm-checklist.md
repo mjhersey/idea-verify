@@ -1,6 +1,9 @@
 # Product Manager (PM) Requirements Checklist
 
-This checklist serves as a comprehensive framework to ensure the Product Requirements Document (PRD) and Epic definitions are complete, well-structured, and appropriately scoped for MVP development. The PM should systematically work through each item during the product definition process.
+This checklist serves as a comprehensive framework to ensure the Product
+Requirements Document (PRD) and Epic definitions are complete, well-structured,
+and appropriately scoped for MVP development. The PM should systematically work
+through each item during the product definition process.
 
 [[LLM: INITIALIZATION INSTRUCTIONS - PM CHECKLIST
 
@@ -11,7 +14,8 @@ Before proceeding with this checklist, ensure you have access to:
 3. Business goals and strategy documents
 4. Any existing epic definitions or user stories
 
-IMPORTANT: If the PRD is missing, immediately ask the user for its location or content before proceeding.
+IMPORTANT: If the PRD is missing, immediately ask the user for its location or
+content before proceeding.
 
 VALIDATION APPROACH:
 
@@ -21,15 +25,17 @@ VALIDATION APPROACH:
 4. Completeness - All aspects of the product vision are covered
 5. Feasibility - Requirements are technically achievable
 
-EXECUTION MODE:
-Ask the user if they want to work through the checklist:
+EXECUTION MODE: Ask the user if they want to work through the checklist:
 
-- Section by section (interactive mode) - Review each section, present findings, get confirmation before proceeding
-- All at once (comprehensive mode) - Complete full analysis and present comprehensive report at end]]
+- Section by section (interactive mode) - Review each section, present findings,
+  get confirmation before proceeding
+- All at once (comprehensive mode) - Complete full analysis and present
+  comprehensive report at end]]
 
 ## 1. PROBLEM DEFINITION & CONTEXT
 
-[[LLM: The foundation of any product is a clear problem statement. As you review this section:
+[[LLM: The foundation of any product is a clear problem statement. As you review
+this section:
 
 1. Verify the problem is real and worth solving
 2. Check that the target audience is specific, not "everyone"
@@ -63,7 +69,8 @@ Ask the user if they want to work through the checklist:
 
 ## 2. MVP SCOPE DEFINITION
 
-[[LLM: MVP scope is critical - too much and you waste resources, too little and you can't validate. Check:
+[[LLM: MVP scope is critical - too much and you waste resources, too little and
+you can't validate. Check:
 
 1. Is this truly minimal? Challenge every feature
 2. Does each feature directly address the core problem?
@@ -162,7 +169,8 @@ Ask the user if they want to work through the checklist:
 - [ ] Stories are sized appropriately (not too large)
 - [ ] Stories are independent where possible
 - [ ] Stories include necessary context
-- [ ] Local testability requirements (e.g., via CLI) defined in ACs for relevant backend/data stories
+- [ ] Local testability requirements (e.g., via CLI) defined in ACs for relevant
+      backend/data stories
 
 ## 5. NON-FUNCTIONAL REQUIREMENTS
 
@@ -233,13 +241,15 @@ Ask the user if they want to work through the checklist:
 - [ ] Integration points identified
 - [ ] Performance considerations highlighted
 - [ ] Security requirements articulated
-- [ ] Known areas of high complexity or technical risk flagged for architectural deep-dive
+- [ ] Known areas of high complexity or technical risk flagged for architectural
+      deep-dive
 
 ### 7.2 Technical Decision Framework
 
 - [ ] Decision criteria for technical choices provided
 - [ ] Trade-offs articulated for key decisions
-- [ ] Rationale for selecting primary approach over considered alternatives documented (for key design/feature choices)
+- [ ] Rationale for selecting primary approach over considered alternatives
+      documented (for key design/feature choices)
 - [ ] Non-negotiable technical requirements highlighted
 - [ ] Areas requiring technical investigation identified
 - [ ] Guidance on technical debt approach provided
@@ -304,34 +314,28 @@ Ask the user if they want to work through the checklist:
 Create a comprehensive validation report that includes:
 
 1. Executive Summary
-
    - Overall PRD completeness (percentage)
    - MVP scope appropriateness (Too Large/Just Right/Too Small)
    - Readiness for architecture phase (Ready/Nearly Ready/Not Ready)
    - Most critical gaps or concerns
 
-2. Category Analysis Table
-   Fill in the actual table with:
-
+2. Category Analysis Table Fill in the actual table with:
    - Status: PASS (90%+ complete), PARTIAL (60-89%), FAIL (<60%)
    - Critical Issues: Specific problems that block progress
 
 3. Top Issues by Priority
-
    - BLOCKERS: Must fix before architect can proceed
    - HIGH: Should fix for quality
    - MEDIUM: Would improve clarity
    - LOW: Nice to have
 
 4. MVP Scope Assessment
-
    - Features that might be cut for true MVP
    - Missing features that are essential
    - Complexity concerns
    - Timeline realism
 
 5. Technical Readiness
-
    - Clarity of technical constraints
    - Identified technical risks
    - Areas needing architect investigation
@@ -371,5 +375,7 @@ After presenting the report, ask if the user wants:
 
 ### Final Decision
 
-- **READY FOR ARCHITECT**: The PRD and epics are comprehensive, properly structured, and ready for architectural design.
-- **NEEDS REFINEMENT**: The requirements documentation requires additional work to address the identified deficiencies.
+- **READY FOR ARCHITECT**: The PRD and epics are comprehensive, properly
+  structured, and ready for architectural design.
+- **NEEDS REFINEMENT**: The requirements documentation requires additional work
+  to address the identified deficiencies.

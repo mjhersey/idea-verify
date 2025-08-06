@@ -76,10 +76,10 @@ jobs:
             ENV="dev"
             RUN_TESTS="false"
           fi
-          
+
           echo "environment=$ENV" >> $GITHUB_OUTPUT
           echo "run_tests=$RUN_TESTS" >> $GITHUB_OUTPUT
-          
+
           # Set base URL based on environment
           case $ENV in
             prod)
@@ -92,7 +92,7 @@ jobs:
               echo "base_url=http://localhost:3000" >> $GITHUB_OUTPUT
               ;;
           esac
-          
+
           echo "🎯 Test Environment: $ENV"
           echo "🔗 Base URL: $(cat $GITHUB_OUTPUT | grep base_url | cut -d= -f2)"
           echo "🧪 Run Tests: $RUN_TESTS"
@@ -128,17 +128,17 @@ jobs:
         working-directory: packages/infrastructure
         run: |
           npm ci
-          
+
           # Deploy parameter store
           npx cdk deploy AiValidationParameters${{ needs.determine-environment.outputs.environment == 'staging' && 'Staging' || 'Dev' }} \
             --context environment=${{ needs.determine-environment.outputs.environment }} \
             --require-approval never
-          
+
           # Deploy infrastructure
           npx cdk deploy AiValidationPlatform${{ needs.determine-environment.outputs.environment == 'staging' && 'Staging' || 'Dev' }} \
             --context environment=${{ needs.determine-environment.outputs.environment }} \
             --require-approval never
-          
+
           # Deploy ECS services
           npx cdk deploy AiValidationEcs${{ needs.determine-environment.outputs.environment == 'staging' && 'Staging' || 'Dev' }} \
             --context environment=${{ needs.determine-environment.outputs.environment }} \
@@ -147,11 +147,11 @@ jobs:
       - name: Wait for services to be ready
         run: |
           echo "⏳ Waiting for services to be ready..."
-          
+
           # Wait for load balancer to be healthy
           MAX_ATTEMPTS=30
           ATTEMPT=0
-          
+
           while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
             if curl -f "${{ needs.determine-environment.outputs.base_url }}/health" > /dev/null 2>&1; then
               echo "✅ Services are ready!"
@@ -162,7 +162,7 @@ jobs:
             echo "Attempt $ATTEMPT/$MAX_ATTEMPTS failed, waiting 30 seconds..."
             sleep 30
           done
-          
+
           if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
             echo "❌ Services did not become ready within timeout"
             exit 1
@@ -451,16 +451,17 @@ jobs:
   generate-test-report:
     name: Generate Test Report
     runs-on: ubuntu-latest
-    needs: [
-      determine-environment,
-      run-unit-tests,
-      run-e2e-tests,
-      run-api-tests,
-      run-database-tests,
-      run-auth-tests,
-      run-evaluation-tests,
-      run-performance-tests
-    ]
+    needs:
+      [
+        determine-environment,
+        run-unit-tests,
+        run-e2e-tests,
+        run-api-tests,
+        run-database-tests,
+        run-auth-tests,
+        run-evaluation-tests,
+        run-performance-tests,
+      ]
     if: always() && needs.determine-environment.outputs.run_tests == 'true'
     steps:
       - name: Checkout code
@@ -479,7 +480,7 @@ jobs:
           echo "**Base URL:** ${{ needs.determine-environment.outputs.base_url }}" >> test-report.md
           echo "**Timestamp:** $(date -u)" >> test-report.md
           echo "" >> test-report.md
-          
+
           # Test Status Summary
           echo "## Test Status Summary" >> test-report.md
           echo "" >> test-report.md
@@ -493,7 +494,7 @@ jobs:
           echo "| Evaluation Tests | ${{ needs.run-evaluation-tests.result == 'success' && '✅ PASSED' || (needs.run-evaluation-tests.result == 'skipped' && '⏭️ SKIPPED' || '❌ FAILED') }} |" >> test-report.md
           echo "| Performance Tests | ${{ needs.run-performance-tests.result == 'success' && '✅ PASSED' || (needs.run-performance-tests.result == 'skipped' && '⏭️ SKIPPED' || '❌ FAILED') }} |" >> test-report.md
           echo "" >> test-report.md
-          
+
           # Overall Status
           FAILED_TESTS=0
           if [[ "${{ needs.run-unit-tests.result }}" == "failure" ]]; then FAILED_TESTS=$((FAILED_TESTS + 1)); fi
@@ -503,7 +504,7 @@ jobs:
           if [[ "${{ needs.run-auth-tests.result }}" == "failure" ]]; then FAILED_TESTS=$((FAILED_TESTS + 1)); fi
           if [[ "${{ needs.run-evaluation-tests.result }}" == "failure" ]]; then FAILED_TESTS=$((FAILED_TESTS + 1)); fi
           if [[ "${{ needs.run-performance-tests.result }}" == "failure" ]]; then FAILED_TESTS=$((FAILED_TESTS + 1)); fi
-          
+
           if [[ $FAILED_TESTS -eq 0 ]]; then
             echo "## 🎉 Overall Status: SUCCESS" >> test-report.md
             echo "All integration tests passed successfully!" >> test-report.md
@@ -511,7 +512,7 @@ jobs:
             echo "## ❌ Overall Status: FAILURE" >> test-report.md
             echo "$FAILED_TESTS test suite(s) failed. Please review the individual test results." >> test-report.md
           fi
-          
+
           echo "" >> test-report.md
           echo "---" >> test-report.md
           echo "*Generated by GitHub Actions Integration Test Workflow*" >> test-report.md
@@ -529,7 +530,7 @@ jobs:
           script: |
             const fs = require('fs');
             const report = fs.readFileSync('test-report.md', 'utf8');
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -540,10 +541,7 @@ jobs:
   cleanup-test-environment:
     name: Cleanup Test Environment
     runs-on: ubuntu-latest
-    needs: [
-      determine-environment,
-      generate-test-report
-    ]
+    needs: [determine-environment, generate-test-report]
     if: always() && needs.determine-environment.outputs.environment == 'dev' && !github.event.inputs.skip_setup
     steps:
       - name: Checkout code
@@ -566,7 +564,7 @@ jobs:
         working-directory: packages/infrastructure
         run: |
           npm ci
-          
+
           # Only cleanup if this was a temporary deployment for testing
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             echo "🧹 Cleaning up temporary test environment..."

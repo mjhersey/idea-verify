@@ -2,58 +2,58 @@
  * MultiAgentOrchestrator Unit Tests - Testing workflow management and parallel execution coordination
  */
 
-import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest';
-import { MultiAgentOrchestrator } from '../../../src/orchestrator/multi-agent-orchestrator.js';
-import { DependencyEngine } from '../../../src/orchestrator/dependency-engine.js';
-import { ResultAggregator } from '../../../src/orchestrator/result-aggregator.js';
-import { MultiAgentQueueManager } from '../../../src/queue/multi-agent-queue-manager.js';
-import { AgentRegistry } from '../../../src/agents/agent-registry.js';
-import { MessageRouter } from '../../../src/communication/message-router.js';
-import { AgentService } from '../../../src/agents/agent-service.js';
-import { AgentType } from '@ai-validation/shared';
+import { describe, test, expect, beforeEach, vi, afterEach } from 'vitest'
+import { MultiAgentOrchestrator } from '../../../src/orchestrator/multi-agent-orchestrator.js'
+import { DependencyEngine } from '../../../src/orchestrator/dependency-engine.js'
+import { ResultAggregator } from '../../../src/orchestrator/result-aggregator.js'
+import { MultiAgentQueueManager } from '../../../src/queue/multi-agent-queue-manager.js'
+import { AgentRegistry } from '../../../src/agents/agent-registry.js'
+import { MessageRouter } from '../../../src/communication/message-router.js'
+import { AgentService } from '../../../src/agents/agent-service.js'
+import { AgentType } from '@ai-validation/shared'
 
 // Mock dependencies
-vi.mock('../../../src/orchestrator/dependency-engine.js');
-vi.mock('../../../src/orchestrator/result-aggregator.js');
-vi.mock('../../../src/queue/multi-agent-queue-manager.js');
-vi.mock('../../../src/agents/agent-registry.js');
-vi.mock('../../../src/communication/message-router.js');
-vi.mock('../../../src/agents/agent-service.js');
+vi.mock('../../../src/orchestrator/dependency-engine.js')
+vi.mock('../../../src/orchestrator/result-aggregator.js')
+vi.mock('../../../src/queue/multi-agent-queue-manager.js')
+vi.mock('../../../src/agents/agent-registry.js')
+vi.mock('../../../src/communication/message-router.js')
+vi.mock('../../../src/agents/agent-service.js')
 
-const MockDependencyEngine = vi.mocked(DependencyEngine);
-const MockResultAggregator = vi.mocked(ResultAggregator);
-const MockMultiAgentQueueManager = vi.mocked(MultiAgentQueueManager);
-const MockAgentRegistry = vi.mocked(AgentRegistry);
-const MockMessageRouter = vi.mocked(MessageRouter);
-const MockAgentService = vi.mocked(AgentService);
+const MockDependencyEngine = vi.mocked(DependencyEngine)
+const MockResultAggregator = vi.mocked(ResultAggregator)
+const MockMultiAgentQueueManager = vi.mocked(MultiAgentQueueManager)
+const MockAgentRegistry = vi.mocked(AgentRegistry)
+const MockMessageRouter = vi.mocked(MessageRouter)
+const MockAgentService = vi.mocked(AgentService)
 
 describe('MultiAgentOrchestrator', () => {
-  let orchestrator: MultiAgentOrchestrator;
-  let mockDependencyEngine: any;
-  let mockResultAggregator: any;
-  let mockQueueManager: any;
-  let mockAgentRegistry: any;
-  let mockMessageRouter: any;
-  let mockAgentService: any;
+  let orchestrator: MultiAgentOrchestrator
+  let mockDependencyEngine: any
+  let mockResultAggregator: any
+  let mockQueueManager: any
+  let mockAgentRegistry: any
+  let mockMessageRouter: any
+  let mockAgentService: any
 
   beforeEach(async () => {
-    vi.clearAllMocks();
+    vi.clearAllMocks()
 
     // Setup mock instances
     mockDependencyEngine = {
       buildDependencyGraph: vi.fn(),
       getReadyAgents: vi.fn(),
       calculateCriticalPath: vi.fn(),
-      optimizeExecutionOrder: vi.fn()
-    };
-    MockDependencyEngine.getInstance.mockReturnValue(mockDependencyEngine);
+      optimizeExecutionOrder: vi.fn(),
+    }
+    MockDependencyEngine.getInstance.mockReturnValue(mockDependencyEngine)
 
     mockResultAggregator = {
       aggregateResults: vi.fn(),
       validateResults: vi.fn(),
-      calculateConfidence: vi.fn()
-    };
-    MockResultAggregator.getInstance.mockReturnValue(mockResultAggregator);
+      calculateConfidence: vi.fn(),
+    }
+    MockResultAggregator.getInstance.mockReturnValue(mockResultAggregator)
 
     mockQueueManager = {
       addMultiAgentEvaluation: vi.fn(),
@@ -63,9 +63,9 @@ describe('MultiAgentOrchestrator', () => {
       off: vi.fn(),
       initialize: vi.fn().mockResolvedValue(undefined),
       shutdown: vi.fn().mockResolvedValue(undefined),
-      pauseAgent: vi.fn().mockResolvedValue(undefined)
-    };
-    MockMultiAgentQueueManager.getInstance.mockReturnValue(mockQueueManager);
+      pauseAgent: vi.fn().mockResolvedValue(undefined),
+    }
+    MockMultiAgentQueueManager.getInstance.mockReturnValue(mockQueueManager)
 
     mockAgentRegistry = {
       getAllRegisteredAgents: vi.fn(),
@@ -74,106 +74,110 @@ describe('MultiAgentOrchestrator', () => {
       isAgentAvailable: vi.fn(),
       initialize: vi.fn().mockResolvedValue(undefined),
       on: vi.fn(),
-      off: vi.fn()
-    };
-    MockAgentRegistry.getInstance.mockReturnValue(mockAgentRegistry);
+      off: vi.fn(),
+    }
+    MockAgentRegistry.getInstance.mockReturnValue(mockAgentRegistry)
 
     mockMessageRouter = {
       registerHandler: vi.fn(),
       addRoutingRule: vi.fn(),
       addFanoutPattern: vi.fn(),
-      shutdown: vi.fn().mockResolvedValue(undefined)
-    };
-    MockMessageRouter.getInstance.mockReturnValue(mockMessageRouter);
+      shutdown: vi.fn().mockResolvedValue(undefined),
+    }
+    MockMessageRouter.getInstance.mockReturnValue(mockMessageRouter)
 
-    mockAgentService = {};
-    MockAgentService.getInstance.mockReturnValue(mockAgentService);
+    mockAgentService = {}
+    MockAgentService.getInstance.mockReturnValue(mockAgentService)
 
-    orchestrator = MultiAgentOrchestrator.getInstance();
-    await orchestrator.initialize();
-  });
+    orchestrator = MultiAgentOrchestrator.getInstance()
+    await orchestrator.initialize()
+  })
 
   afterEach(async () => {
-    await MultiAgentOrchestrator.resetInstance();
-  });
+    await MultiAgentOrchestrator.resetInstance()
+  })
 
   describe('Workflow Execution', () => {
     test('should execute workflow with single agent', async () => {
       const businessIdea = {
         id: 'idea-123',
         title: 'Test Business Idea',
-        description: 'A revolutionary new concept'
-      };
+        description: 'A revolutionary new concept',
+      }
 
-      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(['market-research']);
-      mockAgentRegistry.getParallelExecutionGroups.mockReturnValue([['market-research']]);
-      mockAgentRegistry.validateDependencies.mockReturnValue({ valid: true, issues: [] });
+      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(['market-research'])
+      mockAgentRegistry.getParallelExecutionGroups.mockReturnValue([['market-research']])
+      mockAgentRegistry.validateDependencies.mockReturnValue({ valid: true, issues: [] })
       mockDependencyEngine.buildDependencyGraph.mockReturnValue({
         nodes: ['market-research'],
         edges: [],
-        levels: [['market-research']]
-      });
-      mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123');
+        levels: [['market-research']],
+      })
+      mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123')
 
       const workflowId = await orchestrator.executeWorkflow(
         'standard-evaluation',
         'eval-123',
         businessIdea
-      );
+      )
 
-      expect(workflowId).toBe('workflow-job-123');
+      expect(workflowId).toBe('workflow-job-123')
       expect(mockQueueManager.addMultiAgentEvaluation).toHaveBeenCalledWith(
         expect.objectContaining({
           evaluationId: 'eval-123',
           agentTypes: ['market-research'],
           parallelGroups: [['market-research']],
           dependencies: expect.objectContaining({
-            'market-research': []
+            'market-research': [],
           }),
           priority: 'medium',
           businessIdea: expect.objectContaining({
             id: 'idea-123',
-            title: 'Test Business Idea'
+            title: 'Test Business Idea',
           }),
-          context: expect.any(Object)
+          context: expect.any(Object),
         }),
         expect.any(Object)
-      );
-    });
+      )
+    })
 
     test('should execute workflow with multiple parallel agents', async () => {
       const businessIdea = {
         id: 'idea-123',
         title: 'Test Business Idea',
-        description: 'A revolutionary new concept'
-      };
+        description: 'A revolutionary new concept',
+      }
 
-      const agentTypes: AgentType[] = ['market-research', 'competitive-analysis', 'customer-research'];
+      const agentTypes: AgentType[] = [
+        'market-research',
+        'competitive-analysis',
+        'customer-research',
+      ]
       const parallelGroups: AgentType[][] = [
         ['market-research'],
-        ['competitive-analysis', 'customer-research']
-      ];
+        ['competitive-analysis', 'customer-research'],
+      ]
 
-      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(agentTypes);
-      mockAgentRegistry.getParallelExecutionGroups.mockReturnValue(parallelGroups);
-      mockAgentRegistry.validateDependencies.mockReturnValue({ valid: true, issues: [] });
+      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(agentTypes)
+      mockAgentRegistry.getParallelExecutionGroups.mockReturnValue(parallelGroups)
+      mockAgentRegistry.validateDependencies.mockReturnValue({ valid: true, issues: [] })
       mockDependencyEngine.buildDependencyGraph.mockReturnValue({
         nodes: agentTypes,
         edges: [
           { from: 'market-research', to: 'competitive-analysis' },
-          { from: 'market-research', to: 'customer-research' }
+          { from: 'market-research', to: 'customer-research' },
         ],
-        levels: parallelGroups
-      });
-      mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123');
+        levels: parallelGroups,
+      })
+      mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123')
 
       const workflowId = await orchestrator.executeWorkflow(
         'standard-evaluation',
         'eval-123',
         businessIdea
-      );
+      )
 
-      expect(workflowId).toBe('workflow-job-123');
+      expect(workflowId).toBe('workflow-job-123')
       expect(mockQueueManager.addMultiAgentEvaluation).toHaveBeenCalledWith(
         expect.objectContaining({
           evaluationId: 'eval-123',
@@ -182,53 +186,53 @@ describe('MultiAgentOrchestrator', () => {
           dependencies: expect.objectContaining({
             'market-research': [],
             'competitive-analysis': ['market-research'],
-            'customer-research': ['market-research']
+            'customer-research': ['market-research'],
           }),
           priority: 'medium',
           businessIdea: expect.objectContaining({
             id: 'idea-123',
-            title: 'Test Business Idea'
+            title: 'Test Business Idea',
           }),
-          context: expect.any(Object)
+          context: expect.any(Object),
         }),
         expect.any(Object)
-      );
-    });
+      )
+    })
 
     test('should handle dependency validation failures', async () => {
       const businessIdea = {
         id: 'idea-123',
-        title: 'Test Business Idea', 
-        description: 'A revolutionary new concept'
-      };
+        title: 'Test Business Idea',
+        description: 'A revolutionary new concept',
+      }
 
-      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(['competitive-analysis']);
+      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(['competitive-analysis'])
       mockAgentRegistry.validateDependencies.mockReturnValue({
         valid: false,
-        issues: ['Missing dependency: market-research required by competitive-analysis']
-      });
+        issues: ['Missing dependency: market-research required by competitive-analysis'],
+      })
 
       await expect(
         orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea)
-      ).rejects.toThrow('Dependency validation failed');
-    });
+      ).rejects.toThrow('Dependency validation failed')
+    })
 
     test('should handle workflow execution with custom priority and timeout', async () => {
       const businessIdea = {
         id: 'idea-123',
         title: 'Urgent Business Idea',
-        description: 'Time-sensitive concept'
-      };
+        description: 'Time-sensitive concept',
+      }
 
-      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(['market-research']);
-      mockAgentRegistry.getParallelExecutionGroups.mockReturnValue([['market-research']]);
-      mockAgentRegistry.validateDependencies.mockReturnValue({ valid: true, issues: [] });
+      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(['market-research'])
+      mockAgentRegistry.getParallelExecutionGroups.mockReturnValue([['market-research']])
+      mockAgentRegistry.validateDependencies.mockReturnValue({ valid: true, issues: [] })
       mockDependencyEngine.buildDependencyGraph.mockReturnValue({
         nodes: ['market-research'],
         edges: [],
-        levels: [['market-research']]
-      });
-      mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123');
+        levels: [['market-research']],
+      })
+      mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123')
 
       const workflowId = await orchestrator.executeWorkflow(
         'standard-evaluation',
@@ -238,9 +242,9 @@ describe('MultiAgentOrchestrator', () => {
           requiredAgents: ['market-research'],
           priority: 'high',
           timeout: 600000,
-          context: { urgent: true }
+          context: { urgent: true },
         }
-      );
+      )
 
       expect(mockQueueManager.addMultiAgentEvaluation).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -249,30 +253,30 @@ describe('MultiAgentOrchestrator', () => {
           priority: 'high',
           businessIdea: expect.objectContaining({
             id: 'idea-123',
-            title: 'Urgent Business Idea'
+            title: 'Urgent Business Idea',
           }),
           context: expect.objectContaining({
             workflowId: 'standard-evaluation',
             correlationId: 'eval-123',
-            plan: expect.any(Object)
-          })
+            plan: expect.any(Object),
+          }),
         }),
         expect.objectContaining({
-          priority: 'high'
+          priority: 'high',
         })
-      );
-    });
-  });
+      )
+    })
+  })
 
   describe('Dependency Graph Building', () => {
     test('should build dependency graph for all available agents', () => {
       const allAgents: AgentType[] = [
         'market-research',
-        'competitive-analysis', 
+        'competitive-analysis',
         'customer-research',
         'technical-feasibility',
-        'financial-analysis'
-      ];
+        'financial-analysis',
+      ]
 
       mockDependencyEngine.buildDependencyGraph.mockReturnValue({
         nodes: allAgents,
@@ -280,184 +284,189 @@ describe('MultiAgentOrchestrator', () => {
           { from: 'market-research', to: 'competitive-analysis' },
           { from: 'market-research', to: 'customer-research' },
           { from: 'competitive-analysis', to: 'financial-analysis' },
-          { from: 'customer-research', to: 'financial-analysis' }
+          { from: 'customer-research', to: 'financial-analysis' },
         ],
         levels: [
           ['market-research', 'technical-feasibility'],
           ['competitive-analysis', 'customer-research'],
-          ['financial-analysis']
-        ]
-      });
+          ['financial-analysis'],
+        ],
+      })
 
-      const graph = orchestrator.buildDependencyGraph(allAgents);
+      const graph = orchestrator.buildDependencyGraph(allAgents)
 
-      expect(mockDependencyEngine.buildDependencyGraph).toHaveBeenCalledWith(allAgents);
-      expect(graph.nodes).toHaveLength(5);
-      expect(graph.levels).toHaveLength(3);
-    });
+      expect(mockDependencyEngine.buildDependencyGraph).toHaveBeenCalledWith(allAgents)
+      expect(graph.nodes).toHaveLength(5)
+      expect(graph.levels).toHaveLength(3)
+    })
 
     test('should build dependency graph for subset of agents', () => {
-      const selectedAgents: AgentType[] = ['market-research', 'competitive-analysis'];
+      const selectedAgents: AgentType[] = ['market-research', 'competitive-analysis']
 
       mockDependencyEngine.buildDependencyGraph.mockReturnValue({
         nodes: selectedAgents,
         edges: [{ from: 'market-research', to: 'competitive-analysis' }],
-        levels: [['market-research'], ['competitive-analysis']]
-      });
+        levels: [['market-research'], ['competitive-analysis']],
+      })
 
-      const graph = orchestrator.buildDependencyGraph(selectedAgents);
+      const graph = orchestrator.buildDependencyGraph(selectedAgents)
 
-      expect(mockDependencyEngine.buildDependencyGraph).toHaveBeenCalledWith(selectedAgents);
-      expect(graph.nodes).toHaveLength(2);
-      expect(graph.levels).toHaveLength(2);
-    });
-  });
+      expect(mockDependencyEngine.buildDependencyGraph).toHaveBeenCalledWith(selectedAgents)
+      expect(graph.nodes).toHaveLength(2)
+      expect(graph.levels).toHaveLength(2)
+    })
+  })
 
   describe('Workflow State Management', () => {
     test('should track active workflows', async () => {
-      const businessIdea = { id: 'idea-123', title: 'Test', description: 'Test' };
+      const businessIdea = { id: 'idea-123', title: 'Test', description: 'Test' }
 
-      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(['market-research']);
-      mockAgentRegistry.getParallelExecutionGroups.mockReturnValue([['market-research']]);
-      mockAgentRegistry.validateDependencies.mockReturnValue({ valid: true, issues: [] });
+      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(['market-research'])
+      mockAgentRegistry.getParallelExecutionGroups.mockReturnValue([['market-research']])
+      mockAgentRegistry.validateDependencies.mockReturnValue({ valid: true, issues: [] })
       mockDependencyEngine.buildDependencyGraph.mockReturnValue({
         nodes: ['market-research'],
         edges: [],
-        levels: [['market-research']]
-      });
-      mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123');
+        levels: [['market-research']],
+      })
+      mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123')
 
-      await orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea);
+      await orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea)
 
-      const activeWorkflows = orchestrator.getActiveWorkflows();
-      expect(activeWorkflows).toContain('standard-evaluation');
-    });
+      const activeWorkflows = orchestrator.getActiveWorkflows()
+      expect(activeWorkflows).toContain('standard-evaluation')
+    })
 
     test('should get workflow status', async () => {
-      const businessIdea = { id: 'idea-123', title: 'Test', description: 'Test' };
+      const businessIdea = { id: 'idea-123', title: 'Test', description: 'Test' }
 
-      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(['market-research']);
-      mockAgentRegistry.getParallelExecutionGroups.mockReturnValue([['market-research']]);
-      mockAgentRegistry.validateDependencies.mockReturnValue({ valid: true, issues: [] });
+      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(['market-research'])
+      mockAgentRegistry.getParallelExecutionGroups.mockReturnValue([['market-research']])
+      mockAgentRegistry.validateDependencies.mockReturnValue({ valid: true, issues: [] })
       mockDependencyEngine.buildDependencyGraph.mockReturnValue({
         nodes: ['market-research'],
         edges: [],
-        levels: [['market-research']]
-      });
-      mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123');
+        levels: [['market-research']],
+      })
+      mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123')
 
-      await orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea);
+      await orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea)
 
-      const status = orchestrator.getWorkflowStatus('standard-evaluation');
-      expect(status).toBeDefined();
-      expect(status?.workflowId).toBe('standard-evaluation');
-      expect(status?.evaluationId).toBe('eval-123');
-      expect(status?.status).toBe('running');
-      expect(status?.agentTypes).toContain('market-research');
-    });
+      const status = orchestrator.getWorkflowStatus('standard-evaluation')
+      expect(status).toBeDefined()
+      expect(status?.workflowId).toBe('standard-evaluation')
+      expect(status?.evaluationId).toBe('eval-123')
+      expect(status?.status).toBe('running')
+      expect(status?.agentTypes).toContain('market-research')
+    })
 
     test('should return undefined for non-existent workflow', () => {
-      const status = orchestrator.getWorkflowStatus('non-existent');
-      expect(status).toBeUndefined();
-    });
+      const status = orchestrator.getWorkflowStatus('non-existent')
+      expect(status).toBeUndefined()
+    })
 
     test('should cancel workflow', async () => {
-      const businessIdea = { id: 'idea-123', title: 'Test', description: 'Test' };
+      const businessIdea = { id: 'idea-123', title: 'Test', description: 'Test' }
 
-      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(['market-research']);
-      mockAgentRegistry.getParallelExecutionGroups.mockReturnValue([['market-research']]);
-      mockAgentRegistry.validateDependencies.mockReturnValue({ valid: true, issues: [] });
+      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(['market-research'])
+      mockAgentRegistry.getParallelExecutionGroups.mockReturnValue([['market-research']])
+      mockAgentRegistry.validateDependencies.mockReturnValue({ valid: true, issues: [] })
       mockDependencyEngine.buildDependencyGraph.mockReturnValue({
         nodes: ['market-research'],
         edges: [],
-        levels: [['market-research']]
-      });
-      mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123');
+        levels: [['market-research']],
+      })
+      mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123')
 
-      await orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea);
+      await orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea)
 
-      const result = await orchestrator.cancelWorkflow('eval-123');
-      expect(result).toBe(true);
+      const result = await orchestrator.cancelWorkflow('eval-123')
+      expect(result).toBe(true)
 
-      const status = orchestrator.getWorkflowStatus('standard-evaluation');
-      expect(status?.status).toBe('cancelled');
-    });
+      const status = orchestrator.getWorkflowStatus('standard-evaluation')
+      expect(status?.status).toBe('cancelled')
+    })
 
     test('should return false when cancelling non-existent workflow', async () => {
-      const result = await orchestrator.cancelWorkflow('non-existent');
-      expect(result).toBe(false);
-    });
-  });
+      const result = await orchestrator.cancelWorkflow('non-existent')
+      expect(result).toBe(false)
+    })
+  })
 
   describe('Event Handling', () => {
     test('should emit workflow started event', async () => {
-      const eventSpy = vi.fn();
-      orchestrator.on('workflowStarted', eventSpy);
+      const eventSpy = vi.fn()
+      orchestrator.on('workflowStarted', eventSpy)
 
-      const businessIdea = { id: 'idea-123', title: 'Test', description: 'Test' };
+      const businessIdea = { id: 'idea-123', title: 'Test', description: 'Test' }
 
-      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(['market-research']);
-      mockAgentRegistry.getParallelExecutionGroups.mockReturnValue([['market-research']]);
-      mockAgentRegistry.validateDependencies.mockReturnValue({ valid: true, issues: [] });
+      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(['market-research'])
+      mockAgentRegistry.getParallelExecutionGroups.mockReturnValue([['market-research']])
+      mockAgentRegistry.validateDependencies.mockReturnValue({ valid: true, issues: [] })
       mockDependencyEngine.buildDependencyGraph.mockReturnValue({
         nodes: ['market-research'],
         edges: [],
-        levels: [['market-research']]
-      });
-      mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123');
+        levels: [['market-research']],
+      })
+      mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123')
 
-      await orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea);
+      await orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea)
 
       expect(eventSpy).toHaveBeenCalledWith({
         workflowId: 'standard-evaluation',
         evaluationId: 'eval-123',
         jobId: 'workflow-job-123',
         agentTypes: ['market-research'],
-        startedAt: expect.any(Date)
-      });
-    });
+        startedAt: expect.any(Date),
+      })
+    })
 
     test('should handle queue manager events', () => {
       // Verify event listeners are set up on queue manager
-      expect(mockQueueManager.on).toHaveBeenCalledWith('evaluationCompleted', expect.any(Function));
-      expect(mockQueueManager.on).toHaveBeenCalledWith('evaluationFailed', expect.any(Function));
-      expect(mockQueueManager.on).toHaveBeenCalledWith('agentExecutionCompleted', expect.any(Function));
-      expect(mockQueueManager.on).toHaveBeenCalledWith('agentExecutionFailed', expect.any(Function));
-    });
+      expect(mockQueueManager.on).toHaveBeenCalledWith('evaluationCompleted', expect.any(Function))
+      expect(mockQueueManager.on).toHaveBeenCalledWith('evaluationFailed', expect.any(Function))
+      expect(mockQueueManager.on).toHaveBeenCalledWith(
+        'agentExecutionCompleted',
+        expect.any(Function)
+      )
+      expect(mockQueueManager.on).toHaveBeenCalledWith('agentExecutionFailed', expect.any(Function))
+    })
 
     test('should emit workflow completed event when evaluation completes', () => {
-      const eventSpy = vi.fn();
-      orchestrator.on('workflowCompleted', eventSpy);
+      const eventSpy = vi.fn()
+      orchestrator.on('workflowCompleted', eventSpy)
 
       // Get the event handler that was registered with the queue manager
-      const onEvaluationCompleted = mockQueueManager.on.mock.calls
-        .find(call => call[0] === 'evaluationCompleted')?.[1];
+      const onEvaluationCompleted = mockQueueManager.on.mock.calls.find(
+        call => call[0] === 'evaluationCompleted'
+      )?.[1]
 
-      expect(onEvaluationCompleted).toBeDefined();
+      expect(onEvaluationCompleted).toBeDefined()
 
       // Simulate evaluation completion
-      onEvaluationCompleted({ jobId: 'workflow-job-123' });
+      onEvaluationCompleted({ jobId: 'workflow-job-123' })
 
-      expect(eventSpy).toHaveBeenCalled();
-    });
+      expect(eventSpy).toHaveBeenCalled()
+    })
 
     test('should emit workflow failed event when evaluation fails', () => {
-      const eventSpy = vi.fn();
-      orchestrator.on('workflowFailed', eventSpy);
+      const eventSpy = vi.fn()
+      orchestrator.on('workflowFailed', eventSpy)
 
       // Get the event handler that was registered with the queue manager
-      const onEvaluationFailed = mockQueueManager.on.mock.calls
-        .find(call => call[0] === 'evaluationFailed')?.[1];
+      const onEvaluationFailed = mockQueueManager.on.mock.calls.find(
+        call => call[0] === 'evaluationFailed'
+      )?.[1]
 
-      expect(onEvaluationFailed).toBeDefined();
+      expect(onEvaluationFailed).toBeDefined()
 
       // Simulate evaluation failure
-      const error = new Error('Evaluation failed');
-      onEvaluationFailed({ jobId: 'workflow-job-123', error });
+      const error = new Error('Evaluation failed')
+      onEvaluationFailed({ jobId: 'workflow-job-123', error })
 
-      expect(eventSpy).toHaveBeenCalled();
-    });
-  });
+      expect(eventSpy).toHaveBeenCalled()
+    })
+  })
 
   describe('Performance Optimization', () => {
     test('should optimize execution order based on dependencies', () => {
@@ -465,8 +474,8 @@ describe('MultiAgentOrchestrator', () => {
         'market-research',
         'competitive-analysis',
         'customer-research',
-        'financial-analysis'
-      ];
+        'financial-analysis',
+      ]
 
       const originalGraph = {
         nodes: agentTypes,
@@ -474,29 +483,29 @@ describe('MultiAgentOrchestrator', () => {
           { from: 'market-research', to: 'competitive-analysis' },
           { from: 'market-research', to: 'customer-research' },
           { from: 'competitive-analysis', to: 'financial-analysis' },
-          { from: 'customer-research', to: 'financial-analysis' }
+          { from: 'customer-research', to: 'financial-analysis' },
         ],
         levels: [
           ['market-research'],
           ['competitive-analysis', 'customer-research'],
-          ['financial-analysis']
-        ]
-      };
+          ['financial-analysis'],
+        ],
+      }
 
       const optimizedGraph = {
         ...originalGraph,
         criticalPath: ['market-research', 'competitive-analysis', 'financial-analysis'],
-        estimatedDuration: 15000
-      };
+        estimatedDuration: 15000,
+      }
 
-      mockDependencyEngine.buildDependencyGraph.mockReturnValue(originalGraph);
-      mockDependencyEngine.optimizeExecutionOrder.mockReturnValue(optimizedGraph);
+      mockDependencyEngine.buildDependencyGraph.mockReturnValue(originalGraph)
+      mockDependencyEngine.optimizeExecutionOrder.mockReturnValue(optimizedGraph)
 
-      const result = orchestrator.optimizeWorkflowExecution(agentTypes);
+      const result = orchestrator.optimizeWorkflowExecution(agentTypes)
 
-      expect(mockDependencyEngine.optimizeExecutionOrder).toHaveBeenCalledWith(originalGraph);
-      expect(result).toEqual(optimizedGraph);
-    });
+      expect(mockDependencyEngine.optimizeExecutionOrder).toHaveBeenCalledWith(originalGraph)
+      expect(result).toEqual(optimizedGraph)
+    })
 
     test('should calculate critical path for complex workflows', () => {
       const agentTypes: AgentType[] = [
@@ -504,8 +513,8 @@ describe('MultiAgentOrchestrator', () => {
         'competitive-analysis',
         'customer-research',
         'technical-feasibility',
-        'financial-analysis'
-      ];
+        'financial-analysis',
+      ]
 
       const graph = {
         nodes: agentTypes,
@@ -513,119 +522,119 @@ describe('MultiAgentOrchestrator', () => {
           { from: 'market-research', to: 'competitive-analysis' },
           { from: 'market-research', to: 'customer-research' },
           { from: 'competitive-analysis', to: 'financial-analysis' },
-          { from: 'customer-research', to: 'financial-analysis' }
+          { from: 'customer-research', to: 'financial-analysis' },
         ],
         levels: [
           ['market-research', 'technical-feasibility'],
           ['competitive-analysis', 'customer-research'],
-          ['financial-analysis']
-        ]
-      };
+          ['financial-analysis'],
+        ],
+      }
 
-      mockDependencyEngine.buildDependencyGraph.mockReturnValue(graph);
+      mockDependencyEngine.buildDependencyGraph.mockReturnValue(graph)
       mockDependencyEngine.calculateCriticalPath.mockReturnValue({
         path: ['market-research', 'competitive-analysis', 'financial-analysis'],
-        duration: 18000
-      });
+        duration: 18000,
+      })
 
-      const criticalPath = orchestrator.calculateCriticalPath(agentTypes);
+      const criticalPath = orchestrator.calculateCriticalPath(agentTypes)
 
-      expect(mockDependencyEngine.calculateCriticalPath).toHaveBeenCalledWith(graph);
-      expect(criticalPath.path).toContain('market-research');
-      expect(criticalPath.path).toContain('financial-analysis');
-      expect(criticalPath.duration).toBe(18000);
-    });
-  });
+      expect(mockDependencyEngine.calculateCriticalPath).toHaveBeenCalledWith(graph)
+      expect(criticalPath.path).toContain('market-research')
+      expect(criticalPath.path).toContain('financial-analysis')
+      expect(criticalPath.duration).toBe(18000)
+    })
+  })
 
   describe('Error Handling', () => {
     test('should handle queue manager failures', async () => {
-      const businessIdea = { id: 'idea-123', title: 'Test', description: 'Test' };
+      const businessIdea = { id: 'idea-123', title: 'Test', description: 'Test' }
 
-      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(['market-research']);
-      mockAgentRegistry.getParallelExecutionGroups.mockReturnValue([['market-research']]);
-      mockAgentRegistry.validateDependencies.mockReturnValue({ valid: true, issues: [] });
+      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(['market-research'])
+      mockAgentRegistry.getParallelExecutionGroups.mockReturnValue([['market-research']])
+      mockAgentRegistry.validateDependencies.mockReturnValue({ valid: true, issues: [] })
       mockDependencyEngine.buildDependencyGraph.mockReturnValue({
         nodes: ['market-research'],
         edges: [],
-        levels: [['market-research']]
-      });
-      mockQueueManager.addMultiAgentEvaluation.mockRejectedValue(new Error('Queue unavailable'));
+        levels: [['market-research']],
+      })
+      mockQueueManager.addMultiAgentEvaluation.mockRejectedValue(new Error('Queue unavailable'))
 
       await expect(
         orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea)
-      ).rejects.toThrow('Queue unavailable');
-    });
+      ).rejects.toThrow('Queue unavailable')
+    })
 
     test('should handle agent registry failures', async () => {
-      const businessIdea = { id: 'idea-123', title: 'Test', description: 'Test' };
+      const businessIdea = { id: 'idea-123', title: 'Test', description: 'Test' }
 
       mockAgentRegistry.getAllRegisteredAgents.mockImplementation(() => {
-        throw new Error('Registry unavailable');
-      });
+        throw new Error('Registry unavailable')
+      })
 
       await expect(
         orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea)
-      ).rejects.toThrow('Registry unavailable');
-    });
+      ).rejects.toThrow('Registry unavailable')
+    })
 
     test('should handle workflow validation failures', async () => {
-      const businessIdea = { id: 'idea-123', title: 'Test', description: 'Test' };
+      const businessIdea = { id: 'idea-123', title: 'Test', description: 'Test' }
 
       // Test with an invalid workflow ID that doesn't exist
       await expect(
         orchestrator.executeWorkflow('non-existent-workflow', 'eval-123', businessIdea)
-      ).rejects.toThrow('Workflow not found: non-existent-workflow');
-    });
-  });
+      ).rejects.toThrow('Workflow not found: non-existent-workflow')
+    })
+  })
 
   describe('Statistics and Monitoring', () => {
     test('should get orchestrator statistics', () => {
-      const stats = orchestrator.getStatistics();
+      const stats = orchestrator.getStatistics()
 
-      expect(stats).toHaveProperty('totalWorkflows');
-      expect(stats).toHaveProperty('activeWorkflows');
-      expect(stats).toHaveProperty('completedWorkflows');
-      expect(stats).toHaveProperty('failedWorkflows');
-      expect(stats).toHaveProperty('averageExecutionTime');
-      expect(stats.totalWorkflows).toBe(0);
-      expect(stats.activeWorkflows).toBe(0);
-    });
+      expect(stats).toHaveProperty('totalWorkflows')
+      expect(stats).toHaveProperty('activeWorkflows')
+      expect(stats).toHaveProperty('completedWorkflows')
+      expect(stats).toHaveProperty('failedWorkflows')
+      expect(stats).toHaveProperty('averageExecutionTime')
+      expect(stats.totalWorkflows).toBe(0)
+      expect(stats.activeWorkflows).toBe(0)
+    })
 
     test('should track workflow statistics', async () => {
-      const businessIdea = { id: 'idea-123', title: 'Test', description: 'Test' };
+      const businessIdea = { id: 'idea-123', title: 'Test', description: 'Test' }
 
-      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(['market-research']);
-      mockAgentRegistry.getParallelExecutionGroups.mockReturnValue([['market-research']]);
-      mockAgentRegistry.validateDependencies.mockReturnValue({ valid: true, issues: [] });
+      mockAgentRegistry.getAllRegisteredAgents.mockReturnValue(['market-research'])
+      mockAgentRegistry.getParallelExecutionGroups.mockReturnValue([['market-research']])
+      mockAgentRegistry.validateDependencies.mockReturnValue({ valid: true, issues: [] })
       mockDependencyEngine.buildDependencyGraph.mockReturnValue({
         nodes: ['market-research'],
         edges: [],
-        levels: [['market-research']]
-      });
-      mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123');
+        levels: [['market-research']],
+      })
+      mockQueueManager.addMultiAgentEvaluation.mockResolvedValue('workflow-job-123')
 
-      await orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea);
+      await orchestrator.executeWorkflow('standard-evaluation', 'eval-123', businessIdea)
 
-      const stats = orchestrator.getStatistics();
-      expect(stats.totalWorkflows).toBe(1);
-      expect(stats.activeWorkflows).toBe(1);
-    });
-  });
+      const stats = orchestrator.getStatistics()
+      expect(stats.totalWorkflows).toBe(1)
+      expect(stats.activeWorkflows).toBe(1)
+    })
+  })
 
   describe('Singleton Pattern', () => {
     test('should return same instance', () => {
-      const instance1 = MultiAgentOrchestrator.getInstance();
-      const instance2 = MultiAgentOrchestrator.getInstance();
-      
-      expect(instance1).toBe(instance2);
-    });
+      const instance1 = MultiAgentOrchestrator.getInstance()
+      const instance2 = MultiAgentOrchestrator.getInstance()
+
+      expect(instance1).toBe(instance2)
+    })
 
     test('should reset instance for testing', async () => {
-      const instance1 = MultiAgentOrchestrator.getInstance();
-      await MultiAgentOrchestrator.resetInstance();
-      const instance2 = MultiAgentOrchestrator.getInstance();
-      
-      expect(instance1).not.toBe(instance2);
-    });
-  });
-});
+      const instance1 = MultiAgentOrchestrator.getInstance()
+      await MultiAgentOrchestrator.resetInstance()
+      const instance2 = MultiAgentOrchestrator.getInstance()
+
+      expect(instance1).not.toBe(instance2)
+    })
+  })
+})

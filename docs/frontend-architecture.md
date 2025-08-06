@@ -2,7 +2,11 @@
 
 ## Introduction
 
-This document defines the frontend architecture for the AI-Powered Business Idea Validation Platform, built with Vue.js 3 and designed to provide an intuitive, real-time interface for business idea evaluation. The architecture supports real-time progress visualization, responsive design, and seamless integration with the backend API Gateway.
+This document defines the frontend architecture for the AI-Powered Business Idea
+Validation Platform, built with Vue.js 3 and designed to provide an intuitive,
+real-time interface for business idea evaluation. The architecture supports
+real-time progress visualization, responsive design, and seamless integration
+with the backend API Gateway.
 
 ### Change Log
 
@@ -150,7 +154,7 @@ Based on the provided `design-system.json`, create CSS custom properties:
   --color-chart-line: #e0e7ff;
 
   /* Typography */
-  --font-family: "Inter", sans-serif;
+  --font-family: 'Inter', sans-serif;
   --font-size-xs: 12px;
   --font-size-sm: 14px;
   --font-size-base: 16px;
@@ -191,65 +195,65 @@ Based on the provided `design-system.json`, create CSS custom properties:
 ```javascript
 // tailwind.config.js
 module.exports = {
-  content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
-        primary: "var(--color-primary)",
-        success: "var(--color-success)",
-        warning: "var(--color-warning)",
-        danger: "var(--color-danger)",
-        info: "var(--color-info)",
+        primary: 'var(--color-primary)',
+        success: 'var(--color-success)',
+        warning: 'var(--color-warning)',
+        danger: 'var(--color-danger)',
+        info: 'var(--color-info)',
         sidebar: {
-          bg: "var(--color-sidebar-bg)",
-          highlight: "var(--color-sidebar-highlight)",
+          bg: 'var(--color-sidebar-bg)',
+          highlight: 'var(--color-sidebar-highlight)',
         },
-        surface: "var(--color-surface)",
-        background: "var(--color-background)",
+        surface: 'var(--color-surface)',
+        background: 'var(--color-background)',
         text: {
-          primary: "var(--color-text-primary)",
-          secondary: "var(--color-text-secondary)",
+          primary: 'var(--color-text-primary)',
+          secondary: 'var(--color-text-secondary)',
         },
-        muted: "var(--color-muted)",
-        accent: "var(--color-accent)",
-        highlight: "var(--color-highlight)",
+        muted: 'var(--color-muted)',
+        accent: 'var(--color-accent)',
+        highlight: 'var(--color-highlight)',
       },
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
+        sans: ['Inter', 'sans-serif'],
       },
       fontSize: {
-        xs: "var(--font-size-xs)",
-        sm: "var(--font-size-sm)",
-        base: "var(--font-size-base)",
-        lg: "var(--font-size-lg)",
-        xl: "var(--font-size-xl)",
-        "2xl": "var(--font-size-2xl)",
-        "3xl": "var(--font-size-3xl)",
+        xs: 'var(--font-size-xs)',
+        sm: 'var(--font-size-sm)',
+        base: 'var(--font-size-base)',
+        lg: 'var(--font-size-lg)',
+        xl: 'var(--font-size-xl)',
+        '2xl': 'var(--font-size-2xl)',
+        '3xl': 'var(--font-size-3xl)',
       },
       spacing: {
-        xs: "var(--spacing-xs)",
-        sm: "var(--spacing-sm)",
-        md: "var(--spacing-md)",
-        lg: "var(--spacing-lg)",
-        xl: "var(--spacing-xl)",
-        "2xl": "var(--spacing-2xl)",
+        xs: 'var(--spacing-xs)',
+        sm: 'var(--spacing-sm)',
+        md: 'var(--spacing-md)',
+        lg: 'var(--spacing-lg)',
+        xl: 'var(--spacing-xl)',
+        '2xl': 'var(--spacing-2xl)',
       },
       borderRadius: {
-        sm: "var(--radius-sm)",
-        md: "var(--radius-md)",
-        lg: "var(--radius-lg)",
-        xl: "var(--radius-xl)",
-        pill: "var(--radius-pill)",
+        sm: 'var(--radius-sm)',
+        md: 'var(--radius-md)',
+        lg: 'var(--radius-lg)',
+        xl: 'var(--radius-xl)',
+        pill: 'var(--radius-pill)',
       },
       boxShadow: {
-        sm: "var(--shadow-sm)",
-        md: "var(--shadow-md)",
-        lg: "var(--shadow-lg)",
+        sm: 'var(--shadow-sm)',
+        md: 'var(--shadow-md)',
+        lg: 'var(--shadow-lg)',
       },
     },
   },
   plugins: [],
-};
+}
 ```
 
 ## Component Architecture
@@ -273,57 +277,57 @@ module.exports = {
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import LoadingSpinner from "../common/LoadingSpinner.vue";
+import { computed } from 'vue'
+import LoadingSpinner from '../common/LoadingSpinner.vue'
 
 interface Props {
-  variant?: "primary" | "success" | "danger" | "secondary";
-  size?: "sm" | "md" | "lg";
-  disabled?: boolean;
-  loading?: boolean;
+  variant?: 'primary' | 'success' | 'danger' | 'secondary'
+  size?: 'sm' | 'md' | 'lg'
+  disabled?: boolean
+  loading?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  variant: "primary",
-  size: "md",
+  variant: 'primary',
+  size: 'md',
   disabled: false,
   loading: false,
-});
+})
 
 const emit = defineEmits<{
-  click: [event: MouseEvent];
-}>();
+  click: [event: MouseEvent]
+}>()
 
 const buttonClasses = computed(() => [
-  "inline-flex items-center justify-center font-medium rounded-md transition-colors",
-  "focus:outline-none focus:ring-2 focus:ring-offset-2",
-  "disabled:opacity-50 disabled:cursor-not-allowed",
+  'inline-flex items-center justify-center font-medium rounded-md transition-colors',
+  'focus:outline-none focus:ring-2 focus:ring-offset-2',
+  'disabled:opacity-50 disabled:cursor-not-allowed',
 
   // Size variants
   {
-    "px-3 py-1.5 text-sm": props.size === "sm",
-    "px-4 py-2 text-base": props.size === "md",
-    "px-6 py-3 text-lg": props.size === "lg",
+    'px-3 py-1.5 text-sm': props.size === 'sm',
+    'px-4 py-2 text-base': props.size === 'md',
+    'px-6 py-3 text-lg': props.size === 'lg',
   },
 
   // Color variants
   {
-    "bg-primary text-white hover:bg-primary/90 focus:ring-primary":
-      props.variant === "primary",
-    "bg-success text-white hover:bg-success/90 focus:ring-success":
-      props.variant === "success",
-    "bg-danger text-white hover:bg-danger/90 focus:ring-danger":
-      props.variant === "danger",
-    "bg-surface text-text-primary border border-muted hover:bg-muted/50 focus:ring-accent":
-      props.variant === "secondary",
+    'bg-primary text-white hover:bg-primary/90 focus:ring-primary':
+      props.variant === 'primary',
+    'bg-success text-white hover:bg-success/90 focus:ring-success':
+      props.variant === 'success',
+    'bg-danger text-white hover:bg-danger/90 focus:ring-danger':
+      props.variant === 'danger',
+    'bg-surface text-text-primary border border-muted hover:bg-muted/50 focus:ring-accent':
+      props.variant === 'secondary',
   },
-]);
+])
 
 const handleClick = (event: MouseEvent) => {
   if (!props.disabled && !props.loading) {
-    emit("click", event);
+    emit('click', event)
   }
-};
+}
 </script>
 ```
 
@@ -346,28 +350,28 @@ const handleClick = (event: MouseEvent) => {
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed } from 'vue'
 
 interface Props {
-  padding?: boolean;
-  shadow?: "sm" | "md" | "lg";
+  padding?: boolean
+  shadow?: 'sm' | 'md' | 'lg'
 }
 
 const props = withDefaults(defineProps<Props>(), {
   padding: true,
-  shadow: "md",
-});
+  shadow: 'md',
+})
 
 const cardClasses = computed(() => [
-  "bg-surface rounded-md border border-muted",
+  'bg-surface rounded-md border border-muted',
   {
-    "shadow-sm": props.shadow === "sm",
-    "shadow-md": props.shadow === "md",
-    "shadow-lg": props.shadow === "lg",
+    'shadow-sm': props.shadow === 'sm',
+    'shadow-md': props.shadow === 'md',
+    'shadow-lg': props.shadow === 'lg',
   },
-]);
+])
 
-const contentClasses = computed(() => [props.padding ? "p-6" : ""]);
+const contentClasses = computed(() => [props.padding ? 'p-6' : ''])
 </script>
 ```
 
@@ -439,60 +443,60 @@ const contentClasses = computed(() => [props.padding ? "p-6" : ""]);
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
-import { useEvaluationStore } from "@/stores/evaluation";
-import BaseCard from "@/components/ui/BaseCard.vue";
-import BaseButton from "@/components/ui/BaseButton.vue";
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useEvaluationStore } from '@/stores/evaluation'
+import BaseCard from '@/components/ui/BaseCard.vue'
+import BaseButton from '@/components/ui/BaseButton.vue'
 
-const router = useRouter();
-const evaluationStore = useEvaluationStore();
+const router = useRouter()
+const evaluationStore = useEvaluationStore()
 
-const description = ref("");
-const error = ref("");
-const loading = ref(false);
+const description = ref('')
+const error = ref('')
+const loading = ref(false)
 
 const isValid = computed(() => {
-  return description.value.length >= 50 && description.value.length <= 5000;
-});
+  return description.value.length >= 50 && description.value.length <= 5000
+})
 
 const textareaClasses = computed(() => [
-  "w-full px-3 py-2 border rounded-md resize-none",
-  "focus:outline-none focus:ring-2 focus:border-transparent",
+  'w-full px-3 py-2 border rounded-md resize-none',
+  'focus:outline-none focus:ring-2 focus:border-transparent',
   {
-    "border-muted focus:ring-accent": !error.value,
-    "border-danger focus:ring-danger": error.value,
+    'border-muted focus:ring-accent': !error.value,
+    'border-danger focus:ring-danger': error.value,
   },
-]);
+])
 
 const validateInput = () => {
-  error.value = "";
+  error.value = ''
 
   if (description.value.length > 5000) {
-    error.value = "Description must be less than 5000 characters";
+    error.value = 'Description must be less than 5000 characters'
   } else if (description.value.length > 0 && description.value.length < 50) {
-    error.value = "Description must be at least 50 characters";
+    error.value = 'Description must be at least 50 characters'
   }
-};
+}
 
 const handleSubmit = async () => {
-  if (!isValid.value) return;
+  if (!isValid.value) return
 
-  loading.value = true;
+  loading.value = true
   try {
-    const evaluation = await evaluationStore.startEvaluation(description.value);
-    router.push(`/evaluation/${evaluation.id}`);
+    const evaluation = await evaluationStore.startEvaluation(description.value)
+    router.push(`/evaluation/${evaluation.id}`)
   } catch (err) {
-    error.value = "Failed to start evaluation. Please try again.";
+    error.value = 'Failed to start evaluation. Please try again.'
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
 const clearForm = () => {
-  description.value = "";
-  error.value = "";
-};
+  description.value = ''
+  error.value = ''
+}
 </script>
 ```
 
@@ -560,56 +564,56 @@ const clearForm = () => {
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import { useEvaluation } from "@/composables/useEvaluation";
-import { formatDistanceToNow } from "date-fns";
-import BaseCard from "@/components/ui/BaseCard.vue";
-import AgentCard from "./AgentCard.vue";
-import InsightCard from "./InsightCard.vue";
-import type { Agent, Insight } from "@/types";
+import { computed } from 'vue'
+import { useEvaluation } from '@/composables/useEvaluation'
+import { formatDistanceToNow } from 'date-fns'
+import BaseCard from '@/components/ui/BaseCard.vue'
+import AgentCard from './AgentCard.vue'
+import InsightCard from './InsightCard.vue'
+import type { Agent, Insight } from '@/types'
 
 interface Props {
-  evaluationId: string;
+  evaluationId: string
 }
 
-const props = defineProps<Props>();
+const props = defineProps<Props>()
 
-const { evaluation, agents, insights } = useEvaluation(props.evaluationId);
+const { evaluation, agents, insights } = useEvaluation(props.evaluationId)
 
 const overallProgress = computed(() => {
-  if (!agents.value.length) return 0;
+  if (!agents.value.length) return 0
   const totalProgress = agents.value.reduce(
     (sum, agent) => sum + agent.progress,
     0
-  );
-  return totalProgress / agents.value.length;
-});
+  )
+  return totalProgress / agents.value.length
+})
 
 const estimatedCompletion = computed(() => {
-  if (!evaluation.value || overallProgress.value === 0) return null;
+  if (!evaluation.value || overallProgress.value === 0) return null
 
-  const elapsed = Date.now() - new Date(evaluation.value.startedAt).getTime();
-  const totalEstimated = (elapsed / overallProgress.value) * 100;
+  const elapsed = Date.now() - new Date(evaluation.value.startedAt).getTime()
+  const totalEstimated = (elapsed / overallProgress.value) * 100
   return new Date(
     new Date(evaluation.value.startedAt).getTime() + totalEstimated
-  );
-});
+  )
+})
 
 const recentInsights = computed(() => {
   return insights.value
-    .filter((insight) => insight.timestamp > Date.now() - 300000) // Last 5 minutes
+    .filter(insight => insight.timestamp > Date.now() - 300000) // Last 5 minutes
     .sort((a, b) => b.timestamp - a.timestamp)
-    .slice(0, 10);
-});
+    .slice(0, 10)
+})
 
 const formatTime = (date: Date | string) => {
-  return formatDistanceToNow(new Date(date), { addSuffix: true });
-};
+  return formatDistanceToNow(new Date(date), { addSuffix: true })
+}
 
 const selectAgent = (agent: Agent) => {
   // Handle agent selection for detailed view
-  console.log("Selected agent:", agent);
-};
+  console.log('Selected agent:', agent)
+}
 </script>
 ```
 
@@ -619,90 +623,90 @@ const selectAgent = (agent: Agent) => {
 
 ```typescript
 // stores/evaluation.ts
-import { defineStore } from "pinia";
-import { ref, computed } from "vue";
-import { evaluationApi } from "@/services/evaluation";
-import type { Evaluation, Agent, Insight } from "@/types";
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import { evaluationApi } from '@/services/evaluation'
+import type { Evaluation, Agent, Insight } from '@/types'
 
-export const useEvaluationStore = defineStore("evaluation", () => {
+export const useEvaluationStore = defineStore('evaluation', () => {
   // State
-  const evaluations = ref<Map<string, Evaluation>>(new Map());
-  const agents = ref<Map<string, Agent[]>>(new Map());
-  const insights = ref<Map<string, Insight[]>>(new Map());
-  const loading = ref(false);
-  const error = ref<string | null>(null);
+  const evaluations = ref<Map<string, Evaluation>>(new Map())
+  const agents = ref<Map<string, Agent[]>>(new Map())
+  const insights = ref<Map<string, Insight[]>>(new Map())
+  const loading = ref(false)
+  const error = ref<string | null>(null)
 
   // Getters
   const getEvaluation = computed(() => {
-    return (id: string) => evaluations.value.get(id);
-  });
+    return (id: string) => evaluations.value.get(id)
+  })
 
   const getAgents = computed(() => {
-    return (evaluationId: string) => agents.value.get(evaluationId) || [];
-  });
+    return (evaluationId: string) => agents.value.get(evaluationId) || []
+  })
 
   const getInsights = computed(() => {
-    return (evaluationId: string) => insights.value.get(evaluationId) || [];
-  });
+    return (evaluationId: string) => insights.value.get(evaluationId) || []
+  })
 
   const getOverallProgress = computed(() => {
     return (evaluationId: string) => {
-      const evalAgents = getAgents.value(evaluationId);
-      if (!evalAgents.length) return 0;
+      const evalAgents = getAgents.value(evaluationId)
+      if (!evalAgents.length) return 0
       return (
         evalAgents.reduce((sum, agent) => sum + agent.progress, 0) /
         evalAgents.length
-      );
-    };
-  });
+      )
+    }
+  })
 
   // Actions
   const startEvaluation = async (description: string): Promise<Evaluation> => {
-    loading.value = true;
-    error.value = null;
+    loading.value = true
+    error.value = null
 
     try {
-      const evaluation = await evaluationApi.start(description);
-      evaluations.value.set(evaluation.id, evaluation);
-      agents.value.set(evaluation.id, evaluation.agents || []);
-      insights.value.set(evaluation.id, []);
-      return evaluation;
+      const evaluation = await evaluationApi.start(description)
+      evaluations.value.set(evaluation.id, evaluation)
+      agents.value.set(evaluation.id, evaluation.agents || [])
+      insights.value.set(evaluation.id, [])
+      return evaluation
     } catch (err) {
       error.value =
-        err instanceof Error ? err.message : "Failed to start evaluation";
-      throw err;
+        err instanceof Error ? err.message : 'Failed to start evaluation'
+      throw err
     } finally {
-      loading.value = false;
+      loading.value = false
     }
-  };
+  }
 
   const updateAgent = (
     evaluationId: string,
     agentUpdate: Partial<Agent> & { id: string }
   ) => {
-    const evalAgents = agents.value.get(evaluationId);
-    if (!evalAgents) return;
+    const evalAgents = agents.value.get(evaluationId)
+    if (!evalAgents) return
 
-    const agentIndex = evalAgents.findIndex((a) => a.id === agentUpdate.id);
+    const agentIndex = evalAgents.findIndex(a => a.id === agentUpdate.id)
     if (agentIndex !== -1) {
-      evalAgents[agentIndex] = { ...evalAgents[agentIndex], ...agentUpdate };
-      agents.value.set(evaluationId, [...evalAgents]);
+      evalAgents[agentIndex] = { ...evalAgents[agentIndex], ...agentUpdate }
+      agents.value.set(evaluationId, [...evalAgents])
     }
-  };
+  }
 
   const addInsight = (evaluationId: string, insight: Insight) => {
-    const evalInsights = insights.value.get(evaluationId) || [];
-    insights.value.set(evaluationId, [insight, ...evalInsights]);
-  };
+    const evalInsights = insights.value.get(evaluationId) || []
+    insights.value.set(evaluationId, [insight, ...evalInsights])
+  }
 
   const completeEvaluation = async (evaluationId: string) => {
-    const evaluation = evaluations.value.get(evaluationId);
-    if (!evaluation) return;
+    const evaluation = evaluations.value.get(evaluationId)
+    if (!evaluation) return
 
-    evaluation.status = "completed";
-    evaluation.completedAt = new Date();
-    evaluations.value.set(evaluationId, evaluation);
-  };
+    evaluation.status = 'completed'
+    evaluation.completedAt = new Date()
+    evaluations.value.set(evaluationId, evaluation)
+  }
 
   return {
     // State
@@ -723,86 +727,89 @@ export const useEvaluationStore = defineStore("evaluation", () => {
     updateAgent,
     addInsight,
     completeEvaluation,
-  };
-});
+  }
+})
 ```
 
 ### WebSocket Store
 
 ```typescript
 // stores/websocket.ts
-import { defineStore } from "pinia";
-import { ref, computed } from "vue";
-import { useWebSocketService } from "@/services/websocket";
-import { useEvaluationStore } from "./evaluation";
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import { useWebSocketService } from '@/services/websocket'
+import { useEvaluationStore } from './evaluation'
 
-export const useWebSocketStore = defineStore("websocket", () => {
-  const socket = ref(null);
-  const connected = ref(false);
-  const reconnectAttempts = ref(0);
-  const maxReconnectAttempts = 5;
+export const useWebSocketStore = defineStore('websocket', () => {
+  const socket = ref(null)
+  const connected = ref(false)
+  const reconnectAttempts = ref(0)
+  const maxReconnectAttempts = 5
 
-  const evaluationStore = useEvaluationStore();
-  const webSocketService = useWebSocketService();
+  const evaluationStore = useEvaluationStore()
+  const webSocketService = useWebSocketService()
 
   const connectionStatus = computed(() => {
-    if (connected.value) return "connected";
-    if (reconnectAttempts.value > 0) return "reconnecting";
-    return "disconnected";
-  });
+    if (connected.value) return 'connected'
+    if (reconnectAttempts.value > 0) return 'reconnecting'
+    return 'disconnected'
+  })
 
   const connect = () => {
-    socket.value = webSocketService.connect();
+    socket.value = webSocketService.connect()
 
-    socket.value?.on("connect", () => {
-      connected.value = true;
-      reconnectAttempts.value = 0;
-    });
+    socket.value?.on('connect', () => {
+      connected.value = true
+      reconnectAttempts.value = 0
+    })
 
-    socket.value?.on("disconnect", () => {
-      connected.value = false;
-      attemptReconnect();
-    });
+    socket.value?.on('disconnect', () => {
+      connected.value = false
+      attemptReconnect()
+    })
 
-    socket.value?.on("agent_progress", (data) => {
+    socket.value?.on('agent_progress', data => {
       evaluationStore.updateAgent(data.evaluationId, {
         id: data.agentId,
         progress: data.progress,
         status: data.status,
-      });
-    });
+      })
+    })
 
-    socket.value?.on("new_insight", (data) => {
-      evaluationStore.addInsight(data.evaluationId, data.insight);
-    });
+    socket.value?.on('new_insight', data => {
+      evaluationStore.addInsight(data.evaluationId, data.insight)
+    })
 
-    socket.value?.on("evaluation_complete", (data) => {
-      evaluationStore.completeEvaluation(data.evaluationId);
-    });
-  };
+    socket.value?.on('evaluation_complete', data => {
+      evaluationStore.completeEvaluation(data.evaluationId)
+    })
+  }
 
   const disconnect = () => {
-    socket.value?.disconnect();
-    socket.value = null;
-    connected.value = false;
-  };
+    socket.value?.disconnect()
+    socket.value = null
+    connected.value = false
+  }
 
   const attemptReconnect = () => {
     if (reconnectAttempts.value < maxReconnectAttempts) {
-      reconnectAttempts.value++;
-      setTimeout(() => {
-        connect();
-      }, Math.pow(2, reconnectAttempts.value) * 1000); // Exponential backoff
+      reconnectAttempts.value++
+      setTimeout(
+        () => {
+          connect()
+        },
+        Math.pow(2, reconnectAttempts.value) * 1000
+      ) // Exponential backoff
     }
-  };
+  }
 
   const joinEvaluation = (evaluationId: string) => {
-    socket.value?.emit("join_evaluation", { evaluationId });
-  };
+    socket.value?.emit('join_evaluation', { evaluationId })
+  }
 
   const leaveEvaluation = (evaluationId: string) => {
-    socket.value?.emit("leave_evaluation", { evaluationId });
-  };
+    socket.value?.emit('leave_evaluation', { evaluationId })
+  }
 
   return {
     connected,
@@ -812,8 +819,8 @@ export const useWebSocketStore = defineStore("websocket", () => {
     disconnect,
     joinEvaluation,
     leaveEvaluation,
-  };
-});
+  }
+})
 ```
 
 ## Real-time WebSocket Integration
@@ -822,83 +829,83 @@ export const useWebSocketStore = defineStore("websocket", () => {
 
 ```typescript
 // services/websocket.ts
-import { io, Socket } from "socket.io-client";
-import { useAuthStore } from "@/stores/auth";
+import { io, Socket } from 'socket.io-client'
+import { useAuthStore } from '@/stores/auth'
 
 class WebSocketService {
-  private socket: Socket | null = null;
-  private baseUrl: string;
+  private socket: Socket | null = null
+  private baseUrl: string
 
   constructor() {
-    this.baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
+    this.baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001'
   }
 
   connect(): Socket {
-    const authStore = useAuthStore();
+    const authStore = useAuthStore()
 
     this.socket = io(this.baseUrl, {
       auth: {
         token: authStore.accessToken,
       },
-      transports: ["websocket", "polling"], // Fallback to polling
+      transports: ['websocket', 'polling'], // Fallback to polling
       timeout: 20000,
       forceNew: true,
-    });
+    })
 
-    return this.socket;
+    return this.socket
   }
 
   disconnect(): void {
     if (this.socket) {
-      this.socket.disconnect();
-      this.socket = null;
+      this.socket.disconnect()
+      this.socket = null
     }
   }
 
   emit(event: string, data: any): void {
-    this.socket?.emit(event, data);
+    this.socket?.emit(event, data)
   }
 
   on(event: string, callback: (data: any) => void): void {
-    this.socket?.on(event, callback);
+    this.socket?.on(event, callback)
   }
 
   off(event: string, callback?: (data: any) => void): void {
-    this.socket?.off(event, callback);
+    this.socket?.off(event, callback)
   }
 }
 
-export const useWebSocketService = () => new WebSocketService();
+export const useWebSocketService = () => new WebSocketService()
 ```
 
 ### WebSocket Composable
 
 ```typescript
 // composables/useWebSocket.ts
-import { onMounted, onUnmounted } from "vue";
-import { useWebSocketStore } from "@/stores/websocket";
-import { useAuthStore } from "@/stores/auth";
+import { onMounted, onUnmounted } from 'vue'
+import { useWebSocketStore } from '@/stores/websocket'
+import { useAuthStore } from '@/stores/auth'
 
 export function useWebSocket() {
-  const webSocketStore = useWebSocketStore();
-  const authStore = useAuthStore();
+  const webSocketStore = useWebSocketStore()
+  const authStore = useAuthStore()
 
   onMounted(() => {
     if (authStore.isAuthenticated) {
-      webSocketStore.connect();
+      webSocketStore.connect()
     }
-  });
+  })
 
   onUnmounted(() => {
-    webSocketStore.disconnect();
-  });
+    webSocketStore.disconnect()
+  })
 
   return {
     connected: webSocketStore.connected,
     connectionStatus: webSocketStore.connectionStatus,
     joinEvaluation: webSocketStore.joinEvaluation,
     leaveEvaluation: webSocketStore.leaveEvaluation,
-  };
+  }
 }
 ```
 
@@ -908,63 +915,63 @@ export function useWebSocket() {
 
 ```typescript
 // services/api.ts
-import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
-import { useAuthStore } from "@/stores/auth";
-import router from "@/router";
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
+import { useAuthStore } from '@/stores/auth'
+import router from '@/router'
 
 class ApiService {
-  private client: AxiosInstance;
+  private client: AxiosInstance
 
   constructor() {
     this.client = axios.create({
-      baseURL: import.meta.env.VITE_API_URL || "http://localhost:3001/api",
+      baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3001/api',
       timeout: 30000,
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
-    });
+    })
 
-    this.setupInterceptors();
+    this.setupInterceptors()
   }
 
   private setupInterceptors() {
     // Request interceptor
     this.client.interceptors.request.use(
-      (config) => {
-        const authStore = useAuthStore();
+      config => {
+        const authStore = useAuthStore()
         if (authStore.accessToken) {
-          config.headers.Authorization = `Bearer ${authStore.accessToken}`;
+          config.headers.Authorization = `Bearer ${authStore.accessToken}`
         }
-        return config;
+        return config
       },
-      (error) => Promise.reject(error)
-    );
+      error => Promise.reject(error)
+    )
 
     // Response interceptor
     this.client.interceptors.response.use(
-      (response) => response,
-      async (error) => {
-        const authStore = useAuthStore();
+      response => response,
+      async error => {
+        const authStore = useAuthStore()
 
         if (error.response?.status === 401) {
           try {
-            await authStore.refreshToken();
+            await authStore.refreshToken()
             // Retry the original request
-            return this.client.request(error.config);
+            return this.client.request(error.config)
           } catch (refreshError) {
-            authStore.logout();
-            router.push("/login");
+            authStore.logout()
+            router.push('/login')
           }
         }
 
-        return Promise.reject(error);
+        return Promise.reject(error)
       }
-    );
+    )
   }
 
   async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.client.get(url, config);
-    return response.data;
+    const response = await this.client.get(url, config)
+    return response.data
   }
 
   async post<T>(
@@ -972,8 +979,8 @@ class ApiService {
     data?: any,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    const response = await this.client.post(url, data, config);
-    return response.data;
+    const response = await this.client.post(url, data, config)
+    return response.data
   }
 
   async put<T>(
@@ -981,73 +988,73 @@ class ApiService {
     data?: any,
     config?: AxiosRequestConfig
   ): Promise<T> {
-    const response = await this.client.put(url, data, config);
-    return response.data;
+    const response = await this.client.put(url, data, config)
+    return response.data
   }
 
   async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await this.client.delete(url, config);
-    return response.data;
+    const response = await this.client.delete(url, config)
+    return response.data
   }
 }
 
-export const apiService = new ApiService();
+export const apiService = new ApiService()
 ```
 
 ## Routing Configuration
 
 ```typescript
 // router/index.ts
-import { createRouter, createWebHistory } from "vue-router";
-import { authGuard, guestGuard } from "./guards";
+import { createRouter, createWebHistory } from 'vue-router'
+import { authGuard, guestGuard } from './guards'
 
 const routes = [
   {
-    path: "/",
-    name: "Home",
-    component: () => import("@/views/HomePage.vue"),
+    path: '/',
+    name: 'Home',
+    component: () => import('@/views/HomePage.vue'),
     meta: { requiresAuth: false },
   },
   {
-    path: "/login",
-    name: "Login",
-    component: () => import("@/views/LoginPage.vue"),
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/LoginPage.vue'),
     beforeEnter: guestGuard,
   },
   {
-    path: "/dashboard",
-    name: "Dashboard",
-    component: () => import("@/views/DashboardPage.vue"),
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: () => import('@/views/DashboardPage.vue'),
     beforeEnter: authGuard,
   },
   {
-    path: "/evaluation/:id",
-    name: "Evaluation",
-    component: () => import("@/views/EvaluationPage.vue"),
+    path: '/evaluation/:id',
+    name: 'Evaluation',
+    component: () => import('@/views/EvaluationPage.vue'),
     beforeEnter: authGuard,
     props: true,
   },
   {
-    path: "/results/:id",
-    name: "Results",
-    component: () => import("@/views/ResultsPage.vue"),
+    path: '/results/:id',
+    name: 'Results',
+    component: () => import('@/views/ResultsPage.vue'),
     beforeEnter: authGuard,
     props: true,
   },
   {
-    path: "/profile",
-    name: "Profile",
-    component: () => import("@/views/ProfilePage.vue"),
+    path: '/profile',
+    name: 'Profile',
+    component: () => import('@/views/ProfilePage.vue'),
     beforeEnter: authGuard,
   },
-];
+]
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
-});
+})
 
-export default router;
+export default router
 ```
 
 ## Responsive Design Strategy
@@ -1088,71 +1095,71 @@ export default router;
 
 ```typescript
 // tests/unit/components/BaseButton.test.ts
-import { describe, it, expect } from "vitest";
-import { mount } from "@vue/test-utils";
-import BaseButton from "@/components/ui/BaseButton.vue";
+import { describe, it, expect } from 'vitest'
+import { mount } from '@vue/test-utils'
+import BaseButton from '@/components/ui/BaseButton.vue'
 
-describe("BaseButton", () => {
-  it("renders correctly with default props", () => {
+describe('BaseButton', () => {
+  it('renders correctly with default props', () => {
     const wrapper = mount(BaseButton, {
-      slots: { default: "Click me" },
-    });
+      slots: { default: 'Click me' },
+    })
 
-    expect(wrapper.text()).toBe("Click me");
-    expect(wrapper.classes()).toContain("bg-primary");
-  });
+    expect(wrapper.text()).toBe('Click me')
+    expect(wrapper.classes()).toContain('bg-primary')
+  })
 
-  it("emits click event when clicked", async () => {
-    const wrapper = mount(BaseButton);
-    await wrapper.trigger("click");
+  it('emits click event when clicked', async () => {
+    const wrapper = mount(BaseButton)
+    await wrapper.trigger('click')
 
-    expect(wrapper.emitted("click")).toHaveLength(1);
-  });
+    expect(wrapper.emitted('click')).toHaveLength(1)
+  })
 
-  it("is disabled when loading", () => {
+  it('is disabled when loading', () => {
     const wrapper = mount(BaseButton, {
       props: { loading: true },
-    });
+    })
 
-    expect(wrapper.attributes("disabled")).toBeDefined();
-  });
-});
+    expect(wrapper.attributes('disabled')).toBeDefined()
+  })
+})
 ```
 
 ### E2E Testing (Cypress)
 
 ```typescript
 // cypress/e2e/evaluation-flow.cy.ts
-describe("Evaluation Flow", () => {
+describe('Evaluation Flow', () => {
   beforeEach(() => {
-    cy.login();
-    cy.visit("/dashboard");
-  });
+    cy.login()
+    cy.visit('/dashboard')
+  })
 
-  it("should complete full evaluation flow", () => {
+  it('should complete full evaluation flow', () => {
     // Start evaluation
-    cy.get("[data-cy=start-evaluation]").click();
+    cy.get('[data-cy=start-evaluation]').click()
 
     // Enter idea description
-    cy.get("[data-cy=idea-input]").type(
-      "A mobile app for small business inventory management using AI prediction"
-    );
+    cy.get('[data-cy=idea-input]').type(
+      'A mobile app for small business inventory management using AI prediction'
+    )
 
     // Submit evaluation
-    cy.get("[data-cy=submit-evaluation]").click();
+    cy.get('[data-cy=submit-evaluation]').click()
 
     // Verify progress dashboard
-    cy.get("[data-cy=progress-dashboard]").should("be.visible");
-    cy.get("[data-cy=agent-card]").should("have.length", 5);
+    cy.get('[data-cy=progress-dashboard]').should('be.visible')
+    cy.get('[data-cy=agent-card]').should('have.length', 5)
 
     // Wait for completion (mock WebSocket)
-    cy.mockWebSocketProgress();
+    cy.mockWebSocketProgress()
 
     // Verify results
-    cy.get("[data-cy=results-summary]").should("be.visible");
-    cy.get("[data-cy=recommendation]").should("contain", "GO");
-  });
-});
+    cy.get('[data-cy=results-summary]').should('be.visible')
+    cy.get('[data-cy=recommendation]').should('contain', 'GO')
+  })
+})
 ```
 
 ## Environment Configuration
@@ -1171,25 +1178,25 @@ VITE_LOG_LEVEL=debug
 
 ```typescript
 // vite.config.ts
-import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
-import { resolve } from "path";
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
-      "@": resolve(__dirname, "src"),
+      '@': resolve(__dirname, 'src'),
     },
   },
   build: {
-    target: "esnext",
+    target: 'esnext',
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ["vue", "vue-router", "pinia"],
-          ui: ["@headlessui/vue"],
-          charts: ["chart.js", "vue-chartjs"],
+          vendor: ['vue', 'vue-router', 'pinia'],
+          ui: ['@headlessui/vue'],
+          charts: ['chart.js', 'vue-chartjs'],
         },
       },
     },
@@ -1197,17 +1204,17 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      "/api": {
-        target: "http://localhost:3001",
+      '/api': {
+        target: 'http://localhost:3001',
         changeOrigin: true,
       },
-      "/socket.io": {
-        target: "http://localhost:3001",
+      '/socket.io': {
+        target: 'http://localhost:3001',
         ws: true,
       },
     },
   },
-});
+})
 ```
 
 ## Critical Development Standards
@@ -1226,7 +1233,8 @@ export default defineConfig({
 2. **Composition API**: Use `<script setup>` syntax consistently
 3. **Reactive References**: Use `ref()` for primitives, `reactive()` for objects
 4. **Error Handling**: Wrap async operations in try-catch blocks
-5. **Performance**: Use `computed()` for derived state, avoid watchers when possible
+5. **Performance**: Use `computed()` for derived state, avoid watchers when
+   possible
 
 ### File Naming Conventions
 
@@ -1254,4 +1262,8 @@ export default defineConfig({
 4. **User management and authentication** (Week 4-5)
 5. **Performance optimization and testing** (Week 5-6)
 
-This frontend architecture provides a solid foundation for building an intuitive, performant, and scalable interface for your AI-Powered Business Idea Validation Platform. The architecture emphasizes real-time user feedback, responsive design, and maintainable code structure while integrating seamlessly with your existing design system and backend API.
+This frontend architecture provides a solid foundation for building an
+intuitive, performant, and scalable interface for your AI-Powered Business Idea
+Validation Platform. The architecture emphasizes real-time user feedback,
+responsive design, and maintainable code structure while integrating seamlessly
+with your existing design system and backend API.

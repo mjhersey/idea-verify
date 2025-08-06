@@ -43,7 +43,7 @@ jobs:
             Automated dependency updates
 
             This PR updates dependencies to their latest compatible versions.
-            
+
             - Updated npm dependencies
             - All tests passing
             - Ready for review

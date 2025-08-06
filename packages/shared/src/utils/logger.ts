@@ -57,15 +57,15 @@ export class StructuredLogger {
       environment: this.environment,
       context: {
         ...context,
-        correlationId: context?.correlationId || this.correlationId
-      }
+        correlationId: context?.correlationId || this.correlationId,
+      },
     }
 
     if (error) {
       entry.error = {
         name: error.name,
         message: error.message,
-        stack: error.stack
+        stack: error.stack,
       }
     }
 
@@ -75,7 +75,7 @@ export class StructuredLogger {
   private output(entry: LogEntry): void {
     // In production, this could send to CloudWatch, Elasticsearch, etc.
     const logLine = JSON.stringify(entry)
-    
+
     switch (entry.level) {
       case 'error':
         console.error(logLine)
@@ -119,17 +119,22 @@ export class StructuredLogger {
       ...context,
       requestId,
       action: 'request_started',
-      metadata: { method, path }
+      metadata: { method, path },
     })
   }
 
-  requestCompleted(requestId: string, statusCode: number, duration: number, context?: LogContext): void {
+  requestCompleted(
+    requestId: string,
+    statusCode: number,
+    duration: number,
+    context?: LogContext
+  ): void {
     this.info('Request completed', {
       ...context,
       requestId,
       action: 'request_completed',
       duration,
-      metadata: { statusCode }
+      metadata: { statusCode },
     })
   }
 
@@ -137,17 +142,22 @@ export class StructuredLogger {
     this.info('Evaluation started', {
       ...context,
       evaluationId,
-      action: 'evaluation_started'
+      action: 'evaluation_started',
     })
   }
 
-  evaluationCompleted(evaluationId: string, duration: number, success: boolean, context?: LogContext): void {
+  evaluationCompleted(
+    evaluationId: string,
+    duration: number,
+    success: boolean,
+    context?: LogContext
+  ): void {
     this.info('Evaluation completed', {
       ...context,
       evaluationId,
       action: 'evaluation_completed',
       duration,
-      metadata: { success }
+      metadata: { success },
     })
   }
 
@@ -156,17 +166,23 @@ export class StructuredLogger {
       ...context,
       action: 'agent_task_started',
       component: agentType,
-      metadata: { taskId }
+      metadata: { taskId },
     })
   }
 
-  agentTaskCompleted(agentType: string, taskId: string, duration: number, success: boolean, context?: LogContext): void {
+  agentTaskCompleted(
+    agentType: string,
+    taskId: string,
+    duration: number,
+    success: boolean,
+    context?: LogContext
+  ): void {
     this.info('Agent task completed', {
       ...context,
       action: 'agent_task_completed',
       component: agentType,
       duration,
-      metadata: { taskId, success }
+      metadata: { taskId, success },
     })
   }
 
@@ -175,17 +191,23 @@ export class StructuredLogger {
       ...context,
       action: 'database_query',
       duration,
-      metadata: { query: query.substring(0, 100) + (query.length > 100 ? '...' : '') }
+      metadata: { query: query.substring(0, 100) + (query.length > 100 ? '...' : '') },
     })
   }
 
-  externalApiCall(service: string, endpoint: string, duration: number, success: boolean, context?: LogContext): void {
+  externalApiCall(
+    service: string,
+    endpoint: string,
+    duration: number,
+    success: boolean,
+    context?: LogContext
+  ): void {
     this.info('External API call', {
       ...context,
       action: 'external_api_call',
       component: service,
       duration,
-      metadata: { endpoint, success }
+      metadata: { endpoint, success },
     })
   }
 
@@ -204,7 +226,7 @@ class ChildLogger {
   private mergeContext(context?: LogContext): LogContext {
     return {
       ...this.additionalContext,
-      ...context
+      ...context,
     }
   }
 
@@ -227,13 +249,12 @@ class ChildLogger {
 
 // Correlation ID middleware for Express
 export function correlationIdMiddleware(req: any, res: any, next: any): void {
-  const correlationId = req.headers['x-correlation-id'] || 
-                       req.headers['x-request-id'] || 
-                       generateCorrelationId()
-  
+  const correlationId =
+    req.headers['x-correlation-id'] || req.headers['x-request-id'] || generateCorrelationId()
+
   req.correlationId = correlationId
   res.setHeader('x-correlation-id', correlationId)
-  
+
   next()
 }
 
@@ -242,19 +263,19 @@ export function requestLoggingMiddleware(logger: StructuredLogger) {
   return (req: any, res: any, next: any): void => {
     const startTime = Date.now()
     const requestId = req.correlationId || generateCorrelationId()
-    
+
     logger.setCorrelationId(req.correlationId)
     logger.requestStarted(requestId, req.method, req.path, {
       userId: req.user?.id,
       metadata: {
         userAgent: req.headers['user-agent'],
-        ip: req.ip
-      }
+        ip: req.ip,
+      },
     })
 
     // Override res.end to log completion
     const originalEnd = res.end
-    res.end = function(...args: any[]) {
+    res.end = function (...args: any[]) {
       const duration = Date.now() - startTime
       logger.requestCompleted(requestId, res.statusCode, duration)
       originalEnd.apply(res, args)

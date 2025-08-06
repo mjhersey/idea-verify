@@ -1,10 +1,14 @@
 # Technical Assumptions & Architecture Decisions
 
-This document outlines the key technical decisions, assumptions, and architectural choices that guide the development of the AI-Powered Business Idea Validation Platform.
+This document outlines the key technical decisions, assumptions, and
+architectural choices that guide the development of the AI-Powered Business Idea
+Validation Platform.
 
 ## **Repository Structure: Monorepo**
 
-Starting with a monorepo structure to simplify initial development and deployment. This allows shared code between frontend and agent services while maintaining clear boundaries.
+Starting with a monorepo structure to simplify initial development and
+deployment. This allows shared code between frontend and agent services while
+maintaining clear boundaries.
 
 ### **Monorepo Organization**
 
@@ -40,7 +44,8 @@ ai-validation-platform/
 
 ## **Service Architecture**
 
-**Microservices architecture within monorepo** - The orchestrator and each agent will be separate services that communicate through message queues. This enables:
+**Microservices architecture within monorepo** - The orchestrator and each agent
+will be separate services that communicate through message queues. This enables:
 
 - Independent scaling of agents based on load
 - Parallel processing where possible
@@ -107,7 +112,8 @@ ai-validation-platform/
 
 ### **LLM Flexibility**
 
-System must support OpenAI, Anthropic, and open-source models with easy switching
+System must support OpenAI, Anthropic, and open-source models with easy
+switching
 
 **Implementation Approach:**
 
@@ -118,7 +124,8 @@ System must support OpenAI, Anthropic, and open-source models with easy switchin
 
 ### **Data Collection**
 
-Implement comprehensive analytics from day one to track feature usage and evaluation outcomes
+Implement comprehensive analytics from day one to track feature usage and
+evaluation outcomes
 
 **Analytics Architecture:**
 
@@ -335,4 +342,6 @@ Manual Approval → Deploy to Production → Smoke Tests
 - **Security Score**: Zero critical vulnerabilities
 - **Documentation**: 100% API endpoint documentation
 
-This technical foundation provides a robust, scalable, and maintainable platform that can evolve from MVP to enterprise-grade solution while maintaining development velocity and system reliability.
+This technical foundation provides a robust, scalable, and maintainable platform
+that can evolve from MVP to enterprise-grade solution while maintaining
+development velocity and system reliability.

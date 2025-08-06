@@ -3,42 +3,45 @@
  * Orchestrates comprehensive customer research and validation analysis
  */
 
-import { 
-  BaseAgent, 
-  AgentRequest, 
-  AgentResponse, 
+import {
+  BaseAgent,
+  AgentRequest,
+  AgentResponse,
   AgentExecutionContext,
   AgentCapability,
-  AgentCommunicationContext
-} from './types.js';
-import { CustomerSegmentationEngine } from '../customer-research/segmentation/customer-segmentation-engine.js';
-import { ProblemValidationEngine } from '../customer-research/validation/problem-validation-engine.js';
-import { PainPointAnalysisEngine } from '../customer-research/analysis/pain-point-analysis-engine.js';
-import { WillingnessToPayEngine } from '../customer-research/pricing/willingness-to-pay-engine.js';
-import { ValidationScoringEngine } from '../customer-research/scoring/validation-scoring-engine.js';
-import { PersonaRecommendationEngine } from '../customer-research/personas/persona-recommendation-engine.js';
-import { CustomerResearchOutput, CustomerResearchRequest } from '../customer-research/schemas/customer-research-types.js';
+  AgentCommunicationContext,
+} from './types.js'
+import { CustomerSegmentationEngine } from '../customer-research/segmentation/customer-segmentation-engine.js'
+import { ProblemValidationEngine } from '../customer-research/validation/problem-validation-engine.js'
+import { PainPointAnalysisEngine } from '../customer-research/analysis/pain-point-analysis-engine.js'
+import { WillingnessToPayEngine } from '../customer-research/pricing/willingness-to-pay-engine.js'
+import { ValidationScoringEngine } from '../customer-research/scoring/validation-scoring-engine.js'
+import { PersonaRecommendationEngine } from '../customer-research/personas/persona-recommendation-engine.js'
+import {
+  CustomerResearchOutput,
+  CustomerResearchRequest,
+} from '../customer-research/schemas/customer-research-types.js'
 
 export class CustomerResearchAgent extends BaseAgent {
-  private segmentationEngine: CustomerSegmentationEngine;
-  private problemValidationEngine: ProblemValidationEngine;
-  private painPointEngine: PainPointAnalysisEngine;
-  private pricingEngine: WillingnessToPayEngine;
-  private scoringEngine: ValidationScoringEngine;
-  private personaEngine: PersonaRecommendationEngine;
+  private segmentationEngine: CustomerSegmentationEngine
+  private problemValidationEngine: ProblemValidationEngine
+  private painPointEngine: PainPointAnalysisEngine
+  private pricingEngine: WillingnessToPayEngine
+  private scoringEngine: ValidationScoringEngine
+  private personaEngine: PersonaRecommendationEngine
 
   constructor() {
     super(
       'customer-research',
       'Customer Research Agent',
       'Analyzes target customer segments, personas, pain points, and demand patterns'
-    );
-    this.segmentationEngine = new CustomerSegmentationEngine();
-    this.problemValidationEngine = new ProblemValidationEngine();
-    this.painPointEngine = new PainPointAnalysisEngine();
-    this.pricingEngine = new WillingnessToPayEngine();
-    this.scoringEngine = new ValidationScoringEngine();
-    this.personaEngine = new PersonaRecommendationEngine();
+    )
+    this.segmentationEngine = new CustomerSegmentationEngine()
+    this.problemValidationEngine = new ProblemValidationEngine()
+    this.painPointEngine = new PainPointAnalysisEngine()
+    this.pricingEngine = new WillingnessToPayEngine()
+    this.scoringEngine = new ValidationScoringEngine()
+    this.personaEngine = new PersonaRecommendationEngine()
   }
 
   protected defineCapabilities(): AgentCapability {
@@ -52,75 +55,79 @@ export class CustomerResearchAgent extends BaseAgent {
         'pain-point-analysis',
         'willingness-to-pay-analysis',
         'validation-scoring',
-        'persona-recommendations'
+        'persona-recommendations',
       ],
-      requires: [
-        'business-idea-description'
-      ]
-    };
+      requires: ['business-idea-description'],
+    }
   }
 
   protected async onInitialize(): Promise<void> {
-    console.log('[CustomerResearchAgent] Initializing customer research capabilities...');
+    console.log('[CustomerResearchAgent] Initializing customer research capabilities...')
     // Initialize any shared resources or configurations
   }
 
   protected async onCleanup(): Promise<void> {
-    console.log('[CustomerResearchAgent] Cleaning up customer research resources...');
+    console.log('[CustomerResearchAgent] Cleaning up customer research resources...')
     // Clean up any resources if needed
   }
 
   canHandle(request: AgentRequest, _context?: AgentCommunicationContext): boolean {
-    return !!request.businessIdea?.title && 
-           !!request.businessIdea?.description;
+    return !!request.businessIdea?.title && !!request.businessIdea?.description
   }
 
-  async execute(
-    request: AgentRequest,
-    context: AgentExecutionContext
-  ): Promise<AgentResponse> {
-    const startTime = Date.now();
-    console.log(`[CustomerResearchAgent] Starting customer research analysis for: ${request.businessIdea.title}`);
+  async execute(request: AgentRequest, context: AgentExecutionContext): Promise<AgentResponse> {
+    const startTime = Date.now()
+    console.log(
+      `[CustomerResearchAgent] Starting customer research analysis for: ${request.businessIdea.title}`
+    )
 
     try {
       // Convert AgentRequest to CustomerResearchRequest
-      const customerResearchRequest = this.convertToCustomerResearchRequest(request);
+      const customerResearchRequest = this.convertToCustomerResearchRequest(request)
 
       // Determine analysis scope based on request options
-      const focusAreas = this.determineFocusAreas(request);
-      customerResearchRequest.focusAreas = focusAreas;
+      const focusAreas = this.determineFocusAreas(request)
+      customerResearchRequest.focusAreas = focusAreas
 
       // Execute analysis engines in parallel where possible
-      const analysisResults = await this.executeAnalysisEngines(customerResearchRequest);
+      const analysisResults = await this.executeAnalysisEngines(customerResearchRequest)
 
       // Synthesize comprehensive customer research output
       const customerResearchOutput = this.synthesizeCustomerResearchOutput(
-        analysisResults, customerResearchRequest, startTime
-      );
+        analysisResults,
+        customerResearchRequest,
+        startTime
+      )
 
       // Generate agent response
       const agentResponse = this.generateAgentResponse(
-        customerResearchOutput, request, context, startTime
-      );
+        customerResearchOutput,
+        request,
+        context,
+        startTime
+      )
 
-      console.log(`[CustomerResearchAgent] Customer research analysis completed in ${Date.now() - startTime}ms`);
-      return agentResponse;
-
+      console.log(
+        `[CustomerResearchAgent] Customer research analysis completed in ${Date.now() - startTime}ms`
+      )
+      return agentResponse
     } catch (error) {
-      console.error('[CustomerResearchAgent] Customer research analysis failed:', error);
-      
+      console.error('[CustomerResearchAgent] Customer research analysis failed:', error)
+
       // Return error response with fallback analysis
-      return this.generateErrorResponse(error, request, context, startTime);
+      return this.generateErrorResponse(error, request, context, startTime)
     }
   }
 
   private convertToCustomerResearchRequest(request: AgentRequest): CustomerResearchRequest {
     // Extract analysis depth from request options
-    const analysisDepth = request.options?.analysisDepth || 'standard';
-    
+    const analysisDepth = request.options?.analysisDepth || 'standard'
+
     // Validate analysis depth
-    const validDepths = ['basic', 'standard', 'comprehensive'];
-    const depth = validDepths.includes(analysisDepth) ? analysisDepth as 'basic' | 'standard' | 'comprehensive' : 'standard';
+    const validDepths = ['basic', 'standard', 'comprehensive']
+    const depth = validDepths.includes(analysisDepth)
+      ? (analysisDepth as 'basic' | 'standard' | 'comprehensive')
+      : 'standard'
 
     return {
       businessIdea: {
@@ -128,88 +135,90 @@ export class CustomerResearchAgent extends BaseAgent {
         description: request.businessIdea.description || '',
         category: request.businessIdea.category,
         targetMarket: request.businessIdea.targetMarket,
-        geography: request.businessIdea.geography
+        geography: request.businessIdea.geography,
       },
       analysisDepth: depth,
       focusAreas: [], // Will be set by determineFocusAreas
       maxSegments: request.options?.maxSegments,
       maxPersonas: request.options?.maxPersonas,
-      timeConstraints: request.options?.timeConstraints
-    };
+      timeConstraints: request.options?.timeConstraints,
+    }
   }
 
-  private determineFocusAreas(request: AgentRequest): ('segmentation' | 'problem-validation' | 'pain-points' | 'pricing' | 'personas')[] {
+  private determineFocusAreas(
+    request: AgentRequest
+  ): ('segmentation' | 'problem-validation' | 'pain-points' | 'pricing' | 'personas')[] {
     // Default to all focus areas for comprehensive analysis
-    const allFocusAreas: ('segmentation' | 'problem-validation' | 'pain-points' | 'pricing' | 'personas')[] = [
-      'segmentation',
-      'problem-validation', 
-      'pain-points',
-      'pricing',
-      'personas'
-    ];
+    const allFocusAreas: (
+      | 'segmentation'
+      | 'problem-validation'
+      | 'pain-points'
+      | 'pricing'
+      | 'personas'
+    )[] = ['segmentation', 'problem-validation', 'pain-points', 'pricing', 'personas']
 
     // Check if specific focus areas are requested
     if (request.options?.focusAreas && Array.isArray(request.options.focusAreas)) {
-      const requestedAreas = request.options.focusAreas.filter(area => 
+      const requestedAreas = request.options.focusAreas.filter(area =>
         allFocusAreas.includes(area as any)
-      ) as ('segmentation' | 'problem-validation' | 'pain-points' | 'pricing' | 'personas')[];
-      
-      return requestedAreas.length > 0 ? requestedAreas : allFocusAreas;
+      ) as ('segmentation' | 'problem-validation' | 'pain-points' | 'pricing' | 'personas')[]
+
+      return requestedAreas.length > 0 ? requestedAreas : allFocusAreas
     }
 
     // For basic analysis, focus on core areas
     if (request.options?.analysisDepth === 'basic') {
-      return ['segmentation', 'problem-validation'];
+      return ['segmentation', 'problem-validation']
     }
 
-    return allFocusAreas;
+    return allFocusAreas
   }
 
   private async executeAnalysisEngines(request: CustomerResearchRequest) {
-    const results: any = {};
+    const results: any = {}
 
     // Create array of analysis promises based on focus areas
-    const analysisPromises: Promise<any>[] = [];
-    const analysisNames: string[] = [];
+    const analysisPromises: Promise<any>[] = []
+    const analysisNames: string[] = []
 
     if (request.focusAreas.includes('segmentation')) {
-      analysisPromises.push(this.segmentationEngine.analyzeCustomerSegments(request));
-      analysisNames.push('segmentation');
+      analysisPromises.push(this.segmentationEngine.analyzeCustomerSegments(request))
+      analysisNames.push('segmentation')
     }
 
     if (request.focusAreas.includes('problem-validation')) {
-      analysisPromises.push(this.problemValidationEngine.validateProblem(request));
-      analysisNames.push('problemValidation');
+      analysisPromises.push(this.problemValidationEngine.validateProblem(request))
+      analysisNames.push('problemValidation')
     }
 
     if (request.focusAreas.includes('pain-points')) {
-      analysisPromises.push(this.painPointEngine.analyzePainPoints(request));
-      analysisNames.push('painPoints');
+      analysisPromises.push(this.painPointEngine.analyzePainPoints(request))
+      analysisNames.push('painPoints')
     }
 
     if (request.focusAreas.includes('pricing')) {
-      analysisPromises.push(this.pricingEngine.analyzeWillingnessToPay(request));
-      analysisNames.push('pricing');
+      analysisPromises.push(this.pricingEngine.analyzeWillingnessToPay(request))
+      analysisNames.push('pricing')
     }
 
     if (request.focusAreas.includes('personas')) {
-      analysisPromises.push(this.personaEngine.generatePersonaRecommendations(request));
-      analysisNames.push('personas');
+      analysisPromises.push(this.personaEngine.generatePersonaRecommendations(request))
+      analysisNames.push('personas')
     }
 
     // Always include validation scoring as it synthesizes other results
-    analysisPromises.push(this.scoringEngine.calculateValidationScore(request));
-    analysisNames.push('scoring');
+    analysisPromises.push(this.scoringEngine.calculateValidationScore(request))
+    analysisNames.push('scoring')
 
     // Execute all analyses in parallel
-    const analysisResults = await Promise.all(analysisPromises);
+    const analysisResults = await Promise.all(analysisPromises)
 
     // Map results to named properties
     analysisNames.forEach((name, index) => {
-      results[name] = analysisResults[index];
-    });
+      results[name] = analysisResults[index]
+    })
 
-    return results;
+    return results
   }
 
   private synthesizeCustomerResearchOutput(
@@ -218,35 +227,36 @@ export class CustomerResearchAgent extends BaseAgent {
     startTime: number
   ): CustomerResearchOutput {
     // Extract results from engines
-    const segmentationResult = analysisResults.segmentation;
-    const problemValidationResult = analysisResults.problemValidation;
-    const painPointsResult = analysisResults.painPoints;
-    const pricingResult = analysisResults.pricing;
-    const personasResult = analysisResults.personas;
-    const scoringResult = analysisResults.scoring;
+    const segmentationResult = analysisResults.segmentation
+    const problemValidationResult = analysisResults.problemValidation
+    const painPointsResult = analysisResults.painPoints
+    const pricingResult = analysisResults.pricing
+    const personasResult = analysisResults.personas
+    const scoringResult = analysisResults.scoring
 
     // Aggregate all data sources
-    const allDataSources = [];
-    if (segmentationResult?.dataSources) allDataSources.push(...segmentationResult.dataSources);
-    if (problemValidationResult?.dataSources) allDataSources.push(...problemValidationResult.dataSources);
-    if (painPointsResult?.dataSources) allDataSources.push(...painPointsResult.dataSources);
-    if (pricingResult?.dataSources) allDataSources.push(...pricingResult.dataSources);
-    if (personasResult?.dataSources) allDataSources.push(...personasResult.dataSources);
-    if (scoringResult?.dataSources) allDataSources.push(...scoringResult.dataSources);
+    const allDataSources = []
+    if (segmentationResult?.dataSources) allDataSources.push(...segmentationResult.dataSources)
+    if (problemValidationResult?.dataSources)
+      allDataSources.push(...problemValidationResult.dataSources)
+    if (painPointsResult?.dataSources) allDataSources.push(...painPointsResult.dataSources)
+    if (pricingResult?.dataSources) allDataSources.push(...pricingResult.dataSources)
+    if (personasResult?.dataSources) allDataSources.push(...personasResult.dataSources)
+    if (scoringResult?.dataSources) allDataSources.push(...scoringResult.dataSources)
 
     // Remove duplicate data sources
-    const uniqueDataSources = this.deduplicateDataSources(allDataSources);
+    const uniqueDataSources = this.deduplicateDataSources(allDataSources)
 
     // Calculate processing time and quality metrics
-    const processingTime = Date.now() - startTime;
-    const dataQuality = this.calculateDataQuality(analysisResults);
-    const completeness = this.calculateCompleteness(analysisResults, request);
+    const processingTime = Date.now() - startTime
+    const dataQuality = this.calculateDataQuality(analysisResults)
+    const completeness = this.calculateCompleteness(analysisResults, request)
 
     // Generate validation insights
-    const validationInsights = this.generateValidationInsights(analysisResults, request);
+    const validationInsights = this.generateValidationInsights(analysisResults, request)
 
     // Identify limitations
-    const limitations = this.identifyLimitations(analysisResults, request);
+    const limitations = this.identifyLimitations(analysisResults, request)
 
     return {
       segments: segmentationResult?.segments || [],
@@ -259,22 +269,27 @@ export class CustomerResearchAgent extends BaseAgent {
           segmentViability: 0,
           solutionFit: 0,
           willingnessToPayScore: 0,
-          competitiveAdvantage: 0
+          competitiveAdvantage: 0,
         },
         explanation: 'Unable to calculate validation score',
         strengths: [],
         weaknesses: [],
         recommendations: [],
-        confidence: 0
+        confidence: 0,
       },
       willingnessToPay: pricingResult?.willingnessToPay || {
         priceRange: { min: 0, max: 0, currency: 'USD', confidence: 0 },
         priceModel: 'subscription',
-        valuePerspective: { perceivedValue: 0, costOfProblem: 0, competitiveContext: [], priceAnchors: [] },
+        valuePerspective: {
+          perceivedValue: 0,
+          costOfProblem: 0,
+          competitiveContext: [],
+          priceAnchors: [],
+        },
         priceSensitivity: { elasticity: 'medium', segmentVariations: [] },
         affordabilityAssessment: { canAfford: 0, paymentPreferences: [], budgetConstraints: [] },
         recommendations: { suggestedPrice: 0, pricingStrategy: '', rationale: [], risks: [] },
-        confidence: 0
+        confidence: 0,
       },
       personas: personasResult?.personas || [],
       validationInsights,
@@ -284,88 +299,92 @@ export class CustomerResearchAgent extends BaseAgent {
         dataQuality,
         completeness,
         version: '1.0.0',
-        segmentsAnalyzed: segmentationResult?.segments?.length || 0
+        segmentsAnalyzed: segmentationResult?.segments?.length || 0,
       },
       dataSources: uniqueDataSources,
-      limitations
-    };
+      limitations,
+    }
   }
 
   private deduplicateDataSources(dataSources: any[]): any[] {
-    const uniqueSources = new Map();
-    
-    dataSources.forEach(source => {
-      const key = `${source.name}-${source.type}`;
-      if (!uniqueSources.has(key) || uniqueSources.get(key).credibility < source.credibility) {
-        uniqueSources.set(key, source);
-      }
-    });
+    const uniqueSources = new Map()
 
-    return Array.from(uniqueSources.values());
+    dataSources.forEach(source => {
+      const key = `${source.name}-${source.type}`
+      if (!uniqueSources.has(key) || uniqueSources.get(key).credibility < source.credibility) {
+        uniqueSources.set(key, source)
+      }
+    })
+
+    return Array.from(uniqueSources.values())
   }
 
   private calculateDataQuality(analysisResults: any): number {
-    let totalQuality = 0;
-    let qualityFactors = 0;
+    let totalQuality = 0
+    let qualityFactors = 0
 
     // Assess quality based on available results
     if (analysisResults.segmentation) {
-      const segmentCount = analysisResults.segmentation.segments?.length || 0;
-      totalQuality += Math.min(100, segmentCount * 20); // Max 100 for 5+ segments
-      qualityFactors++;
+      const segmentCount = analysisResults.segmentation.segments?.length || 0
+      totalQuality += Math.min(100, segmentCount * 20) // Max 100 for 5+ segments
+      qualityFactors++
     }
 
     if (analysisResults.problemValidation) {
-      const validationScore = analysisResults.problemValidation.problemValidation?.validationScore || 0;
-      totalQuality += validationScore;
-      qualityFactors++;
+      const validationScore =
+        analysisResults.problemValidation.problemValidation?.validationScore || 0
+      totalQuality += validationScore
+      qualityFactors++
     }
 
     if (analysisResults.painPoints) {
-      const painPointCount = analysisResults.painPoints.painPoints?.length || 0;
-      totalQuality += Math.min(100, painPointCount * 15); // Max 100 for 7+ pain points
-      qualityFactors++;
+      const painPointCount = analysisResults.painPoints.painPoints?.length || 0
+      totalQuality += Math.min(100, painPointCount * 15) // Max 100 for 7+ pain points
+      qualityFactors++
     }
 
     if (analysisResults.scoring) {
-      const confidence = analysisResults.scoring.validationScore?.confidence || 0;
-      totalQuality += confidence;
-      qualityFactors++;
+      const confidence = analysisResults.scoring.validationScore?.confidence || 0
+      totalQuality += confidence
+      qualityFactors++
     }
 
-    return qualityFactors > 0 ? Math.round(totalQuality / qualityFactors) : 70;
+    return qualityFactors > 0 ? Math.round(totalQuality / qualityFactors) : 70
   }
 
   private calculateCompleteness(analysisResults: any, request: CustomerResearchRequest): number {
-    const requestedAreas = request.focusAreas.length;
-    let completedAreas = 0;
+    const requestedAreas = request.focusAreas.length
+    let completedAreas = 0
 
     if (request.focusAreas.includes('segmentation') && analysisResults.segmentation) {
-      completedAreas++;
+      completedAreas++
     }
     if (request.focusAreas.includes('problem-validation') && analysisResults.problemValidation) {
-      completedAreas++;
+      completedAreas++
     }
     if (request.focusAreas.includes('pain-points') && analysisResults.painPoints) {
-      completedAreas++;
+      completedAreas++
     }
     if (request.focusAreas.includes('pricing') && analysisResults.pricing) {
-      completedAreas++;
+      completedAreas++
     }
     if (request.focusAreas.includes('personas') && analysisResults.personas) {
-      completedAreas++;
+      completedAreas++
     }
 
-    return requestedAreas > 0 ? Math.round((completedAreas / requestedAreas) * 100) : 100;
+    return requestedAreas > 0 ? Math.round((completedAreas / requestedAreas) * 100) : 100
   }
 
-  private generateValidationInsights(analysisResults: any, request: CustomerResearchRequest): any[] {
-    const insights = [];
+  private generateValidationInsights(
+    analysisResults: any,
+    request: CustomerResearchRequest
+  ): any[] {
+    const insights = []
 
     // Generate insights from scoring results
     if (analysisResults.scoring?.validationScore) {
-      const score = analysisResults.scoring.validationScore.overall;
-      
+      const score = analysisResults.scoring.validationScore.overall
+
       if (score >= 80) {
         insights.push({
           type: 'market-demand',
@@ -376,8 +395,8 @@ export class CustomerResearchAgent extends BaseAgent {
           evidence: ['High validation score', 'Strong component scores'],
           recommendations: ['Proceed with confidence to development phase'],
           risks: [],
-          priority: 95
-        });
+          priority: 95,
+        })
       } else if (score >= 70) {
         insights.push({
           type: 'market-demand',
@@ -388,8 +407,8 @@ export class CustomerResearchAgent extends BaseAgent {
           evidence: ['Above-average validation score'],
           recommendations: ['Address weaker validation areas before launch'],
           risks: ['Some validation concerns remain'],
-          priority: 80
-        });
+          priority: 80,
+        })
       } else {
         insights.push({
           type: 'problem-validation',
@@ -400,15 +419,17 @@ export class CustomerResearchAgent extends BaseAgent {
           evidence: ['Below-average validation metrics'],
           recommendations: ['Conduct additional customer research', 'Refine value proposition'],
           risks: ['Product-market fit uncertainty', 'Market entry challenges'],
-          priority: 90
-        });
+          priority: 90,
+        })
       }
     }
 
     // Add segmentation insights
     if (analysisResults.segmentation?.segments) {
-      const segmentCount = analysisResults.segmentation.segments.length;
-      const highPrioritySegments = analysisResults.segmentation.segments.filter((s: any) => s.priority > 80).length;
+      const segmentCount = analysisResults.segmentation.segments.length
+      const highPrioritySegments = analysisResults.segmentation.segments.filter(
+        (s: any) => s.priority > 80
+      ).length
 
       if (highPrioritySegments > 0) {
         insights.push({
@@ -420,15 +441,15 @@ export class CustomerResearchAgent extends BaseAgent {
           evidence: [`${highPrioritySegments} segments with >80 priority score`],
           recommendations: ['Focus initial marketing on high-priority segments'],
           risks: [],
-          priority: 85
-        });
+          priority: 85,
+        })
       }
     }
 
     // Add pricing insights
     if (analysisResults.pricing?.willingnessToPay) {
-      const priceRange = analysisResults.pricing.willingnessToPay.priceRange;
-      const confidence = priceRange.confidence;
+      const priceRange = analysisResults.pricing.willingnessToPay.priceRange
+      const confidence = priceRange.confidence
 
       if (confidence > 75) {
         insights.push({
@@ -440,42 +461,46 @@ export class CustomerResearchAgent extends BaseAgent {
           evidence: [`${confidence}% pricing confidence`, 'Market pricing analysis'],
           recommendations: ['Proceed with suggested pricing strategy'],
           risks: [],
-          priority: 75
-        });
+          priority: 75,
+        })
       }
     }
 
-    return insights;
+    return insights
   }
 
   private identifyLimitations(analysisResults: any, request: CustomerResearchRequest): string[] {
-    const limitations = [];
+    const limitations = []
 
     // Analysis depth limitations
     if (request.analysisDepth === 'basic') {
-      limitations.push('Basic analysis depth may not capture all customer nuances');
+      limitations.push('Basic analysis depth may not capture all customer nuances')
     }
 
     // Missing focus areas
-    const allAreas = ['segmentation', 'problem-validation', 'pain-points', 'pricing', 'personas'];
-    const missingAreas = allAreas.filter(area => !request.focusAreas.includes(area as any));
-    
+    const allAreas = ['segmentation', 'problem-validation', 'pain-points', 'pricing', 'personas']
+    const missingAreas = allAreas.filter(area => !request.focusAreas.includes(area as any))
+
     if (missingAreas.length > 0) {
-      limitations.push(`Analysis excludes: ${missingAreas.join(', ')}`);
+      limitations.push(`Analysis excludes: ${missingAreas.join(', ')}`)
     }
 
     // Data source limitations
-    limitations.push('Analysis based on simulated market data - validation with real customer data recommended');
+    limitations.push(
+      'Analysis based on simulated market data - validation with real customer data recommended'
+    )
 
     // Time constraints
     if (request.timeConstraints && request.timeConstraints < 60) {
-      limitations.push('Time constraints may have limited analysis depth');
+      limitations.push('Time constraints may have limited analysis depth')
     }
 
     // Sample size assumptions
-    limitations.push('Market sizing estimates based on demographic assumptions rather than direct measurement');
+    limitations.push(
+      'Market sizing estimates based on demographic assumptions rather than direct measurement'
+    )
 
-    return limitations;
+    return limitations
   }
 
   private generateAgentResponse(
@@ -484,8 +509,8 @@ export class CustomerResearchAgent extends BaseAgent {
     context: AgentExecutionContext,
     startTime: number
   ): AgentResponse {
-    const score = customerResearchOutput.validationScore.overall;
-    const confidence = customerResearchOutput.validationScore.confidence;
+    const score = customerResearchOutput.validationScore.overall
+    const confidence = customerResearchOutput.validationScore.confidence
 
     // Generate key insights for the response
     const insights = [
@@ -493,14 +518,15 @@ export class CustomerResearchAgent extends BaseAgent {
       `Customer validation score: ${score}/100 (${this.getScoreInterpretation(score)})`,
       `${customerResearchOutput.painPoints.length} key pain points identified with actionable solutions`,
       `Pricing analysis suggests ${customerResearchOutput.willingnessToPay.priceModel} model at $${customerResearchOutput.willingnessToPay.recommendations.suggestedPrice}`,
-      `${customerResearchOutput.personas.length} detailed customer personas developed for targeting`
-    ];
+      `${customerResearchOutput.personas.length} detailed customer personas developed for targeting`,
+    ]
 
     // Add validation-specific insights
     if (customerResearchOutput.validationInsights.length > 0) {
-      const topInsight = customerResearchOutput.validationInsights
-        .sort((a, b) => (b.priority || 0) - (a.priority || 0))[0];
-      insights.push(topInsight.description);
+      const topInsight = customerResearchOutput.validationInsights.sort(
+        (a, b) => (b.priority || 0) - (a.priority || 0)
+      )[0]
+      insights.push(topInsight.description)
     }
 
     return {
@@ -518,24 +544,24 @@ export class CustomerResearchAgent extends BaseAgent {
         completeness: customerResearchOutput.metadata.completeness,
         version: '1.0.0',
         executionId: context.evaluationId,
-        correlationId: context.correlationId
+        correlationId: context.correlationId,
       },
-      rawData: customerResearchOutput
-    };
+      rawData: customerResearchOutput,
+    }
   }
 
   private getScoreInterpretation(score: number): string {
-    if (score >= 80) return 'Strong validation';
-    if (score >= 70) return 'Good validation';
-    if (score >= 60) return 'Moderate validation';
-    if (score >= 50) return 'Weak validation';
-    return 'Poor validation';
+    if (score >= 80) return 'Strong validation'
+    if (score >= 70) return 'Good validation'
+    if (score >= 60) return 'Moderate validation'
+    if (score >= 50) return 'Weak validation'
+    return 'Poor validation'
   }
 
   private mapConfidenceToString(confidence: number): 'high' | 'medium' | 'low' {
-    if (confidence >= 80) return 'high';
-    if (confidence >= 60) return 'medium';
-    return 'low';
+    if (confidence >= 80) return 'high'
+    if (confidence >= 60) return 'medium'
+    return 'low'
   }
 
   private generateErrorResponse(
@@ -544,7 +570,7 @@ export class CustomerResearchAgent extends BaseAgent {
     context: AgentExecutionContext,
     startTime: number
   ): AgentResponse {
-    console.error('[CustomerResearchAgent] Generating error response:', error);
+    console.error('[CustomerResearchAgent] Generating error response:', error)
 
     return {
       agentType: this.agentType,
@@ -552,7 +578,7 @@ export class CustomerResearchAgent extends BaseAgent {
       insights: [
         'Customer research analysis failed due to technical error',
         'Recommend retrying with simplified parameters',
-        'Manual customer research may be required'
+        'Manual customer research may be required',
       ],
       confidence: 'low',
       metadata: {
@@ -566,12 +592,12 @@ export class CustomerResearchAgent extends BaseAgent {
         completeness: 0,
         version: '1.0.0',
         executionId: context.evaluationId,
-        correlationId: context.correlationId
+        correlationId: context.correlationId,
       },
       rawData: {
         error: true,
-        message: error instanceof Error ? error.message : 'Customer research analysis failed'
-      }
-    };
+        message: error instanceof Error ? error.message : 'Customer research analysis failed',
+      },
+    }
   }
 }

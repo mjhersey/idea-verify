@@ -1,52 +1,52 @@
-import * as cdk from 'aws-cdk-lib';
-import * as ec2 from 'aws-cdk-lib/aws-ec2';
-import * as ecs from 'aws-cdk-lib/aws-ecs';
-import * as ecr from 'aws-cdk-lib/aws-ecr';
-import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2';
-import * as elbv2Targets from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets';
-import * as acm from 'aws-cdk-lib/aws-certificatemanager';
-import * as route53 from 'aws-cdk-lib/aws-route53';
-import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
-import * as iam from 'aws-cdk-lib/aws-iam';
-import * as logs from 'aws-cdk-lib/aws-logs';
-import * as autoscaling from 'aws-cdk-lib/aws-applicationautoscaling';
-import { Construct } from 'constructs';
-import { AiValidationPlatformStack } from './ai-validation-platform-stack';
+import * as cdk from 'aws-cdk-lib'
+import * as ec2 from 'aws-cdk-lib/aws-ec2'
+import * as ecs from 'aws-cdk-lib/aws-ecs'
+import * as ecr from 'aws-cdk-lib/aws-ecr'
+import * as elbv2 from 'aws-cdk-lib/aws-elasticloadbalancingv2'
+import * as elbv2Targets from 'aws-cdk-lib/aws-elasticloadbalancingv2-targets'
+import * as acm from 'aws-cdk-lib/aws-certificatemanager'
+import * as route53 from 'aws-cdk-lib/aws-route53'
+import * as route53Targets from 'aws-cdk-lib/aws-route53-targets'
+import * as iam from 'aws-cdk-lib/aws-iam'
+import * as logs from 'aws-cdk-lib/aws-logs'
+import * as autoscaling from 'aws-cdk-lib/aws-applicationautoscaling'
+import { Construct } from 'constructs'
+import { AiValidationPlatformStack } from './ai-validation-platform-stack'
 
 export interface EcsStackEnhancedProps extends cdk.StackProps {
-  environment: string;
-  infrastructureStack: AiValidationPlatformStack;
-  domainName?: string; // e.g., 'aivalidation.com'
-  hostedZoneId?: string; // Route53 hosted zone ID
+  environment: string
+  infrastructureStack: AiValidationPlatformStack
+  domainName?: string // e.g., 'aivalidation.com'
+  hostedZoneId?: string // Route53 hosted zone ID
 }
 
 export class EcsStackEnhanced extends cdk.Stack {
-  public readonly cluster: ecs.Cluster;
-  public readonly loadBalancer: elbv2.ApplicationLoadBalancer;
-  public readonly apiService: ecs.FargateService;
-  public readonly orchestratorService: ecs.FargateService;
-  public readonly webService: ecs.FargateService;
-  public readonly certificate?: acm.Certificate;
+  public readonly cluster: ecs.Cluster
+  public readonly loadBalancer: elbv2.ApplicationLoadBalancer
+  public readonly apiService: ecs.FargateService
+  public readonly orchestratorService: ecs.FargateService
+  public readonly webService: ecs.FargateService
+  public readonly certificate?: acm.Certificate
 
   constructor(scope: Construct, id: string, props: EcsStackEnhancedProps) {
-    super(scope, id, props);
+    super(scope, id, props)
 
-    const { environment, infrastructureStack, domainName, hostedZoneId } = props;
-    const { vpc, database, redisCluster, reportsBucket, assetsBucket } = infrastructureStack;
+    const { environment, infrastructureStack, domainName, hostedZoneId } = props
+    const { vpc, database, redisCluster, reportsBucket, assetsBucket } = infrastructureStack
 
     // Create ECS Cluster
     this.cluster = new ecs.Cluster(this, 'AiValidationCluster', {
       vpc,
       clusterName: `ai-validation-${environment}`,
       containerInsights: environment !== 'dev',
-    });
+    })
 
     // Create or import SSL certificate
     if (domainName && hostedZoneId) {
       const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'HostedZone', {
         hostedZoneId,
         zoneName: domainName,
-      });
+      })
 
       this.certificate = new acm.Certificate(this, 'Certificate', {
         domainName: environment === 'prod' ? domainName : `${environment}.${domainName}`,
@@ -55,7 +55,7 @@ export class EcsStackEnhanced extends cdk.Stack {
           environment === 'prod' ? `api.${domainName}` : `api.${environment}.${domainName}`,
         ],
         validation: acm.CertificateValidation.fromDns(hostedZone),
-      });
+      })
     }
 
     // Create Application Load Balancer with security enhancements
@@ -68,7 +68,7 @@ export class EcsStackEnhanced extends cdk.Stack {
       loadBalancerName: `ai-validation-alb-${environment}`,
       dropInvalidHeaderFields: true, // Security: Drop invalid headers
       desyncMitigationMode: elbv2.DesyncMitigationMode.STRICTEST, // Security: Strictest desync mitigation
-    });
+    })
 
     // Enable access logs for ALB
     if (environment === 'prod') {
@@ -83,9 +83,9 @@ export class EcsStackEnhanced extends cdk.Stack {
             expiration: cdk.Duration.days(30),
           },
         ],
-      });
+      })
 
-      this.loadBalancer.logAccessLogs(albLogBucket, 'alb-logs');
+      this.loadBalancer.logAccessLogs(albLogBucket, 'alb-logs')
     }
 
     // Configure HTTPS listener with TLS 1.2 minimum
@@ -94,13 +94,13 @@ export class EcsStackEnhanced extends cdk.Stack {
       protocol: elbv2.ApplicationProtocol.HTTPS,
       certificates: this.certificate ? [this.certificate] : undefined,
       sslPolicy: elbv2.SslPolicy.TLS12_EXT, // Security: TLS 1.2+ only
-    });
+    })
 
     // Configure HTTP listener to redirect to HTTPS
     const httpListener = this.loadBalancer.addListener('HttpListener', {
       port: 80,
       protocol: elbv2.ApplicationProtocol.HTTP,
-    });
+    })
 
     httpListener.addAction('RedirectToHttps', {
       action: elbv2.ListenerAction.redirect({
@@ -108,7 +108,7 @@ export class EcsStackEnhanced extends cdk.Stack {
         port: '443',
         permanent: true,
       }),
-    });
+    })
 
     // Add security headers via ALB
     const defaultTargetGroup = new elbv2.ApplicationTargetGroup(this, 'DefaultTargetGroup', {
@@ -126,7 +126,7 @@ export class EcsStackEnhanced extends cdk.Stack {
         interval: cdk.Duration.seconds(30),
         timeout: cdk.Duration.seconds(5),
       },
-    });
+    })
 
     // Add default action with security headers
     httpsListener.addAction('DefaultAction', {
@@ -134,7 +134,7 @@ export class EcsStackEnhanced extends cdk.Stack {
         contentType: 'text/plain',
         messageBody: 'OK',
       }),
-    });
+    })
 
     // Create services with enhanced configurations
     this.apiService = this.createApiService(
@@ -142,27 +142,24 @@ export class EcsStackEnhanced extends cdk.Stack {
       environment,
       httpsListener,
       domainName
-    );
+    )
 
-    this.orchestratorService = this.createOrchestratorService(
-      infrastructureStack,
-      environment
-    );
+    this.orchestratorService = this.createOrchestratorService(infrastructureStack, environment)
 
     this.webService = this.createWebService(
       infrastructureStack,
       environment,
       httpsListener,
       domainName
-    );
+    )
 
     // Configure DNS if domain is provided
     if (domainName && hostedZoneId) {
-      this.configureDNS(domainName, hostedZoneId, environment);
+      this.configureDNS(domainName, hostedZoneId, environment)
     }
 
     // Add CloudWatch alarms for security monitoring
-    this.createSecurityAlarms(environment);
+    this.createSecurityAlarms(environment)
   }
 
   private createApiService(
@@ -171,7 +168,7 @@ export class EcsStackEnhanced extends cdk.Stack {
     httpsListener: elbv2.ApplicationListener,
     domainName?: string
   ): ecs.FargateService {
-    const { database, redisCluster, reportsBucket, assetsBucket } = infrastructureStack;
+    const { database, redisCluster, reportsBucket, assetsBucket } = infrastructureStack
 
     // Create API repository
     const apiRepository = new ecr.Repository(this, 'ApiRepository', {
@@ -184,7 +181,7 @@ export class EcsStackEnhanced extends cdk.Stack {
           description: 'Keep only 10 most recent images',
         },
       ],
-    });
+    })
 
     // Task execution role
     const taskExecutionRole = new iam.Role(this, 'ApiTaskExecutionRole', {
@@ -192,9 +189,9 @@ export class EcsStackEnhanced extends cdk.Stack {
       managedPolicies: [
         iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy'),
       ],
-    });
+    })
 
-    apiRepository.grantPull(taskExecutionRole);
+    apiRepository.grantPull(taskExecutionRole)
 
     // Task definition with security settings
     const apiTaskDefinition = new ecs.FargateTaskDefinition(this, 'ApiTaskDefinition', {
@@ -203,7 +200,7 @@ export class EcsStackEnhanced extends cdk.Stack {
       memoryLimitMiB: environment === 'dev' ? 512 : 1024,
       executionRole: taskExecutionRole,
       taskRole: infrastructureStack.applicationRole,
-    });
+    })
 
     // Add container with security configurations
     const apiContainer = apiTaskDefinition.addContainer('ApiContainer', {
@@ -213,7 +210,7 @@ export class EcsStackEnhanced extends cdk.Stack {
         PORT: '3000',
         // Security headers configuration
         ENABLE_SECURITY_HEADERS: 'true',
-        CORS_ORIGIN: domainName 
+        CORS_ORIGIN: domainName
           ? `https://${environment === 'prod' ? '' : `${environment}.`}${domainName}`
           : 'http://localhost:3000',
         // CSP configuration
@@ -226,7 +223,7 @@ export class EcsStackEnhanced extends cdk.Stack {
           "connect-src 'self'",
           "frame-ancestors 'none'",
           "base-uri 'self'",
-          "form-action 'self'"
+          "form-action 'self'",
         ].join('; '),
         // Security configurations
         HELMET_CONFIG: JSON.stringify({
@@ -240,14 +237,14 @@ export class EcsStackEnhanced extends cdk.Stack {
           hsts: {
             maxAge: 31536000,
             includeSubDomains: true,
-            preload: true
+            preload: true,
           },
           ieNoOpen: true,
           noSniff: true,
           originAgentCluster: true,
           permittedCrossDomainPolicies: false,
           referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-          xssFilter: true
+          xssFilter: true,
         }),
       },
       secrets: {
@@ -263,11 +260,15 @@ export class EcsStackEnhanced extends cdk.Stack {
         streamPrefix: 'api',
         logGroup: new logs.LogGroup(this, 'ApiLogGroup', {
           logGroupName: `/ecs/ai-validation-api-${environment}`,
-          retention: environment === 'prod' ? logs.RetentionDays.ONE_MONTH : logs.RetentionDays.ONE_WEEK,
+          retention:
+            environment === 'prod' ? logs.RetentionDays.ONE_MONTH : logs.RetentionDays.ONE_WEEK,
         }),
       }),
       healthCheck: {
-        command: ['CMD-SHELL', 'wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1'],
+        command: [
+          'CMD-SHELL',
+          'wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1',
+        ],
         interval: cdk.Duration.seconds(30),
         timeout: cdk.Duration.seconds(5),
         retries: 3,
@@ -277,12 +278,12 @@ export class EcsStackEnhanced extends cdk.Stack {
       readonlyRootFilesystem: true,
       // Security: Run as non-root user
       user: '1000:1000',
-    });
+    })
 
     apiContainer.addPortMappings({
       containerPort: 3000,
       protocol: ecs.Protocol.TCP,
-    });
+    })
 
     // Create service
     const apiService = new ecs.FargateService(this, 'ApiService', {
@@ -296,25 +297,25 @@ export class EcsStackEnhanced extends cdk.Stack {
       },
       platformVersion: ecs.FargatePlatformVersion.LATEST,
       enableExecuteCommand: environment !== 'prod', // Debug access for non-prod
-    });
+    })
 
     // Configure auto-scaling
     const scaling = apiService.autoScaleTaskCount({
       minCapacity: environment === 'dev' ? 1 : 2,
       maxCapacity: environment === 'dev' ? 2 : 10,
-    });
+    })
 
     scaling.scaleOnCpuUtilization('CpuScaling', {
       targetUtilizationPercent: 70,
       scaleInCooldown: cdk.Duration.seconds(60),
       scaleOutCooldown: cdk.Duration.seconds(60),
-    });
+    })
 
     scaling.scaleOnMemoryUtilization('MemoryScaling', {
       targetUtilizationPercent: 75,
       scaleInCooldown: cdk.Duration.seconds(60),
       scaleOutCooldown: cdk.Duration.seconds(60),
-    });
+    })
 
     // Add to load balancer with path-based routing
     const apiTargetGroup = httpsListener.addTargets('ApiTargetGroup', {
@@ -332,26 +333,24 @@ export class EcsStackEnhanced extends cdk.Stack {
         timeout: cdk.Duration.seconds(5),
       },
       priority: 10,
-      conditions: [
-        elbv2.ListenerCondition.pathPatterns(['/api/*']),
-      ],
-    });
+      conditions: [elbv2.ListenerCondition.pathPatterns(['/api/*'])],
+    })
 
     // Configure stickiness for session management
     apiTargetGroup.configureHealthCheck({
       enabled: true,
-    });
+    })
 
-    apiTargetGroup.enableCookieStickiness(cdk.Duration.hours(1), 'AIVSESSIONID');
+    apiTargetGroup.enableCookieStickiness(cdk.Duration.hours(1), 'AIVSESSIONID')
 
-    return apiService;
+    return apiService
   }
 
   private createOrchestratorService(
     infrastructureStack: AiValidationPlatformStack,
     environment: string
   ): ecs.FargateService {
-    const { database, redisCluster } = infrastructureStack;
+    const { database, redisCluster } = infrastructureStack
 
     // Create orchestrator repository
     const orchestratorRepository = new ecr.Repository(this, 'OrchestratorRepository', {
@@ -364,7 +363,7 @@ export class EcsStackEnhanced extends cdk.Stack {
           description: 'Keep only 10 most recent images',
         },
       ],
-    });
+    })
 
     // Task execution role
     const taskExecutionRole = new iam.Role(this, 'OrchestratorTaskExecutionRole', {
@@ -372,18 +371,22 @@ export class EcsStackEnhanced extends cdk.Stack {
       managedPolicies: [
         iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy'),
       ],
-    });
+    })
 
-    orchestratorRepository.grantPull(taskExecutionRole);
+    orchestratorRepository.grantPull(taskExecutionRole)
 
     // Task definition
-    const orchestratorTaskDefinition = new ecs.FargateTaskDefinition(this, 'OrchestratorTaskDefinition', {
-      family: `ai-validation-orchestrator-${environment}`,
-      cpu: environment === 'dev' ? 256 : 512,
-      memoryLimitMiB: environment === 'dev' ? 512 : 1024,
-      executionRole: taskExecutionRole,
-      taskRole: infrastructureStack.applicationRole,
-    });
+    const orchestratorTaskDefinition = new ecs.FargateTaskDefinition(
+      this,
+      'OrchestratorTaskDefinition',
+      {
+        family: `ai-validation-orchestrator-${environment}`,
+        cpu: environment === 'dev' ? 256 : 512,
+        memoryLimitMiB: environment === 'dev' ? 512 : 1024,
+        executionRole: taskExecutionRole,
+        taskRole: infrastructureStack.applicationRole,
+      }
+    )
 
     // Add container
     const orchestratorContainer = orchestratorTaskDefinition.addContainer('OrchestratorContainer', {
@@ -405,11 +408,15 @@ export class EcsStackEnhanced extends cdk.Stack {
         streamPrefix: 'orchestrator',
         logGroup: new logs.LogGroup(this, 'OrchestratorLogGroup', {
           logGroupName: `/ecs/ai-validation-orchestrator-${environment}`,
-          retention: environment === 'prod' ? logs.RetentionDays.ONE_MONTH : logs.RetentionDays.ONE_WEEK,
+          retention:
+            environment === 'prod' ? logs.RetentionDays.ONE_MONTH : logs.RetentionDays.ONE_WEEK,
         }),
       }),
       healthCheck: {
-        command: ['CMD-SHELL', 'wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1'],
+        command: [
+          'CMD-SHELL',
+          'wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1',
+        ],
         interval: cdk.Duration.seconds(30),
         timeout: cdk.Duration.seconds(5),
         retries: 3,
@@ -417,12 +424,12 @@ export class EcsStackEnhanced extends cdk.Stack {
       },
       readonlyRootFilesystem: true,
       user: '1000:1000',
-    });
+    })
 
     orchestratorContainer.addPortMappings({
       containerPort: 3001,
       protocol: ecs.Protocol.TCP,
-    });
+    })
 
     // Create service (internal, not exposed to internet)
     const orchestratorService = new ecs.FargateService(this, 'OrchestratorService', {
@@ -436,19 +443,19 @@ export class EcsStackEnhanced extends cdk.Stack {
       },
       platformVersion: ecs.FargatePlatformVersion.LATEST,
       enableExecuteCommand: environment !== 'prod',
-    });
+    })
 
     // Configure auto-scaling
     const scaling = orchestratorService.autoScaleTaskCount({
       minCapacity: environment === 'dev' ? 1 : 2,
       maxCapacity: environment === 'dev' ? 2 : 5,
-    });
+    })
 
     scaling.scaleOnCpuUtilization('OrchestratorCpuScaling', {
       targetUtilizationPercent: 70,
-    });
+    })
 
-    return orchestratorService;
+    return orchestratorService
   }
 
   private createWebService(
@@ -468,7 +475,7 @@ export class EcsStackEnhanced extends cdk.Stack {
           description: 'Keep only 10 most recent images',
         },
       ],
-    });
+    })
 
     // Task execution role
     const taskExecutionRole = new iam.Role(this, 'WebTaskExecutionRole', {
@@ -476,9 +483,9 @@ export class EcsStackEnhanced extends cdk.Stack {
       managedPolicies: [
         iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy'),
       ],
-    });
+    })
 
-    webRepository.grantPull(taskExecutionRole);
+    webRepository.grantPull(taskExecutionRole)
 
     // Task definition
     const webTaskDefinition = new ecs.FargateTaskDefinition(this, 'WebTaskDefinition', {
@@ -486,14 +493,14 @@ export class EcsStackEnhanced extends cdk.Stack {
       cpu: 256,
       memoryLimitMiB: 512,
       executionRole: taskExecutionRole,
-    });
+    })
 
     // Add container
     const webContainer = webTaskDefinition.addContainer('WebContainer', {
       image: ecs.ContainerImage.fromEcrRepository(webRepository, 'latest'),
       environment: {
         NODE_ENV: 'production',
-        API_BASE_URL: domainName 
+        API_BASE_URL: domainName
           ? `https://api.${environment === 'prod' ? '' : `${environment}.`}${domainName}`
           : '/api',
       },
@@ -501,11 +508,15 @@ export class EcsStackEnhanced extends cdk.Stack {
         streamPrefix: 'web',
         logGroup: new logs.LogGroup(this, 'WebLogGroup', {
           logGroupName: `/ecs/ai-validation-web-${environment}`,
-          retention: environment === 'prod' ? logs.RetentionDays.ONE_MONTH : logs.RetentionDays.ONE_WEEK,
+          retention:
+            environment === 'prod' ? logs.RetentionDays.ONE_MONTH : logs.RetentionDays.ONE_WEEK,
         }),
       }),
       healthCheck: {
-        command: ['CMD-SHELL', 'wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1'],
+        command: [
+          'CMD-SHELL',
+          'wget --no-verbose --tries=1 --spider http://localhost:8080/ || exit 1',
+        ],
         interval: cdk.Duration.seconds(30),
         timeout: cdk.Duration.seconds(5),
         retries: 3,
@@ -513,12 +524,12 @@ export class EcsStackEnhanced extends cdk.Stack {
       },
       readonlyRootFilesystem: true,
       user: '1000:1000',
-    });
+    })
 
     webContainer.addPortMappings({
       containerPort: 8080,
       protocol: ecs.Protocol.TCP,
-    });
+    })
 
     // Create service
     const webService = new ecs.FargateService(this, 'WebService', {
@@ -532,17 +543,17 @@ export class EcsStackEnhanced extends cdk.Stack {
       },
       platformVersion: ecs.FargatePlatformVersion.LATEST,
       enableExecuteCommand: environment !== 'prod',
-    });
+    })
 
     // Configure auto-scaling
     const scaling = webService.autoScaleTaskCount({
       minCapacity: environment === 'dev' ? 1 : 2,
       maxCapacity: environment === 'dev' ? 2 : 5,
-    });
+    })
 
     scaling.scaleOnCpuUtilization('WebCpuScaling', {
       targetUtilizationPercent: 70,
-    });
+    })
 
     // Add to load balancer with root path
     const webTargetGroup = httpsListener.addTargets('WebTargetGroup', {
@@ -560,19 +571,17 @@ export class EcsStackEnhanced extends cdk.Stack {
         timeout: cdk.Duration.seconds(5),
       },
       priority: 100,
-      conditions: [
-        elbv2.ListenerCondition.pathPatterns(['/*']),
-      ],
-    });
+      conditions: [elbv2.ListenerCondition.pathPatterns(['/*'])],
+    })
 
-    return webService;
+    return webService
   }
 
   private configureDNS(domainName: string, hostedZoneId: string, environment: string): void {
     const hostedZone = route53.HostedZone.fromHostedZoneAttributes(this, 'DNSHostedZone', {
       hostedZoneId,
       zoneName: domainName,
-    });
+    })
 
     // Main domain record
     new route53.ARecord(this, 'MainDomainRecord', {
@@ -581,7 +590,7 @@ export class EcsStackEnhanced extends cdk.Stack {
       target: route53.RecordTarget.fromAlias(
         new route53Targets.LoadBalancerTarget(this.loadBalancer)
       ),
-    });
+    })
 
     // WWW subdomain
     new route53.ARecord(this, 'WwwDomainRecord', {
@@ -590,7 +599,7 @@ export class EcsStackEnhanced extends cdk.Stack {
       target: route53.RecordTarget.fromAlias(
         new route53Targets.LoadBalancerTarget(this.loadBalancer)
       ),
-    });
+    })
 
     // API subdomain
     new route53.ARecord(this, 'ApiDomainRecord', {
@@ -599,7 +608,7 @@ export class EcsStackEnhanced extends cdk.Stack {
       target: route53.RecordTarget.fromAlias(
         new route53Targets.LoadBalancerTarget(this.loadBalancer)
       ),
-    });
+    })
   }
 
   private createSecurityAlarms(environment: string): void {
@@ -607,7 +616,7 @@ export class EcsStackEnhanced extends cdk.Stack {
     const alarmTopic = new cdk.aws_sns.Topic(this, 'SecurityAlarmTopic', {
       topicName: `ai-validation-security-alarms-${environment}`,
       displayName: `AI Validation Security Alarms (${environment})`,
-    });
+    })
 
     // 4xx errors alarm
     new cdk.aws_cloudwatch.Alarm(this, 'High4xxErrorsAlarm', {
@@ -625,7 +634,7 @@ export class EcsStackEnhanced extends cdk.Stack {
       threshold: 100,
       evaluationPeriods: 2,
       comparisonOperator: cdk.aws_cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
-    }).addAlarmAction(new cdk.aws_cloudwatch_actions.SnsAction(alarmTopic));
+    }).addAlarmAction(new cdk.aws_cloudwatch_actions.SnsAction(alarmTopic))
 
     // 5xx errors alarm
     new cdk.aws_cloudwatch.Alarm(this, 'High5xxErrorsAlarm', {
@@ -643,8 +652,8 @@ export class EcsStackEnhanced extends cdk.Stack {
       threshold: 10,
       evaluationPeriods: 1,
       comparisonOperator: cdk.aws_cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
-    }).addAlarmAction(new cdk.aws_cloudwatch_actions.SnsAction(alarmTopic));
+    }).addAlarmAction(new cdk.aws_cloudwatch_actions.SnsAction(alarmTopic))
   }
 }
 
-export default EcsStackEnhanced;
+export default EcsStackEnhanced

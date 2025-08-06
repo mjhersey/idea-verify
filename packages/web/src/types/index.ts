@@ -41,49 +41,52 @@ export type {
   EvaluationStatusEvent,
   AgentCompletedEvent,
   ErrorEvent,
-  EvaluationCompletedEvent
-} from '@ai-validation/shared';
+  EvaluationCompletedEvent,
+} from '@ai-validation/shared'
 
 // Frontend-specific WebSocket types
 export interface WebSocketConnection {
-  state: import('@ai-validation/shared').ConnectionState;
-  isConnected: boolean;
-  isReconnecting: boolean;
-  lastError?: string;
-  reconnectAttempts: number;
-  usingSse: boolean;
+  state: import('@ai-validation/shared').ConnectionState
+  isConnected: boolean
+  isReconnecting: boolean
+  lastError?: string
+  reconnectAttempts: number
+  usingSse: boolean
 }
 
 export interface EvaluationProgress {
-  evaluationId: string;
-  overallProgress: number;
-  activeAgents: string[];
-  completedAgents: string[];
-  failedAgents: string[];
-  estimatedCompletionTime?: Date;
-  agentProgresses: Record<string, {
-    status: string;
-    progressPercentage: number;
-    lastUpdate: Date;
-  }>;
+  evaluationId: string
+  overallProgress: number
+  activeAgents: string[]
+  completedAgents: string[]
+  failedAgents: string[]
+  estimatedCompletionTime?: Date
+  agentProgresses: Record<
+    string,
+    {
+      status: string
+      progressPercentage: number
+      lastUpdate: Date
+    }
+  >
 }
 
 export interface NotificationMessage {
-  id: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  title: string;
-  message: string;
-  timestamp: Date;
-  autoClose?: boolean;
+  id: string
+  type: 'info' | 'success' | 'warning' | 'error'
+  title: string
+  message: string
+  timestamp: Date
+  autoClose?: boolean
 }
 
 export interface EvaluationInsight {
-  id: string;
-  agentType: string;
-  type: string;
-  content: string;
-  importance: 'low' | 'medium' | 'high' | 'critical';
-  confidence: number;
-  timestamp: Date;
-  metadata?: Record<string, any>;
+  id: string
+  agentType: string
+  type: string
+  content: string
+  importance: 'low' | 'medium' | 'high' | 'critical'
+  confidence: number
+  timestamp: Date
+  metadata?: Record<string, any>
 }

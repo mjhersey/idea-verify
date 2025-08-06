@@ -1,28 +1,30 @@
 # Product Owner (PO) Master Validation Checklist
 
-This checklist serves as a comprehensive framework for the Product Owner to validate project plans before development execution. It adapts intelligently based on project type (greenfield vs brownfield) and includes UI/UX considerations when applicable.
+This checklist serves as a comprehensive framework for the Product Owner to
+validate project plans before development execution. It adapts intelligently
+based on project type (greenfield vs brownfield) and includes UI/UX
+considerations when applicable.
 
 [[LLM: INITIALIZATION INSTRUCTIONS - PO MASTER CHECKLIST
 
-PROJECT TYPE DETECTION:
-First, determine the project type by checking:
+PROJECT TYPE DETECTION: First, determine the project type by checking:
 
 1. Is this a GREENFIELD project (new from scratch)?
-
    - Look for: New project initialization, no existing codebase references
    - Check for: prd.md, architecture.md, new project setup stories
 
 2. Is this a BROWNFIELD project (enhancing existing system)?
-
-   - Look for: References to existing codebase, enhancement/modification language
-   - Check for: brownfield-prd.md, brownfield-architecture.md, existing system analysis
+   - Look for: References to existing codebase, enhancement/modification
+     language
+   - Check for: brownfield-prd.md, brownfield-architecture.md, existing system
+     analysis
 
 3. Does the project include UI/UX components?
    - Check for: frontend-architecture.md, UI/UX specifications, design files
-   - Look for: Frontend stories, component specifications, user interface mentions
+   - Look for: Frontend stories, component specifications, user interface
+     mentions
 
-DOCUMENT REQUIREMENTS:
-Based on project type, ensure you have access to:
+DOCUMENT REQUIREMENTS: Based on project type, ensure you have access to:
 
 For GREENFIELD projects:
 
@@ -53,11 +55,12 @@ VALIDATION APPROACH:
 3. Critical Thinking - Question assumptions and identify gaps
 4. Risk Assessment - Consider what could go wrong with each decision
 
-EXECUTION MODE:
-Ask the user if they want to work through the checklist:
+EXECUTION MODE: Ask the user if they want to work through the checklist:
 
-- Section by section (interactive mode) - Review each section, get confirmation before proceeding
-- All at once (comprehensive mode) - Complete full analysis and present report at end]]
+- Section by section (interactive mode) - Review each section, get confirmation
+  before proceeding
+- All at once (comprehensive mode) - Complete full analysis and present report
+  at end]]
 
 ## 1. PROJECT SETUP & INITIALIZATION
 
@@ -132,7 +135,8 @@ Ask the user if they want to work through the checklist:
 - [ ] Test environment setup precedes test implementation
 - [ ] Mock services or data are defined before testing
 - [ ] [[BROWNFIELD ONLY]] Regression testing covers existing functionality
-- [ ] [[BROWNFIELD ONLY]] Integration testing validates new-to-existing connections
+- [ ] [[BROWNFIELD ONLY]] Integration testing validates new-to-existing
+      connections
 
 ## 3. EXTERNAL DEPENDENCIES & INTEGRATIONS
 
@@ -347,7 +351,6 @@ Ask the user if they want to work through the checklist:
 Generate a comprehensive validation report that adapts to project type:
 
 1. Executive Summary
-
    - Project type: [Greenfield/Brownfield] with [UI/No UI]
    - Overall readiness (percentage)
    - Go/No-Go recommendation
@@ -357,42 +360,36 @@ Generate a comprehensive validation report that adapts to project type:
 2. Project-Specific Analysis
 
    FOR GREENFIELD:
-
    - Setup completeness
    - Dependency sequencing
    - MVP scope appropriateness
    - Development timeline feasibility
 
    FOR BROWNFIELD:
-
    - Integration risk level (High/Medium/Low)
    - Existing system impact assessment
    - Rollback readiness
    - User disruption potential
 
 3. Risk Assessment
-
    - Top 5 risks by severity
    - Mitigation recommendations
    - Timeline impact of addressing issues
    - [BROWNFIELD] Specific integration risks
 
 4. MVP Completeness
-
    - Core features coverage
    - Missing essential functionality
    - Scope creep identified
    - True MVP vs over-engineering
 
 5. Implementation Readiness
-
    - Developer clarity score (1-10)
    - Ambiguous requirements count
    - Missing technical details
    - [BROWNFIELD] Integration point clarity
 
 6. Recommendations
-
    - Must-fix before development
    - Should-fix for quality
    - Consider for improvement
@@ -436,6 +433,8 @@ After presenting the report, ask if the user wants:
 
 ### Final Decision
 
-- **APPROVED**: The plan is comprehensive, properly sequenced, and ready for implementation.
+- **APPROVED**: The plan is comprehensive, properly sequenced, and ready for
+  implementation.
 - **CONDITIONAL**: The plan requires specific adjustments before proceeding.
-- **REJECTED**: The plan requires significant revision to address critical deficiencies.
+- **REJECTED**: The plan requires significant revision to address critical
+  deficiencies.

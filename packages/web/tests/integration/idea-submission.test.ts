@@ -16,20 +16,20 @@ import { useAuthStore } from '@/stores/auth'
 vi.mock('@/services/ideas', () => ({
   ideasService: {
     submitIdea: vi.fn(),
-    validateIdeaSubmission: vi.fn(() => ({ isValid: true, errors: [] }))
-  }
+    validateIdeaSubmission: vi.fn(() => ({ isValid: true, errors: [] })),
+  },
 }))
 vi.mock('@/services/evaluation', () => ({
   evaluationService: {
-    submitEvaluation: vi.fn()
-  }
+    submitEvaluation: vi.fn(),
+  },
 }))
 vi.mock('@/services/auth', () => ({
   authService: {
     login: vi.fn(),
     logout: vi.fn(),
-    register: vi.fn()
-  }
+    register: vi.fn(),
+  },
 }))
 
 describe('Idea Submission Integration', () => {
@@ -42,15 +42,15 @@ describe('Idea Submission Integration', () => {
   beforeEach(async () => {
     pinia = createPinia()
     setActivePinia(pinia)
-    
+
     // Create router
     router = createRouter({
       history: createWebHistory(),
       routes: [
         { path: '/', component: HomeView },
         { path: '/login', component: { template: '<div>Login</div>' } },
-        { path: '/evaluation/:id', component: { template: '<div>Evaluation Results</div>' } }
-      ]
+        { path: '/evaluation/:id', component: { template: '<div>Evaluation Results</div>' } },
+      ],
     })
 
     await router.push('/')
@@ -59,14 +59,14 @@ describe('Idea Submission Integration', () => {
     // Setup stores
     ideasStore = useIdeasStore()
     authStore = useAuthStore()
-    
+
     // Mock authenticated user by setting up the store state properly
     authStore.$patch({
       user: {
         id: 'user-123',
         name: 'Test User',
-        email: 'test@example.com'
-      }
+        email: 'test@example.com',
+      },
     })
 
     // Mount component with proper global configuration
@@ -75,16 +75,16 @@ describe('Idea Submission Integration', () => {
         plugins: [router, pinia],
         stubs: {
           'router-link': {
-            template: '<a><slot /></a>'
+            template: '<a><slot /></a>',
           },
-          'RouterLink': {
-            template: '<a><slot /></a>'
-          }
+          RouterLink: {
+            template: '<a><slot /></a>',
+          },
         },
         mocks: {
-          $route: router.currentRoute.value
-        }
-      }
+          $route: router.currentRoute.value,
+        },
+      },
     })
 
     await nextTick()
@@ -102,7 +102,7 @@ describe('Idea Submission Integration', () => {
           success: true,
           message: 'Idea submitted successfully!',
           ideaId: 'idea-123',
-          evaluationId: 'eval-456'
+          evaluationId: 'eval-456',
         }
       })
 
@@ -131,7 +131,7 @@ describe('Idea Submission Integration', () => {
       // Verify submission was called with correct data
       expect(mockSubmitIdea).toHaveBeenCalledWith({
         title: 'Revolutionary AI Assistant',
-        description: expect.stringContaining('This is a comprehensive business idea')
+        description: expect.stringContaining('This is a comprehensive business idea'),
       })
 
       // Wait for success message
@@ -165,7 +165,7 @@ describe('Idea Submission Integration', () => {
       // Mock failed submission
       const mockSubmitIdea = vi.spyOn(ideasStore, 'submitIdea').mockResolvedValue({
         success: false,
-        message: 'Network error occurred'
+        message: 'Network error occurred',
       })
 
       const descriptionTextarea = wrapper.find('textarea')
@@ -184,7 +184,7 @@ describe('Idea Submission Integration', () => {
 
       // Should show error message
       expect(wrapper.text()).toContain('Network error occurred')
-      
+
       // Should have called the submit function
       expect(mockSubmitIdea).toHaveBeenCalled()
     })
@@ -208,10 +208,17 @@ describe('Idea Submission Integration', () => {
     it('should show loading state during submission', async () => {
       // Mock slow submission
       const mockSubmitIdea = vi.spyOn(ideasStore, 'submitIdea').mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve({
-          success: true,
-          message: 'Success'
-        }), 100))
+        () =>
+          new Promise(resolve =>
+            setTimeout(
+              () =>
+                resolve({
+                  success: true,
+                  message: 'Success',
+                }),
+              100
+            )
+          )
       )
 
       const descriptionTextarea = wrapper.find('textarea')
@@ -231,7 +238,7 @@ describe('Idea Submission Integration', () => {
       // Should show loading state
       expect(wrapper.text()).toContain('Submitting...')
       expect(submitButton.attributes('disabled')).toBeDefined()
-      
+
       // Should have called the submit function
       expect(mockSubmitIdea).toHaveBeenCalled()
     })
@@ -240,7 +247,7 @@ describe('Idea Submission Integration', () => {
   describe('Form Validation Integration', () => {
     it('should provide real-time character count feedback', async () => {
       const descriptionTextarea = wrapper.find('textarea')
-      
+
       const testDescription = 'Testing character count functionality'
       await descriptionTextarea.setValue(testDescription)
       await descriptionTextarea.trigger('input')
@@ -251,12 +258,12 @@ describe('Idea Submission Integration', () => {
 
     it('should show validation status indicators', async () => {
       const descriptionTextarea = wrapper.find('textarea')
-      
+
       // Test invalid length
       await descriptionTextarea.setValue('Short')
       await descriptionTextarea.trigger('input')
       await nextTick()
-      
+
       expect(wrapper.find('.text-red-600').exists()).toBe(true)
 
       // Test valid length
@@ -265,7 +272,7 @@ describe('Idea Submission Integration', () => {
       )
       await descriptionTextarea.trigger('input')
       await nextTick()
-      
+
       expect(wrapper.find('.text-green-600').exists()).toBe(true)
     })
   })
@@ -289,7 +296,7 @@ describe('Idea Submission Integration', () => {
     it('should have proper form labels and accessibility', () => {
       const titleLabel = wrapper.find('label[for="title"]')
       const descriptionLabel = wrapper.find('label[for="description"]')
-      
+
       expect(titleLabel.exists()).toBe(true)
       expect(descriptionLabel.exists()).toBe(true)
       expect(descriptionLabel.text()).toContain('*') // Required indicator
@@ -299,9 +306,9 @@ describe('Idea Submission Integration', () => {
   describe('Error Handling', () => {
     it('should handle network errors during submission', async () => {
       // Mock network error
-      const mockSubmitIdea = vi.spyOn(ideasStore, 'submitIdea').mockRejectedValue(
-        new Error('Network error')
-      )
+      const mockSubmitIdea = vi
+        .spyOn(ideasStore, 'submitIdea')
+        .mockRejectedValue(new Error('Network error'))
 
       const descriptionTextarea = wrapper.find('textarea')
       const submitButton = wrapper.find('button[type="submit"]')
@@ -317,7 +324,7 @@ describe('Idea Submission Integration', () => {
 
       // Should handle the error gracefully
       expect(wrapper.find('.text-red-600').exists()).toBe(true)
-      
+
       // Should have called the submit function
       expect(mockSubmitIdea).toHaveBeenCalled()
     })
@@ -326,7 +333,7 @@ describe('Idea Submission Integration', () => {
       // First, cause an error
       vi.spyOn(ideasStore, 'submitIdea').mockResolvedValueOnce({
         success: false,
-        message: 'First error'
+        message: 'First error',
       })
 
       const descriptionTextarea = wrapper.find('textarea')
@@ -346,7 +353,7 @@ describe('Idea Submission Integration', () => {
       // Now mock success
       vi.spyOn(ideasStore, 'submitIdea').mockResolvedValueOnce({
         success: true,
-        message: 'Success'
+        message: 'Success',
       })
 
       await submitButton.trigger('click')

@@ -1,6 +1,6 @@
-const js = require('@eslint/js');
-const typescript = require('@typescript-eslint/eslint-plugin');
-const tsParser = require('@typescript-eslint/parser');
+const js = require('@eslint/js')
+const typescript = require('@typescript-eslint/eslint-plugin')
+const tsParser = require('@typescript-eslint/parser')
 
 module.exports = [
   js.configs.recommended,
@@ -37,7 +37,7 @@ module.exports = [
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-non-null-assertion': 'warn',
-      
+
       // General JavaScript rules
       'no-console': 'off', // Allow console for logging in this project
       'no-unused-vars': 'off', // Disable base rule in favor of TypeScript version
@@ -79,12 +79,6 @@ module.exports = [
     },
   },
   {
-    ignores: [
-      'dist/**',
-      'node_modules/**',
-      '*.js',
-      '*.mjs',
-      'coverage/**',
-    ],
+    ignores: ['dist/**', 'node_modules/**', '*.js', '*.mjs', 'coverage/**'],
   },
-];
+]

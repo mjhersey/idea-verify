@@ -2,28 +2,30 @@
 
 ## Overview
 
-This document defines the step-by-step procedures for responding to external service outages and maintaining platform availability during service disruptions.
+This document defines the step-by-step procedures for responding to external
+service outages and maintaining platform availability during service
+disruptions.
 
 ## Outage Classification
 
 ### Severity Levels
 
-| Level | Description | Response Time | Examples |
-|-------|-------------|---------------|----------|
-| **P1 - Critical** | Complete service unavailable | < 5 minutes | All API calls failing, service returns 5xx |
-| **P2 - High** | Degraded performance | < 15 minutes | High latency, intermittent failures |
-| **P3 - Medium** | Partial functionality affected | < 1 hour | Rate limiting, specific endpoints down |
-| **P4 - Low** | Minor issues, workarounds available | < 4 hours | Documentation issues, non-critical features |
+| Level             | Description                         | Response Time | Examples                                    |
+| ----------------- | ----------------------------------- | ------------- | ------------------------------------------- |
+| **P1 - Critical** | Complete service unavailable        | < 5 minutes   | All API calls failing, service returns 5xx  |
+| **P2 - High**     | Degraded performance                | < 15 minutes  | High latency, intermittent failures         |
+| **P3 - Medium**   | Partial functionality affected      | < 1 hour      | Rate limiting, specific endpoints down      |
+| **P4 - Low**      | Minor issues, workarounds available | < 4 hours     | Documentation issues, non-critical features |
 
 ### Service Impact Matrix
 
-| Service | Impact Level | Fallback Available | Recovery Strategy |
-|---------|--------------|-------------------|-------------------|
-| OpenAI API | High | Yes (Anthropic) | Automatic failover |
-| Anthropic API | Medium | Yes (OpenAI) | Manual failover |
-| AWS Secrets Manager | Critical | No | Emergency credentials |
-| AWS S3 | Medium | Yes (Local storage) | Temporary local storage |
-| LocalStack | Low | N/A (Dev only) | Docker restart |
+| Service             | Impact Level | Fallback Available  | Recovery Strategy       |
+| ------------------- | ------------ | ------------------- | ----------------------- |
+| OpenAI API          | High         | Yes (Anthropic)     | Automatic failover      |
+| Anthropic API       | Medium       | Yes (OpenAI)        | Manual failover         |
+| AWS Secrets Manager | Critical     | No                  | Emergency credentials   |
+| AWS S3              | Medium       | Yes (Local storage) | Temporary local storage |
+| LocalStack          | Low          | N/A (Dev only)      | Docker restart          |
 
 ## Detection and Alerting
 
@@ -33,15 +35,15 @@ The platform continuously monitors service health through:
 
 ```typescript
 // Health monitoring setup
-const monitors = new ServiceHealthMonitors();
-monitors.startAllMonitoring();
+const monitors = new ServiceHealthMonitors()
+monitors.startAllMonitoring()
 
 // Custom alert thresholds
 const alertConfig = {
   consecutiveFailures: 3,
   responseTimeThreshold: 5000, // 5 seconds
-  errorRateThreshold: 10       // 10%
-};
+  errorRateThreshold: 10, // 10%
+}
 ```
 
 ### Alert Channels
@@ -69,29 +71,32 @@ const alertConfig = {
 **Immediate Actions (0-5 minutes):**
 
 1. **Activate Emergency Fallback:**
+
    ```bash
    # Enable mock services immediately
    export USE_MOCK_SERVICES=true
    npm run mock:start
-   
+
    # Verify mock services are healthy
    npm run mock:validate
    ```
 
 2. **Notify Stakeholders:**
+
    ```bash
    # Send automated notification
    ./scripts/send-outage-alert.sh --severity=P1 --service=openai
-   
+
    # Update status page
    ./scripts/update-status-page.sh --status=degraded
    ```
 
 3. **Verify Impact:**
+
    ```bash
    # Check system functionality with mocks
    npm run test:integration:full
-   
+
    # Monitor error rates
    tail -f logs/application.log | grep ERROR
    ```
@@ -99,6 +104,7 @@ const alertConfig = {
 **Short-term Actions (5-30 minutes):**
 
 1. **Implement Service Failover:**
+
    ```typescript
    // Automatic failover configuration
    const failoverConfig = {
@@ -106,42 +112,45 @@ const alertConfig = {
      secondary: 'anthropic',
      fallback: 'mock-services',
      maxRetries: 3,
-     timeout: 10000
-   };
+     timeout: 10000,
+   }
    ```
 
 2. **Scale Mock Services:**
+
    ```bash
    # Increase mock service capacity
    docker-compose up --scale mock-openai=3 --scale mock-anthropic=3
-   
+
    # Monitor mock service performance
    npm run monitor:mocks
    ```
 
 3. **Communicate with Users:**
    ```
-   "We're experiencing issues with our AI services. 
-   The platform is operating with backup systems. 
+   "We're experiencing issues with our AI services.
+   The platform is operating with backup systems.
    Some features may have reduced functionality."
    ```
 
 **Recovery Actions (30+ minutes):**
 
 1. **Monitor Service Recovery:**
+
    ```bash
    # Continuous service health monitoring
    watch -n 30 'npm run validate:credentials'
-   
+
    # Check provider status pages
    curl -s https://status.openai.com/api/v2/status.json
    ```
 
 2. **Gradual Service Restoration:**
+
    ```bash
    # Test service availability
    npm run test:integration -- --real-services
-   
+
    # Gradually switch traffic back
    export FAILOVER_PERCENTAGE=10  # Start with 10%
    npm run enable:gradual-failback
@@ -157,22 +166,24 @@ const alertConfig = {
 **Immediate Actions (0-15 minutes):**
 
 1. **Assess Impact:**
+
    ```bash
    # Check current error rates
    grep -c "ERROR" logs/application.log | tail -10
-   
+
    # Monitor response times
    npm run monitor:performance
    ```
 
 2. **Enable Rate Limiting Protection:**
+
    ```typescript
    // Reduce request rate to affected service
    const protectiveConfig = {
-     requestsPerMinute: 50,  // Reduce by 50%
-     maxRetries: 5,          // Increase retries
-     baseDelayMs: 2000       // Increase delay
-   };
+     requestsPerMinute: 50, // Reduce by 50%
+     maxRetries: 5, // Increase retries
+     baseDelayMs: 2000, // Increase delay
+   }
    ```
 
 3. **Prepare Fallback:**
@@ -185,17 +196,18 @@ const alertConfig = {
 **Ongoing Actions:**
 
 1. **Monitor and Adjust:**
+
    ```bash
    # Continuous monitoring
    watch -n 60 'npm run system:health'
-   
+
    # Adjust rate limits based on performance
    npm run adjust:rate-limits --service=openai --reduction=25
    ```
 
 2. **User Communication:**
    ```
-   "We're experiencing slower response times with our AI services. 
+   "We're experiencing slower response times with our AI services.
    We're working to resolve the issue. Thank you for your patience."
    ```
 
@@ -204,21 +216,23 @@ const alertConfig = {
 **Actions (0-1 hour):**
 
 1. **Implement Workarounds:**
+
    ```typescript
    // Use alternative endpoints or methods
    const workaroundConfig = {
      useAlternativeModels: true,
      reducedFeatureSet: true,
-     cachingEnabled: true
-   };
+     cachingEnabled: true,
+   }
    ```
 
 2. **Optimize Performance:**
+
    ```bash
    # Enable aggressive caching
    export CACHE_TTL=3600  # 1 hour cache
    npm run enable:caching
-   
+
    # Use cheaper/faster models
    export PREFERRED_MODEL=gpt-3.5-turbo
    ```
@@ -244,37 +258,41 @@ const alertConfig = {
 ```typescript
 const fallbackChain = {
   'business-evaluation': [
-    'openai-gpt4',      // Primary
-    'anthropic-claude3', // Secondary  
-    'openai-gpt35',     // Tertiary
-    'mock-evaluation'   // Emergency
+    'openai-gpt4', // Primary
+    'anthropic-claude3', // Secondary
+    'openai-gpt35', // Tertiary
+    'mock-evaluation', // Emergency
   ],
   'market-analysis': [
     'anthropic-claude3', // Primary
-    'openai-gpt4',      // Secondary
-    'cached-analysis'   // Emergency
-  ]
-};
+    'openai-gpt4', // Secondary
+    'cached-analysis', // Emergency
+  ],
+}
 ```
 
 ### Degraded Mode Operations
 
 **Level 1 - Full Functionality:**
+
 - All services operational
 - Real-time AI processing
 - Complete feature set
 
 **Level 2 - Reduced Functionality:**
+
 - Alternative AI providers
 - Slightly longer response times
 - Core features available
 
 **Level 3 - Emergency Mode:**
+
 - Mock/cached responses
 - Limited new processing
 - Historical data available
 
 **Level 4 - Maintenance Mode:**
+
 - Read-only access
 - Status updates only
 - No new processing
@@ -284,6 +302,7 @@ const fallbackChain = {
 ### Internal Notifications
 
 **Incident Start:**
+
 ```
 🚨 SERVICE OUTAGE - P1
 Service: OpenAI API
@@ -297,6 +316,7 @@ Updates every 15 minutes.
 ```
 
 **Incident Update:**
+
 ```
 📋 OUTAGE UPDATE - P1
 Service: OpenAI API
@@ -311,6 +331,7 @@ Actions taken:
 ```
 
 **Incident Resolution:**
+
 ```
 ✅ INCIDENT RESOLVED - P1
 Service: OpenAI API
@@ -328,16 +349,18 @@ Post-incident review scheduled.
 ### User Communications
 
 **Service Advisory:**
+
 ```
-We're currently experiencing issues with our AI processing services. 
-Our team is working to resolve this quickly. The platform remains 
+We're currently experiencing issues with our AI processing services.
+Our team is working to resolve this quickly. The platform remains
 operational with backup systems providing core functionality.
 ```
 
 **Resolution Notice:**
+
 ```
-Our AI services have been fully restored. Thank you for your patience 
-during the temporary service interruption. All functionality is now 
+Our AI services have been fully restored. Thank you for your patience
+during the temporary service interruption. All functionality is now
 operating normally.
 ```
 
@@ -351,8 +374,8 @@ const restorationPhases = [
   { phase: 1, trafficPercentage: 10, duration: '10 minutes' },
   { phase: 2, trafficPercentage: 25, duration: '15 minutes' },
   { phase: 3, trafficPercentage: 50, duration: '20 minutes' },
-  { phase: 4, trafficPercentage: 100, duration: 'ongoing' }
-];
+  { phase: 4, trafficPercentage: 100, duration: 'ongoing' },
+]
 ```
 
 ### Health Validation Checklist
@@ -375,20 +398,20 @@ Before declaring full recovery:
 const outageMetrics = {
   // Service availability
   uptime: { target: '99.9%', measurement: 'percentage' },
-  
-  // Performance metrics  
+
+  // Performance metrics
   responseTime: { target: '<2s', measurement: 'milliseconds' },
   errorRate: { target: '<1%', measurement: 'percentage' },
-  
+
   // Fallback effectiveness
   fallbackActivation: { measurement: 'count', threshold: 3 },
   mockServiceLoad: { target: '<80%', measurement: 'percentage' },
-  
+
   // User impact
   activeUsers: { measurement: 'count' },
   completedRequests: { measurement: 'count' },
-  userComplaints: { measurement: 'count' }
-};
+  userComplaints: { measurement: 'count' },
+}
 ```
 
 ### Dashboard Setup
@@ -438,22 +461,24 @@ npm run test:post-incident-review
 ### Immediate Post-Incident (0-2 hours)
 
 1. **Service Validation:**
+
    ```bash
    # Full system health check
    npm run test:integration:full
-   
+
    # Performance validation
    npm run test:performance
-   
+
    # User acceptance testing
    npm run test:user-flows
    ```
 
 2. **Data Integrity Check:**
+
    ```bash
    # Verify no data loss during outage
    npm run verify:data-integrity
-   
+
    # Check request/response logs
    npm run analyze:outage-logs
    ```
@@ -485,20 +510,20 @@ npm run test:post-incident-review
 const updatedConfig = {
   monitoring: {
     healthCheckInterval: 30000, // Reduced from 60s
-    alertThreshold: 2,          // Reduced from 3
-    responseTimeAlert: 3000     // Reduced from 5s
+    alertThreshold: 2, // Reduced from 3
+    responseTimeAlert: 3000, // Reduced from 5s
   },
   fallback: {
-    activationDelay: 10000,     // Reduced from 30s
-    trafficSplitEnabled: true,  // New feature
-    automaticRecovery: true     // Enhanced automation
-  }
-};
+    activationDelay: 10000, // Reduced from 30s
+    trafficSplitEnabled: true, // New feature
+    automaticRecovery: true, // Enhanced automation
+  },
+}
 ```
 
 ---
 
-*Last updated: January 2025*
-*Version: 1.0*
+_Last updated: January 2025_ _Version: 1.0_
 
-This document should be reviewed and updated after each significant outage to incorporate lessons learned and improve response procedures.
+This document should be reviewed and updated after each significant outage to
+incorporate lessons learned and improve response procedures.

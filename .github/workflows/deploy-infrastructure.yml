@@ -85,7 +85,7 @@ jobs:
           cd packages/infrastructure
           npx cdk synth --all --quiet
         env:
-          CDK_DEFAULT_ACCOUNT: '123456789012'  # Placeholder for synth
+          CDK_DEFAULT_ACCOUNT: '123456789012' # Placeholder for synth
 
   deploy-dev:
     name: Deploy to Development

@@ -77,27 +77,27 @@ jobs:
               --jq '.artifacts[] | select(.name | startswith("rollback-info-")) | .name' || true
             exit 1
           fi
-          
+
           ROLLBACK_INFO=$(cat ./rollback-info/rollback-info.json)
           DEPLOYMENT_ENV=$(echo "$ROLLBACK_INFO" | jq -r '.environment')
           COMMIT_SHA=$(echo "$ROLLBACK_INFO" | jq -r '.commit_sha')
           COMPONENTS=$(echo "$ROLLBACK_INFO" | jq -r '.components_deployed | @csv')
-          
+
           if [ "$DEPLOYMENT_ENV" != "${{ github.event.inputs.environment }}" ]; then
             echo "❌ Environment mismatch. Deployment was for '$DEPLOYMENT_ENV', requested rollback for '${{ github.event.inputs.environment }}'"
             exit 1
           fi
-          
+
           echo "✅ Rollback validation passed"
           echo "📋 Deployment Info:"
           echo "  - Environment: $DEPLOYMENT_ENV"
           echo "  - Commit SHA: $COMMIT_SHA"
           echo "  - Components: $COMPONENTS"
           echo "  - Rollback Type: ${{ github.event.inputs.rollback_type }}"
-          
+
           # Find previous successful deployment
           PREVIOUS_COMMIT=$(git log --oneline --before="$(echo "$ROLLBACK_INFO" | jq -r '.timestamp')" -n 1 --format="%H")
-          
+
           echo "can_proceed=true" >> $GITHUB_OUTPUT
           echo "previous_commit=$PREVIOUS_COMMIT" >> $GITHUB_OUTPUT
           echo "rollback_components=$COMPONENTS" >> $GITHUB_OUTPUT
@@ -128,7 +128,7 @@ jobs:
             });
 
             core.setOutput('deployment_id', deployment.data.id);
-            
+
             await github.rest.repos.createDeploymentStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -171,42 +171,42 @@ jobs:
         working-directory: packages/infrastructure
         run: |
           STACK_NAME="AiValidationSecurity${{ github.event.inputs.environment == 'prod' && 'Prod' || (github.event.inputs.environment == 'staging' && 'Staging' || 'Dev') }}"
-          
+
           echo "🔄 Rolling back security configuration: $STACK_NAME"
-          
+
           npx cdk deploy $STACK_NAME \
             --context environment=${{ github.event.inputs.environment }} \
             --require-approval never \
             --outputs-file security-rollback-outputs.json
-          
+
           echo "✅ Security configuration rollback completed"
 
       - name: Rollback ECS services
         working-directory: packages/infrastructure
         run: |
           STACK_NAME="AiValidationEcs${{ github.event.inputs.environment == 'prod' && 'Prod' || (github.event.inputs.environment == 'staging' && 'Staging' || 'Dev') }}"
-          
+
           echo "🔄 Rolling back ECS services: $STACK_NAME"
-          
+
           npx cdk deploy $STACK_NAME \
             --context environment=${{ github.event.inputs.environment }} \
             --require-approval never \
             --outputs-file ecs-rollback-outputs.json
-          
+
           echo "✅ ECS services rollback completed"
 
       - name: Rollback core infrastructure
         working-directory: packages/infrastructure
         run: |
           STACK_NAME="AiValidationPlatform${{ github.event.inputs.environment == 'prod' && 'Prod' || (github.event.inputs.environment == 'staging' && 'Staging' || 'Dev') }}"
-          
+
           echo "🔄 Rolling back core infrastructure: $STACK_NAME"
-          
+
           npx cdk deploy $STACK_NAME \
             --context environment=${{ github.event.inputs.environment }} \
             --require-approval never \
             --outputs-file infrastructure-rollback-outputs.json
-          
+
           echo "✅ Core infrastructure rollback completed"
 
       - name: Upload rollback outputs
@@ -338,7 +338,7 @@ jobs:
       - name: Get database information
         run: |
           DB_INSTANCE="ai-validation-db-${{ github.event.inputs.environment }}"
-          
+
           echo "📊 Database Instance Information:"
           aws rds describe-db-instances --db-instance-identifier $DB_INSTANCE \
             --query 'DBInstances[0].{
@@ -364,7 +364,7 @@ jobs:
         run: |
           DB_INSTANCE="ai-validation-db-${{ github.event.inputs.environment }}"
           SNAPSHOT_ID="pre-rollback-$(date +%Y%m%d-%H%M%S)"
-          
+
           echo "📸 Creating pre-rollback snapshot: $SNAPSHOT_ID"
           aws rds create-db-snapshot \
             --db-instance-identifier $DB_INSTANCE \
@@ -389,11 +389,11 @@ jobs:
           TEST_ENVIRONMENT: ${{ github.event.inputs.environment }}
         run: |
           BASE_URL="https://${{ github.event.inputs.environment }}.aivalidation.com"
-          
+
           echo "🔍 Validating rollback success"
           echo "Environment: $TEST_ENVIRONMENT"
           echo "Base URL: $BASE_URL"
-          
+
           # Health check
           if curl -f -s "$BASE_URL/health" > /dev/null; then
             echo "✅ Health check passed"
@@ -401,7 +401,7 @@ jobs:
             echo "❌ Health check failed"
             exit 1
           fi
-          
+
           # Basic functionality test
           if curl -f -s "$BASE_URL/api/status" > /dev/null; then
             echo "✅ API status check passed"
@@ -416,7 +416,7 @@ jobs:
         with:
           script: |
             const success = '${{ job.status }}' === 'success';
-            
+
             await github.rest.repos.createDeploymentStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -429,13 +429,14 @@ jobs:
   rollback-notification:
     name: Send Rollback Notification
     runs-on: ubuntu-latest
-    needs: [
-      validate-rollback,
-      rollback-infrastructure,
-      rollback-application,
-      rollback-database,
-      post-rollback-validation
-    ]
+    needs:
+      [
+        validate-rollback,
+        rollback-infrastructure,
+        rollback-application,
+        rollback-database,
+        post-rollback-validation,
+      ]
     if: always() && needs.validate-rollback.outputs.can_proceed == 'true'
     steps:
       - name: Determine rollback status
@@ -445,7 +446,7 @@ jobs:
           APP_STATUS="${{ needs.rollback-application.result }}"
           DB_STATUS="${{ needs.rollback-database.result }}"
           VALIDATION_STATUS="${{ needs.post-rollback-validation.result }}"
-          
+
           if [[ "$INFRA_STATUS" == "success" && "$APP_STATUS" == "success" && "$VALIDATION_STATUS" == "success" ]]; then
             if [[ "$DB_STATUS" == "success" || "$DB_STATUS" == "skipped" ]]; then
               echo "status=success" >> $GITHUB_OUTPUT
@@ -462,7 +463,7 @@ jobs:
       - name: Send rollback notification
         run: |
           STATUS_EMOJI="${{ steps.status.outputs.status == 'success' && '✅' || (steps.status.outputs.status == 'warning' && '⚠️' || '❌') }}"
-          
+
           echo "$STATUS_EMOJI ROLLBACK NOTIFICATION"
           echo "Environment: ${{ github.event.inputs.environment }}"
           echo "Deployment ID: ${{ github.event.inputs.deployment_id }}"
@@ -470,7 +471,7 @@ jobs:
           echo "Status: ${{ steps.status.outputs.message }}"
           echo "Initiated by: ${{ github.actor }}"
           echo "Completed at: $(date -u)"
-          
+
           # In a real environment, this would send notifications via:
           # - Slack
           # - Email

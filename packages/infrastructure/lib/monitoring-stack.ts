@@ -1,77 +1,75 @@
-import * as cdk from 'aws-cdk-lib';
-import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
-import * as logs from 'aws-cdk-lib/aws-logs';
-import * as sns from 'aws-cdk-lib/aws-sns';
-import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
-import * as iam from 'aws-cdk-lib/aws-iam';
-import { Construct } from 'constructs';
-import { EcsStack } from './ecs-stack';
+import * as cdk from 'aws-cdk-lib'
+import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
+import * as logs from 'aws-cdk-lib/aws-logs'
+import * as sns from 'aws-cdk-lib/aws-sns'
+import * as subscriptions from 'aws-cdk-lib/aws-sns-subscriptions'
+import * as iam from 'aws-cdk-lib/aws-iam'
+import { Construct } from 'constructs'
+import { EcsStack } from './ecs-stack'
 
 export interface MonitoringStackProps extends cdk.StackProps {
-  environment: string;
-  ecsStack: EcsStack;
-  databaseInstance?: string; // Database instance identifier from infrastructure stack
-  redisClusterId?: string; // Redis cluster ID from infrastructure stack
+  environment: string
+  ecsStack: EcsStack
+  databaseInstance?: string // Database instance identifier from infrastructure stack
+  redisClusterId?: string // Redis cluster ID from infrastructure stack
 }
 
 export class MonitoringStack extends cdk.Stack {
-  public readonly dashboard: cloudwatch.Dashboard;
-  public readonly alertTopic: sns.Topic;
+  public readonly dashboard: cloudwatch.Dashboard
+  public readonly alertTopic: sns.Topic
 
   constructor(scope: Construct, id: string, props: MonitoringStackProps) {
-    super(scope, id, props);
+    super(scope, id, props)
 
-    const { environment, ecsStack, databaseInstance, redisClusterId } = props;
-    
+    const { environment, ecsStack, databaseInstance, redisClusterId } = props
+
     // Get resource identifiers dynamically or use defaults
-    const dbInstanceId = databaseInstance || `ai-validation-db-${environment}`;
-    const redisId = redisClusterId || `ai-validation-redis-${environment}`;
+    const dbInstanceId = databaseInstance || `ai-validation-db-${environment}`
+    const redisId = redisClusterId || `ai-validation-redis-${environment}`
 
     // SNS Topic for alerts
     this.alertTopic = new sns.Topic(this, 'AlertTopic', {
       topicName: `ai-validation-alerts-${environment}`,
       displayName: `AI Validation Platform Alerts (${environment})`,
-    });
+    })
 
     // Email subscription for alerts (optional)
     if (process.env.ALERT_EMAIL) {
-      this.alertTopic.addSubscription(
-        new subscriptions.EmailSubscription(process.env.ALERT_EMAIL)
-      );
+      this.alertTopic.addSubscription(new subscriptions.EmailSubscription(process.env.ALERT_EMAIL))
     }
 
     // CloudWatch Dashboard
     this.dashboard = new cloudwatch.Dashboard(this, 'MonitoringDashboard', {
       dashboardName: `ai-validation-${environment}`,
-    });
+    })
 
     // Application metrics
-    this.createApplicationMetrics(ecsStack);
-    
+    this.createApplicationMetrics(ecsStack)
+
     // Infrastructure metrics
-    this.createInfrastructureMetrics(ecsStack, dbInstanceId, redisId);
-    
+    this.createInfrastructureMetrics(ecsStack, dbInstanceId, redisId)
+
     // Custom business metrics
-    this.createBusinessMetrics();
-    
+    this.createBusinessMetrics()
+
     // Alarms
-    this.createAlarms(ecsStack, dbInstanceId, redisId);
+    this.createAlarms(ecsStack, dbInstanceId, redisId)
 
     // Log Insights queries
-    this.createLogInsights();
+    this.createLogInsights()
 
     // Outputs
     new cdk.CfnOutput(this, 'DashboardUrl', {
       value: `https://${this.region}.console.aws.amazon.com/cloudwatch/home?region=${this.region}#dashboards:name=${this.dashboard.dashboardName}`,
       description: 'CloudWatch Dashboard URL',
       exportName: `${this.stackName}-DashboardUrl`,
-    });
+    })
 
     new cdk.CfnOutput(this, 'AlertTopicArn', {
       value: this.alertTopic.topicArn,
       description: 'SNS topic ARN for alerts',
       exportName: `${this.stackName}-AlertTopicArn`,
-    });
+    })
   }
 
   private createApplicationMetrics(ecsStack: EcsStack): void {
@@ -97,7 +95,7 @@ export class MonitoringStack extends cdk.Stack {
         statistic: 'Average',
         period: cdk.Duration.minutes(1),
       }),
-    ];
+    ]
 
     // Application Load Balancer metrics
     const albMetrics = [
@@ -128,7 +126,7 @@ export class MonitoringStack extends cdk.Stack {
         statistic: 'Sum',
         period: cdk.Duration.minutes(1),
       }),
-    ];
+    ]
 
     // Add to dashboard
     this.dashboard.addWidgets(
@@ -148,10 +146,14 @@ export class MonitoringStack extends cdk.Stack {
         width: 12,
         height: 6,
       })
-    );
+    )
   }
 
-  private createInfrastructureMetrics(ecsStack: EcsStack, dbInstanceId: string, redisId: string): void {
+  private createInfrastructureMetrics(
+    ecsStack: EcsStack,
+    dbInstanceId: string,
+    redisId: string
+  ): void {
     // Database metrics (RDS)
     const dbMetrics = [
       new cloudwatch.Metric({
@@ -172,7 +174,7 @@ export class MonitoringStack extends cdk.Stack {
         statistic: 'Average',
         period: cdk.Duration.minutes(1),
       }),
-    ];
+    ]
 
     // ElastiCache metrics (Redis)
     const redisMetrics = [
@@ -194,7 +196,7 @@ export class MonitoringStack extends cdk.Stack {
         statistic: 'Average',
         period: cdk.Duration.minutes(1),
       }),
-    ];
+    ]
 
     this.dashboard.addWidgets(
       new cloudwatch.GraphWidget({
@@ -213,7 +215,7 @@ export class MonitoringStack extends cdk.Stack {
         width: 12,
         height: 6,
       })
-    );
+    )
   }
 
   private createBusinessMetrics(): void {
@@ -243,7 +245,7 @@ export class MonitoringStack extends cdk.Stack {
         statistic: 'Maximum',
         period: cdk.Duration.minutes(5),
       }),
-    ];
+    ]
 
     this.dashboard.addWidgets(
       new cloudwatch.GraphWidget({
@@ -261,7 +263,7 @@ export class MonitoringStack extends cdk.Stack {
         width: 6,
         height: 3,
       })
-    );
+    )
   }
 
   private createAlarms(ecsStack: EcsStack, dbInstanceId: string, redisId: string): void {
@@ -282,7 +284,7 @@ export class MonitoringStack extends cdk.Stack {
       threshold: 80,
       evaluationPeriods: 2,
       comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
-    }).addAlarmAction(new cloudwatch.SnsAction(this.alertTopic));
+    }).addAlarmAction(new cloudwatch.SnsAction(this.alertTopic))
 
     // High memory alarm
     new cloudwatch.Alarm(this, 'HighMemoryAlarm', {
@@ -301,7 +303,7 @@ export class MonitoringStack extends cdk.Stack {
       threshold: 85,
       evaluationPeriods: 2,
       comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
-    }).addAlarmAction(new cloudwatch.SnsAction(this.alertTopic));
+    }).addAlarmAction(new cloudwatch.SnsAction(this.alertTopic))
 
     // High error rate alarm
     new cloudwatch.Alarm(this, 'HighErrorRateAlarm', {
@@ -319,7 +321,7 @@ export class MonitoringStack extends cdk.Stack {
       threshold: 10,
       evaluationPeriods: 2,
       comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
-    }).addAlarmAction(new cloudwatch.SnsAction(this.alertTopic));
+    }).addAlarmAction(new cloudwatch.SnsAction(this.alertTopic))
 
     // Database connection alarm
     new cloudwatch.Alarm(this, 'HighDbConnectionsAlarm', {
@@ -337,7 +339,7 @@ export class MonitoringStack extends cdk.Stack {
       threshold: 15, // Free tier limit is 20
       evaluationPeriods: 2,
       comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
-    }).addAlarmAction(new cloudwatch.SnsAction(this.alertTopic));
+    }).addAlarmAction(new cloudwatch.SnsAction(this.alertTopic))
   }
 
   private createLogInsights(): void {
@@ -350,7 +352,7 @@ export class MonitoringStack extends cdk.Stack {
           | filter level = "error"
           | sort @timestamp desc
           | limit 100
-        `
+        `,
       },
       {
         name: 'Request Performance',
@@ -358,7 +360,7 @@ export class MonitoringStack extends cdk.Stack {
           fields @timestamp, context.duration, context.action, context.metadata.statusCode
           | filter context.action = "request_completed"
           | stats avg(context.duration), max(context.duration), count() by bin(5m)
-        `
+        `,
       },
       {
         name: 'Evaluation Performance',
@@ -366,7 +368,7 @@ export class MonitoringStack extends cdk.Stack {
           fields @timestamp, context.evaluationId, context.duration
           | filter context.action = "evaluation_completed"
           | stats avg(context.duration), count() by bin(15m)
-        `
+        `,
       },
       {
         name: 'External API Health',
@@ -374,9 +376,9 @@ export class MonitoringStack extends cdk.Stack {
           fields @timestamp, context.component, context.duration, context.metadata.success
           | filter context.action = "external_api_call"
           | stats count() by context.component, context.metadata.success
-        `
-      }
-    ];
+        `,
+      },
+    ]
 
     // Store queries as CloudWatch Insights saved queries would be done manually
     // or through custom resources - documenting them here for reference
@@ -384,8 +386,8 @@ export class MonitoringStack extends cdk.Stack {
       new cdk.CfnOutput(this, `LogInsightsQuery${query.name.replace(/\s/g, '')}`, {
         value: query.query,
         description: `CloudWatch Logs Insights query: ${query.name}`,
-      });
-    });
+      })
+    })
   }
 }
 

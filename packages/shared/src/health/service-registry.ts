@@ -41,19 +41,19 @@ export class ServiceRegistry {
     this.registerService({
       name: 'api',
       url: process.env.API_SERVICE_URL || 'http://localhost:3000',
-      healthPath: '/health'
+      healthPath: '/health',
     })
 
     this.registerService({
       name: 'orchestrator',
       url: process.env.ORCHESTRATOR_SERVICE_URL || 'http://localhost:3001',
-      healthPath: '/health'
+      healthPath: '/health',
     })
 
     this.registerService({
       name: 'web',
       url: process.env.WEB_SERVICE_URL || 'http://localhost:8080',
-      healthPath: '/health'
+      healthPath: '/health',
     })
   }
 
@@ -61,7 +61,7 @@ export class ServiceRegistry {
     this.services.set(service.name, {
       timeout: 5000,
       retries: 2,
-      ...service
+      ...service,
     })
   }
 
@@ -78,7 +78,7 @@ export class ServiceRegistry {
 
     // Check cache first
     const cached = this.healthCache.get(name)
-    if (!forceRefresh && cached && (Date.now() - cached.lastCheck.getTime()) < this.cacheTimeout) {
+    if (!forceRefresh && cached && Date.now() - cached.lastCheck.getTime() < this.cacheTimeout) {
       return cached
     }
 
@@ -94,20 +94,19 @@ export class ServiceRegistry {
         status: response.ok ? 'healthy' : 'unhealthy',
         responseTime,
         lastCheck: new Date(),
-        metadata: response.data
+        metadata: response.data,
       }
 
       if (!response.ok) {
         health.error = `HTTP ${response.status}: ${response.statusText}`
       }
-
     } catch (error) {
       health = {
         name,
         status: 'unhealthy',
         responseTime: Date.now() - startTime,
         lastCheck: new Date(),
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       }
     }
 
@@ -129,10 +128,10 @@ export class ServiceRegistry {
       const response = await fetch(url, {
         method: 'GET',
         headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'ServiceRegistry/1.0'
+          Accept: 'application/json',
+          'User-Agent': 'ServiceRegistry/1.0',
         },
-        signal: controller.signal
+        signal: controller.signal,
       })
 
       clearTimeout(timeoutId)
@@ -149,9 +148,8 @@ export class ServiceRegistry {
         ok: response.ok,
         status: response.status,
         statusText: response.statusText,
-        data
+        data,
       }
-
     } finally {
       clearTimeout(timeoutId)
     }
@@ -159,12 +157,12 @@ export class ServiceRegistry {
 
   async checkAllServices(forceRefresh = false): Promise<ServiceHealth[]> {
     const serviceNames = Array.from(this.services.keys())
-    const promises = serviceNames.map(name => 
+    const promises = serviceNames.map(name =>
       this.checkServiceHealth(name, forceRefresh).catch(error => ({
         name,
         status: 'unknown' as const,
         lastCheck: new Date(),
-        error: error.message
+        error: error.message,
       }))
     )
 
@@ -180,7 +178,7 @@ export class ServiceRegistry {
         name: 'openai',
         baseUrl: 'https://api.openai.com',
         apiKey: process.env.OPENAI_API_KEY,
-        timeout: 10000
+        timeout: 10000,
       })
     }
 
@@ -190,13 +188,11 @@ export class ServiceRegistry {
         name: 'anthropic',
         baseUrl: 'https://api.anthropic.com',
         apiKey: process.env.ANTHROPIC_API_KEY,
-        timeout: 10000
+        timeout: 10000,
       })
     }
 
-    const healthChecks = externalServices.map(service => 
-      this.checkExternalService(service)
-    )
+    const healthChecks = externalServices.map(service => this.checkExternalService(service))
 
     return Promise.all(healthChecks)
   }
@@ -211,15 +207,15 @@ export class ServiceRegistry {
       if (config.name === 'openai') {
         testEndpoint = '/v1/models'
         headers = {
-          'Authorization': `Bearer ${config.apiKey}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${config.apiKey}`,
+          'Content-Type': 'application/json',
         }
       } else if (config.name === 'anthropic') {
         testEndpoint = '/v1/messages'
         headers = {
           'x-api-key': config.apiKey!,
           'Content-Type': 'application/json',
-          'anthropic-version': '2023-06-01'
+          'anthropic-version': '2023-06-01',
         }
       }
 
@@ -230,12 +226,15 @@ export class ServiceRegistry {
         const response = await fetch(`${config.baseUrl}${testEndpoint}`, {
           method: config.name === 'anthropic' ? 'POST' : 'GET',
           headers,
-          body: config.name === 'anthropic' ? JSON.stringify({
-            model: 'claude-3-haiku-20240307',
-            max_tokens: 1,
-            messages: [{ role: 'user', content: 'test' }]
-          }) : undefined,
-          signal: controller.signal
+          body:
+            config.name === 'anthropic'
+              ? JSON.stringify({
+                  model: 'claude-3-haiku-20240307',
+                  max_tokens: 1,
+                  messages: [{ role: 'user', content: 'test' }],
+                })
+              : undefined,
+          signal: controller.signal,
         })
 
         clearTimeout(timeoutId)
@@ -246,16 +245,14 @@ export class ServiceRegistry {
           status: response.ok || response.status === 400 ? 'healthy' : 'unhealthy', // 400 is ok for test calls
           responseTime,
           lastCheck: new Date(),
-          metadata: { 
+          metadata: {
             statusCode: response.status,
-            configured: true 
-          }
+            configured: true,
+          },
         }
-
       } finally {
         clearTimeout(timeoutId)
       }
-
     } catch (error) {
       return {
         name: config.name,
@@ -263,7 +260,7 @@ export class ServiceRegistry {
         responseTime: Date.now() - startTime,
         lastCheck: new Date(),
         error: error instanceof Error ? error.message : 'Unknown error',
-        metadata: { configured: true }
+        metadata: { configured: true },
       }
     }
   }
@@ -287,14 +284,14 @@ export class ServiceRegistry {
   async getServiceMap(): Promise<Record<string, ServiceHealth>> {
     const allHealth = await this.checkAllServices()
     const externalHealth = await this.checkExternalServices()
-    
+
     const serviceMap: Record<string, ServiceHealth> = {}
-    
+
     const combinedHealth = allHealth.concat(externalHealth)
     combinedHealth.forEach(health => {
       serviceMap[health.name] = health
     })
-    
+
     return serviceMap
   }
 }

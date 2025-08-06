@@ -2,7 +2,8 @@
 
 ## Overview
 
-This guide covers the comprehensive WebSocket integration testing suite for Story 2.5: WebSocket Integration & Real-time Updates.
+This guide covers the comprehensive WebSocket integration testing suite for
+Story 2.5: WebSocket Integration & Real-time Updates.
 
 ## Test Structure
 
@@ -11,30 +12,35 @@ This guide covers the comprehensive WebSocket integration testing suite for Stor
 Comprehensive end-to-end testing covering:
 
 #### **Connection Management**
+
 - Basic WebSocket connection establishment with authentication
 - Subscription to evaluation updates
 - Multiple event type handling (progress, insights, status, completion, errors)
 - Connection state management and monitoring
 
 #### **Network Resilience**
+
 - Automatic reconnection after connection loss
 - Subscription state persistence after reconnection
 - Connection failure handling and recovery
 - Network interruption simulation and recovery
 
 #### **Authentication & Security**
+
 - Invalid token rejection testing
 - Token expiration handling
 - Authentication middleware validation
 - Secure connection establishment
 
 #### **Server-Sent Events (SSE) Fallback**
+
 - Automatic fallback when WebSocket fails
 - Event format consistency between WebSocket and SSE
 - SSE connection management and cleanup
 - Fallback mechanism validation
 
 #### **Resource Management**
+
 - Memory leak detection and prevention
 - Connection cleanup validation
 - Resource usage monitoring
@@ -45,24 +51,28 @@ Comprehensive end-to-end testing covering:
 Advanced performance validation including:
 
 #### **Connection Performance**
+
 - Connection establishment time measurement
 - Concurrent connection handling (up to 50 connections)
 - Connection spike handling without degradation
 - Scalability under load testing
 
 #### **Message Throughput**
+
 - High-volume message processing (1000+ messages)
 - Message latency measurement and validation
 - Burst message handling without loss
 - Real-time performance metrics collection
 
 #### **Resource Utilization**
+
 - Memory usage monitoring under sustained load
 - CPU utilization tracking
 - Connection pool management
 - Resource cleanup validation
 
 #### **Scalability Validation**
+
 - Maximum concurrent connection testing
 - Message distribution across connections
 - Performance degradation monitoring
@@ -88,18 +98,21 @@ PERFORMANCE_MESSAGE_COUNT=1000
 ### Performance Benchmarks
 
 #### **Connection Performance**
+
 - Average connection time: < 2 seconds
 - Maximum connection time: < 5 seconds
 - Concurrent connections: 50+ without degradation
 - Connection failure rate: < 1%
 
 #### **Message Performance**
+
 - Message throughput: > 50 messages/second
 - Average message latency: < 100ms
 - Maximum message latency: < 1 second
 - Message loss rate: 0%
 
 #### **Resource Usage**
+
 - Memory increase under load: < 50MB
 - Maximum memory usage: < 100MB increase
 - Connection cleanup: 100% resource recovery
@@ -108,6 +121,7 @@ PERFORMANCE_MESSAGE_COUNT=1000
 ## Running Tests
 
 ### Basic Integration Tests
+
 ```bash
 # Run all WebSocket integration tests
 npm run test:integration:websocket:all
@@ -124,6 +138,7 @@ npm run test:integration:websocket -- --coverage
 ```
 
 ### Performance Testing
+
 ```bash
 # Run performance tests with extended timeout
 npm run test:integration:websocket:performance -- --testTimeout=120000
@@ -136,6 +151,7 @@ node --expose-gc node_modules/.bin/vitest run tests/integration/websocket-perfor
 ```
 
 ### Continuous Integration
+
 ```bash
 # CI-friendly test execution
 CI=true npm run test:integration:websocket:all
@@ -157,8 +173,8 @@ const mockAgentProgressEvent: AgentProgressEvent = {
   agentType: 'market-research',
   status: 'running',
   progressPercentage: 50,
-  timestamp: new Date()
-};
+  timestamp: new Date(),
+}
 
 // Insight Discovery Event
 const mockInsightEvent: InsightDiscoveredEvent = {
@@ -166,11 +182,11 @@ const mockInsightEvent: InsightDiscoveredEvent = {
   insight: {
     type: 'market-opportunity',
     content: 'Large untapped market identified',
-    importance: 'high'
+    importance: 'high',
   },
   confidence: 0.85,
-  timestamp: new Date()
-};
+  timestamp: new Date(),
+}
 
 // Evaluation Status Event
 const mockStatusEvent: EvaluationStatusEvent = {
@@ -179,8 +195,8 @@ const mockStatusEvent: EvaluationStatusEvent = {
   activeAgents: ['market-research'],
   completedAgents: ['competitive-analysis'],
   failedAgents: [],
-  timestamp: new Date()
-};
+  timestamp: new Date(),
+}
 ```
 
 ### Authentication Tokens
@@ -192,6 +208,7 @@ const mockStatusEvent: EvaluationStatusEvent = {
 ## Test Scenarios Covered
 
 ### ✅ Functional Testing
+
 - [x] WebSocket connection establishment
 - [x] Authentication and authorization
 - [x] Event subscription and unsubscription
@@ -200,6 +217,7 @@ const mockStatusEvent: EvaluationStatusEvent = {
 - [x] Connection state management
 
 ### ✅ Resilience Testing
+
 - [x] Network interruption recovery
 - [x] Automatic reconnection
 - [x] Connection failure handling
@@ -208,6 +226,7 @@ const mockStatusEvent: EvaluationStatusEvent = {
 - [x] Resource cleanup on disconnect
 
 ### ✅ Performance Testing
+
 - [x] Concurrent connection handling
 - [x] Message throughput validation
 - [x] Latency measurement
@@ -216,6 +235,7 @@ const mockStatusEvent: EvaluationStatusEvent = {
 - [x] Resource utilization tracking
 
 ### ✅ Security Testing
+
 - [x] Invalid authentication rejection
 - [x] Token expiration handling
 - [x] Secure connection establishment
@@ -291,6 +311,7 @@ When updating performance benchmarks:
 ### Test Reports
 
 Test results include:
+
 - Connection performance metrics
 - Message throughput statistics
 - Memory usage reports
@@ -302,8 +323,10 @@ Test results include:
 ### Common Test Environment Issues
 
 1. **Port Conflicts**: Ensure test server ports (3000, 5432, 6379) are available
-2. **Service Dependencies**: Start required services (PostgreSQL, Redis) before tests
-3. **Authentication**: Verify test tokens are configured correctly in test environment
+2. **Service Dependencies**: Start required services (PostgreSQL, Redis) before
+   tests
+3. **Authentication**: Verify test tokens are configured correctly in test
+   environment
 4. **Network Settings**: Check firewall settings for WebSocket connections
 5. **Resource Limits**: Ensure sufficient memory for concurrent connection tests
 
@@ -319,18 +342,21 @@ Test results include:
 All tests must pass with the following criteria:
 
 ### ✅ Integration Tests (100% Pass Rate)
+
 - Connection establishment: < 5 second average
 - Message delivery: 100% success rate
 - Reconnection: < 10 second recovery time
 - Resource cleanup: No memory leaks detected
 
 ### ✅ Performance Tests (Benchmark Achievement)
+
 - Concurrent connections: 50+ simultaneous
 - Message throughput: 50+ messages/second
 - Memory efficiency: < 50MB increase under load
 - Zero message loss under normal conditions
 
 ### ✅ Security Tests (100% Pass Rate)
+
 - Authentication validation: All invalid tokens rejected
 - Authorization enforcement: Proper access control
 - Secure connections: TLS/WSS in production environment
@@ -338,6 +364,7 @@ All tests must pass with the following criteria:
 ## Future Enhancements
 
 Planned test improvements:
+
 - [ ] Browser-based WebSocket testing with Playwright
 - [ ] Cross-platform compatibility testing
 - [ ] WebSocket protocol version testing

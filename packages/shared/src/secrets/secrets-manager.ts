@@ -2,79 +2,105 @@
  * AWS Secrets Manager integration for secure credential storage
  */
 
-import { SecretsManagerClient, GetSecretValueCommand, PutSecretValueCommand, CreateSecretCommand } from '@aws-sdk/client-secrets-manager';
-import { ExternalServiceCredentials, SecretsManagerConfig, OpenAICredentials, AnthropicCredentials, AWSCredentials } from '../types/credentials.js';
+import {
+  SecretsManagerClient,
+  GetSecretValueCommand,
+  PutSecretValueCommand,
+  CreateSecretCommand,
+} from '@aws-sdk/client-secrets-manager'
+import {
+  ExternalServiceCredentials,
+  SecretsManagerConfig,
+  OpenAICredentials,
+  AnthropicCredentials,
+  AWSCredentials,
+} from '../types/credentials.js'
 
 export class SecretsManager {
-  private client: SecretsManagerClient;
-  private config: SecretsManagerConfig;
+  private client: SecretsManagerClient
+  private config: SecretsManagerConfig
 
   constructor(config: SecretsManagerConfig) {
-    this.config = config;
-    this.client = new SecretsManagerClient({ 
-      region: config.region 
-    });
+    this.config = config
+    this.client = new SecretsManagerClient({
+      region: config.region,
+    })
   }
 
   /**
    * Retrieve credentials from AWS Secrets Manager
    */
-  async getCredentials(service: keyof ExternalServiceCredentials): Promise<ExternalServiceCredentials[typeof service]> {
+  async getCredentials(
+    service: keyof ExternalServiceCredentials
+  ): Promise<ExternalServiceCredentials[typeof service]> {
     try {
-      const secretName = this.config.secretNames[service];
+      const secretName = this.config.secretNames[service]
       const command = new GetSecretValueCommand({
-        SecretId: secretName
-      });
+        SecretId: secretName,
+      })
 
-      const response = await this.client.send(command);
-      
+      const response = await this.client.send(command)
+
       if (!response.SecretString) {
-        throw new Error(`No secret string found for ${service}`);
+        throw new Error(`No secret string found for ${service}`)
       }
 
-      return JSON.parse(response.SecretString);
+      return JSON.parse(response.SecretString)
     } catch (error) {
-      throw new Error(`Failed to retrieve ${service} credentials: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to retrieve ${service} credentials: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
   /**
    * Store credentials in AWS Secrets Manager
    */
-  async putCredentials(service: keyof ExternalServiceCredentials, credentials: ExternalServiceCredentials[typeof service]): Promise<void> {
+  async putCredentials(
+    service: keyof ExternalServiceCredentials,
+    credentials: ExternalServiceCredentials[typeof service]
+  ): Promise<void> {
     try {
-      const secretName = this.config.secretNames[service];
+      const secretName = this.config.secretNames[service]
       const command = new PutSecretValueCommand({
         SecretId: secretName,
-        SecretString: JSON.stringify(credentials)
-      });
+        SecretString: JSON.stringify(credentials),
+      })
 
-      await this.client.send(command);
+      await this.client.send(command)
     } catch (error) {
-      throw new Error(`Failed to store ${service} credentials: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to store ${service} credentials: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
   /**
    * Create a new secret in AWS Secrets Manager
    */
-  async createSecret(service: keyof ExternalServiceCredentials, credentials: ExternalServiceCredentials[typeof service], description?: string): Promise<void> {
+  async createSecret(
+    service: keyof ExternalServiceCredentials,
+    credentials: ExternalServiceCredentials[typeof service],
+    description?: string
+  ): Promise<void> {
     try {
-      const secretName = this.config.secretNames[service];
+      const secretName = this.config.secretNames[service]
       const command = new CreateSecretCommand({
         Name: secretName,
         SecretString: JSON.stringify(credentials),
-        Description: description || `Credentials for ${service} service`
-      });
+        Description: description || `Credentials for ${service} service`,
+      })
 
-      await this.client.send(command);
+      await this.client.send(command)
     } catch (error) {
       if (error instanceof Error && error.name === 'ResourceExistsException') {
         // Secret already exists, update it instead
-        await this.putCredentials(service, credentials);
-        return;
+        await this.putCredentials(service, credentials)
+        return
       }
-      throw new Error(`Failed to create ${service} secret: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to create ${service} secret: ${error instanceof Error ? error.message : 'Unknown error'}`
+      )
     }
   }
 
@@ -85,13 +111,13 @@ export class SecretsManager {
     const [openai, anthropic, aws] = await Promise.all([
       this.getCredentials('openai'),
       this.getCredentials('anthropic'),
-      this.getCredentials('aws')
-    ]);
+      this.getCredentials('aws'),
+    ])
 
     return {
       openai: openai as OpenAICredentials,
       anthropic: anthropic as AnthropicCredentials,
-      aws: aws as AWSCredentials
-    };
+      aws: aws as AWSCredentials,
+    }
   }
 }

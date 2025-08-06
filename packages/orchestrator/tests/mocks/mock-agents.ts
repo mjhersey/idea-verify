@@ -2,43 +2,39 @@
  * Mock Agent Implementations - Comprehensive mocks for testing multi-agent workflows
  */
 
-import { BaseAgent } from '../../src/agents/types.js';
-import { AgentType } from '@ai-validation/shared';
+import { BaseAgent } from '../../src/agents/types.js'
+import { AgentType } from '@ai-validation/shared'
 
 export interface MockAgentConfig {
-  executionTime?: number;
-  failureRate?: number;
-  score?: number;
-  confidence?: 'high' | 'medium' | 'low';
-  customInsights?: string[];
-  customRecommendations?: string[];
+  executionTime?: number
+  failureRate?: number
+  score?: number
+  confidence?: 'high' | 'medium' | 'low'
+  customInsights?: string[]
+  customRecommendations?: string[]
   resourceUsage?: {
-    cpu?: number;
-    memory?: number;
-    responseTime?: number;
-  };
-  healthStatus?: 'healthy' | 'degraded' | 'unhealthy';
+    cpu?: number
+    memory?: number
+    responseTime?: number
+  }
+  healthStatus?: 'healthy' | 'degraded' | 'unhealthy'
 }
 
 /**
  * Base Mock Agent - Configurable mock agent with realistic behavior simulation
  */
 export class MockAgent extends BaseAgent {
-  protected agentType: AgentType;
-  protected dependencies: AgentType[];
-  protected config: MockAgentConfig;
-  protected initialized: boolean = false;
-  protected executionCount: number = 0;
-  protected lastExecution?: Date;
+  protected agentType: AgentType
+  protected dependencies: AgentType[]
+  protected config: MockAgentConfig
+  protected initialized: boolean = false
+  protected executionCount: number = 0
+  protected lastExecution?: Date
 
-  constructor(
-    type: AgentType,
-    dependencies: AgentType[] = [],
-    config: MockAgentConfig = {}
-  ) {
-    super();
-    this.agentType = type;
-    this.dependencies = dependencies;
+  constructor(type: AgentType, dependencies: AgentType[] = [], config: MockAgentConfig = {}) {
+    super()
+    this.agentType = type
+    this.dependencies = dependencies
     this.config = {
       executionTime: 1000,
       failureRate: 0,
@@ -47,19 +43,19 @@ export class MockAgent extends BaseAgent {
       resourceUsage: {
         cpu: 0.3,
         memory: 0.4,
-        responseTime: 1000
+        responseTime: 1000,
       },
       healthStatus: 'healthy',
-      ...config
-    };
+      ...config,
+    }
   }
 
   getName(): string {
-    return `Mock ${this.agentType} Agent`;
+    return `Mock ${this.agentType} Agent`
   }
 
   getDescription(): string {
-    return `Mock implementation of ${this.agentType} agent for testing purposes`;
+    return `Mock implementation of ${this.agentType} agent for testing purposes`
   }
 
   getCapabilities() {
@@ -68,38 +64,38 @@ export class MockAgent extends BaseAgent {
       version: '1.0.0-mock',
       dependencies: this.dependencies,
       provides: [`${this.agentType}-analysis`, `${this.agentType}-insights`],
-      requires: this.dependencies.map(dep => `${dep}-data`)
-    };
+      requires: this.dependencies.map(dep => `${dep}-data`),
+    }
   }
 
   async initialize(): Promise<void> {
     if (this.initialized) {
-      return;
+      return
     }
 
     // Simulate initialization time
-    await new Promise(resolve => setTimeout(resolve, 100));
-    this.initialized = true;
+    await new Promise(resolve => setTimeout(resolve, 100))
+    this.initialized = true
   }
 
   async cleanup(): Promise<void> {
     if (!this.initialized) {
-      return;
+      return
     }
 
     // Simulate cleanup time
-    await new Promise(resolve => setTimeout(resolve, 50));
-    this.initialized = false;
+    await new Promise(resolve => setTimeout(resolve, 50))
+    this.initialized = false
   }
 
   async healthCheck() {
-    const currentTime = new Date();
-    const resourceUsage = this.config.resourceUsage!;
-    
+    const currentTime = new Date()
+    const resourceUsage = this.config.resourceUsage!
+
     // Add some variability to resource usage
-    const cpuVariance = (Math.random() - 0.5) * 0.1;
-    const memoryVariance = (Math.random() - 0.5) * 0.1;
-    const responseTimeVariance = (Math.random() - 0.5) * 200;
+    const cpuVariance = (Math.random() - 0.5) * 0.1
+    const memoryVariance = (Math.random() - 0.5) * 0.1
+    const responseTimeVariance = (Math.random() - 0.5) * 200
 
     return {
       agentType: this.agentType,
@@ -109,40 +105,41 @@ export class MockAgent extends BaseAgent {
       resourceUsage: {
         cpu: Math.max(0, Math.min(1, resourceUsage.cpu! + cpuVariance)),
         memory: Math.max(0, Math.min(1, resourceUsage.memory! + memoryVariance)),
-        responseTime: Math.max(100, resourceUsage.responseTime! + responseTimeVariance)
+        responseTime: Math.max(100, resourceUsage.responseTime! + responseTimeVariance),
       },
       healthStatus: this.config.healthStatus || 'healthy',
-      capabilities: this.getCapabilities()
-    };
+      capabilities: this.getCapabilities(),
+    }
   }
 
   async execute(request: any, context: any) {
     if (!this.initialized) {
-      throw new Error(`${this.agentType} agent not initialized`);
+      throw new Error(`${this.agentType} agent not initialized`)
     }
 
-    this.executionCount++;
-    this.lastExecution = new Date();
+    this.executionCount++
+    this.lastExecution = new Date()
 
     // Simulate execution time
-    await new Promise(resolve => setTimeout(resolve, this.config.executionTime));
+    await new Promise(resolve => setTimeout(resolve, this.config.executionTime))
 
     // Simulate failures based on failure rate
     if (Math.random() < this.config.failureRate!) {
-      throw new Error(`Simulated failure in ${this.agentType} agent (execution #${this.executionCount})`);
+      throw new Error(
+        `Simulated failure in ${this.agentType} agent (execution #${this.executionCount})`
+      )
     }
 
     // Generate response based on agent type and configuration
-    const baseScore = this.config.score || 75;
-    const scoreVariance = (Math.random() - 0.5) * 10;
-    const finalScore = Math.max(0, Math.min(100, Math.round(baseScore + scoreVariance)));
+    const baseScore = this.config.score || 75
+    const scoreVariance = (Math.random() - 0.5) * 10
+    const finalScore = Math.max(0, Math.min(100, Math.round(baseScore + scoreVariance)))
 
-    const confidence = this.config.confidence || (
-      finalScore > 85 ? 'high' : finalScore > 65 ? 'medium' : 'low'
-    );
+    const confidence =
+      this.config.confidence || (finalScore > 85 ? 'high' : finalScore > 65 ? 'medium' : 'low')
 
-    const insights = this.config.customInsights || this.generateInsights();
-    const recommendations = this.config.customRecommendations || this.generateRecommendations();
+    const insights = this.config.customInsights || this.generateInsights()
+    const recommendations = this.config.customRecommendations || this.generateRecommendations()
 
     return {
       score: finalScore,
@@ -157,10 +154,10 @@ export class MockAgent extends BaseAgent {
         dependencies: this.dependencies,
         tokensUsed: Math.floor(Math.random() * 1000) + 500,
         apiCalls: Math.floor(Math.random() * 5) + 1,
-        cacheHits: Math.floor(Math.random() * 3)
+        cacheHits: Math.floor(Math.random() * 3),
       },
-      rawData: this.generateRawData(request, context)
-    };
+      rawData: this.generateRawData(request, context),
+    }
   }
 
   protected generateInsights(): string[] {
@@ -168,10 +165,10 @@ export class MockAgent extends BaseAgent {
       `${this.agentType} analysis completed successfully`,
       `Key finding from ${this.agentType} evaluation`,
       `${this.agentType} data shows positive indicators`,
-      `Analysis reveals important ${this.agentType} considerations`
-    ];
+      `Analysis reveals important ${this.agentType} considerations`,
+    ]
 
-    return baseInsights.slice(0, Math.floor(Math.random() * 3) + 2);
+    return baseInsights.slice(0, Math.floor(Math.random() * 3) + 2)
   }
 
   protected generateRecommendations(): string[] {
@@ -179,10 +176,10 @@ export class MockAgent extends BaseAgent {
       `Primary recommendation from ${this.agentType} analysis`,
       `Consider ${this.agentType} optimization strategies`,
       `Focus on ${this.agentType} improvements`,
-      `Implement ${this.agentType} best practices`
-    ];
+      `Implement ${this.agentType} best practices`,
+    ]
 
-    return baseRecommendations.slice(0, Math.floor(Math.random() * 2) + 1);
+    return baseRecommendations.slice(0, Math.floor(Math.random() * 2) + 1)
   }
 
   protected generateRawData(request: any, context: any): any {
@@ -193,43 +190,46 @@ export class MockAgent extends BaseAgent {
       evaluationId: context?.evaluationId,
       timestamp: new Date().toISOString(),
       executionCount: this.executionCount,
-      dependencyData: this.dependencies.reduce((acc, dep) => {
-        acc[dep] = {
-          available: true,
-          score: Math.random() * 100,
-          processed: true
-        };
-        return acc;
-      }, {} as Record<string, any>),
+      dependencyData: this.dependencies.reduce(
+        (acc, dep) => {
+          acc[dep] = {
+            available: true,
+            score: Math.random() * 100,
+            processed: true,
+          }
+          return acc
+        },
+        {} as Record<string, any>
+      ),
       mockData: {
         version: '1.0.0-mock',
         simulatedResults: true,
-        randomSeed: Math.random()
-      }
-    };
+        randomSeed: Math.random(),
+      },
+    }
   }
 
   // Test utilities
   getExecutionCount(): number {
-    return this.executionCount;
+    return this.executionCount
   }
 
   getLastExecution(): Date | undefined {
-    return this.lastExecution;
+    return this.lastExecution
   }
 
   isInitialized(): boolean {
-    return this.initialized;
+    return this.initialized
   }
 
   updateConfig(newConfig: Partial<MockAgentConfig>): void {
-    this.config = { ...this.config, ...newConfig };
+    this.config = { ...this.config, ...newConfig }
   }
 
   reset(): void {
-    this.initialized = false;
-    this.executionCount = 0;
-    this.lastExecution = undefined;
+    this.initialized = false
+    this.executionCount = 0
+    this.lastExecution = undefined
   }
 }
 
@@ -243,8 +243,8 @@ export class MockMarketResearchAgent extends MockAgent {
       executionTime: 1200,
       score: 82,
       confidence: 'high',
-      ...config
-    });
+      ...config,
+    })
   }
 
   protected generateInsights(): string[] {
@@ -252,16 +252,16 @@ export class MockMarketResearchAgent extends MockAgent {
       'Market opportunity identified in target segment',
       'Competitive landscape analysis shows favorable positioning',
       'Market trends indicate growing demand',
-      'Target customer base shows strong interest signals'
-    ];
+      'Target customer base shows strong interest signals',
+    ]
   }
 
   protected generateRecommendations(): string[] {
     return [
       'Focus on primary target market segment',
       'Leverage market timing advantages',
-      'Develop competitive differentiation strategy'
-    ];
+      'Develop competitive differentiation strategy',
+    ]
   }
 
   protected generateRawData(request: any, context: any): any {
@@ -272,9 +272,9 @@ export class MockMarketResearchAgent extends MockAgent {
         growthRate: Math.random() * 0.3 + 0.05,
         competitorCount: Math.floor(Math.random() * 20) + 5,
         marketSegments: ['enterprise', 'smb', 'consumer'],
-        trends: ['digitalization', 'automation', 'sustainability']
-      }
-    };
+        trends: ['digitalization', 'automation', 'sustainability'],
+      },
+    }
   }
 }
 
@@ -284,8 +284,8 @@ export class MockCompetitiveAnalysisAgent extends MockAgent {
       executionTime: 1500,
       score: 78,
       confidence: 'medium',
-      ...config
-    });
+      ...config,
+    })
   }
 
   protected generateInsights(): string[] {
@@ -293,8 +293,8 @@ export class MockCompetitiveAnalysisAgent extends MockAgent {
       'Competitive analysis reveals market gaps',
       'Key competitors identified with strategic positioning',
       'Differentiation opportunities discovered',
-      'Competitive advantages clearly defined'
-    ];
+      'Competitive advantages clearly defined',
+    ]
   }
 
   protected generateRawData(request: any, context: any): any {
@@ -305,9 +305,9 @@ export class MockCompetitiveAnalysisAgent extends MockAgent {
         indirectCompetitors: Math.floor(Math.random() * 15) + 10,
         competitorStrengths: ['brand recognition', 'market share', 'technology'],
         competitorWeaknesses: ['pricing', 'customer service', 'innovation'],
-        competitiveAdvantages: ['unique features', 'better pricing', 'superior technology']
-      }
-    };
+        competitiveAdvantages: ['unique features', 'better pricing', 'superior technology'],
+      },
+    }
   }
 }
 
@@ -317,8 +317,8 @@ export class MockCustomerResearchAgent extends MockAgent {
       executionTime: 1300,
       score: 85,
       confidence: 'high',
-      ...config
-    });
+      ...config,
+    })
   }
 
   protected generateInsights(): string[] {
@@ -326,8 +326,8 @@ export class MockCustomerResearchAgent extends MockAgent {
       'Customer validation shows strong product-market fit',
       'Target customer personas clearly defined',
       'Customer pain points thoroughly analyzed',
-      'Customer acquisition channels identified'
-    ];
+      'Customer acquisition channels identified',
+    ]
   }
 
   protected generateRawData(request: any, context: any): any {
@@ -338,9 +338,9 @@ export class MockCustomerResearchAgent extends MockAgent {
         customerSegments: ['early adopters', 'mainstream', 'laggards'],
         painPoints: ['time consuming', 'expensive', 'complex'],
         preferredChannels: ['online', 'mobile', 'in-person'],
-        willingnessToPayScale: Math.random() * 5 + 3
-      }
-    };
+        willingnessToPayScale: Math.random() * 5 + 3,
+      },
+    }
   }
 }
 
@@ -350,8 +350,8 @@ export class MockTechnicalFeasibilityAgent extends MockAgent {
       executionTime: 1800,
       score: 88,
       confidence: 'high',
-      ...config
-    });
+      ...config,
+    })
   }
 
   protected generateInsights(): string[] {
@@ -359,8 +359,8 @@ export class MockTechnicalFeasibilityAgent extends MockAgent {
       'Technical implementation is feasible with current technology',
       'Architecture design supports scalability requirements',
       'Technology stack evaluation shows optimal choices',
-      'Development timeline and resource requirements defined'
-    ];
+      'Development timeline and resource requirements defined',
+    ]
   }
 
   protected generateRawData(request: any, context: any): any {
@@ -371,9 +371,9 @@ export class MockTechnicalFeasibilityAgent extends MockAgent {
         developmentTime: Math.floor(Math.random() * 12) + 6,
         scalabilityScore: Math.random() * 40 + 60,
         complexityLevel: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)],
-        riskFactors: ['technology maturity', 'team expertise', 'third-party dependencies']
-      }
-    };
+        riskFactors: ['technology maturity', 'team expertise', 'third-party dependencies'],
+      },
+    }
   }
 }
 
@@ -383,8 +383,8 @@ export class MockFinancialAnalysisAgent extends MockAgent {
       executionTime: 2000,
       score: 79,
       confidence: 'medium',
-      ...config
-    });
+      ...config,
+    })
   }
 
   protected generateInsights(): string[] {
@@ -392,8 +392,8 @@ export class MockFinancialAnalysisAgent extends MockAgent {
       'Financial projections show positive ROI potential',
       'Revenue model analysis indicates strong viability',
       'Cost structure optimization opportunities identified',
-      'Funding requirements and timeline established'
-    ];
+      'Funding requirements and timeline established',
+    ]
   }
 
   protected generateRawData(request: any, context: any): any {
@@ -408,10 +408,10 @@ export class MockFinancialAnalysisAgent extends MockAgent {
         keyMetrics: {
           ltv: Math.floor(Math.random() * 5000) + 1000,
           cac: Math.floor(Math.random() * 500) + 100,
-          churnRate: Math.random() * 0.1 + 0.02
-        }
-      }
-    };
+          churnRate: Math.random() * 0.1 + 0.02,
+        },
+      },
+    }
   }
 }
 
@@ -424,8 +424,8 @@ export class MockSlowAgent extends MockAgent {
     super(agentType, [], {
       executionTime,
       score: 60,
-      confidence: 'low'
-    });
+      confidence: 'low',
+    })
   }
 }
 
@@ -435,8 +435,8 @@ export class MockFailingAgent extends MockAgent {
       executionTime: 500,
       failureRate,
       score: 30,
-      confidence: 'low'
-    });
+      confidence: 'low',
+    })
   }
 }
 
@@ -446,10 +446,10 @@ export class MockUnhealthyAgent extends MockAgent {
       healthStatus: 'unhealthy',
       resourceUsage: {
         cpu: 0.95,
-        memory: 0.90,
-        responseTime: 10000
-      }
-    });
+        memory: 0.9,
+        responseTime: 10000,
+      },
+    })
   }
 }
 
@@ -461,10 +461,10 @@ export class MockHighPerformanceAgent extends MockAgent {
       confidence: 'high',
       resourceUsage: {
         cpu: 0.15,
-        memory: 0.20,
-        responseTime: 300
-      }
-    });
+        memory: 0.2,
+        responseTime: 300,
+      },
+    })
   }
 }
 
@@ -478,8 +478,8 @@ export class MockAgentFactory {
       'competitive-analysis': new MockCompetitiveAnalysisAgent(),
       'customer-research': new MockCustomerResearchAgent(),
       'technical-feasibility': new MockTechnicalFeasibilityAgent(),
-      'financial-analysis': new MockFinancialAnalysisAgent()
-    };
+      'financial-analysis': new MockFinancialAnalysisAgent(),
+    }
   }
 
   static createHighPerformanceMockAgents(): Record<AgentType, MockAgent> {
@@ -488,13 +488,16 @@ export class MockAgentFactory {
       'competitive-analysis',
       'customer-research',
       'technical-feasibility',
-      'financial-analysis'
-    ];
+      'financial-analysis',
+    ]
 
-    return agentTypes.reduce((agents, type) => {
-      agents[type] = new MockHighPerformanceAgent(type);
-      return agents;
-    }, {} as Record<AgentType, MockAgent>);
+    return agentTypes.reduce(
+      (agents, type) => {
+        agents[type] = new MockHighPerformanceAgent(type)
+        return agents
+      },
+      {} as Record<AgentType, MockAgent>
+    )
   }
 
   static createUnreliableMockAgents(failureRate: number = 0.3): Record<AgentType, MockAgent> {
@@ -503,13 +506,16 @@ export class MockAgentFactory {
       'competitive-analysis',
       'customer-research',
       'technical-feasibility',
-      'financial-analysis'
-    ];
+      'financial-analysis',
+    ]
 
-    return agentTypes.reduce((agents, type) => {
-      agents[type] = new MockFailingAgent(type, failureRate);
-      return agents;
-    }, {} as Record<AgentType, MockAgent>);
+    return agentTypes.reduce(
+      (agents, type) => {
+        agents[type] = new MockFailingAgent(type, failureRate)
+        return agents
+      },
+      {} as Record<AgentType, MockAgent>
+    )
   }
 
   static createMixedPerformanceMockAgents(): Record<AgentType, MockAgent> {
@@ -518,8 +524,8 @@ export class MockAgentFactory {
       'competitive-analysis': new MockFailingAgent('competitive-analysis', 0.2),
       'customer-research': new MockAgent('customer-research', ['market-research']),
       'technical-feasibility': new MockSlowAgent('technical-feasibility', 5000),
-      'financial-analysis': new MockUnhealthyAgent('financial-analysis')
-    };
+      'financial-analysis': new MockUnhealthyAgent('financial-analysis'),
+    }
   }
 
   static createCustomMockAgent(
@@ -527,6 +533,6 @@ export class MockAgentFactory {
     dependencies: AgentType[] = [],
     config: MockAgentConfig = {}
   ): MockAgent {
-    return new MockAgent(agentType, dependencies, config);
+    return new MockAgent(agentType, dependencies, config)
   }
 }

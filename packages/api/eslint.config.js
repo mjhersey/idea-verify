@@ -1,6 +1,6 @@
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const sharedConfig = require('../shared/eslint.config.shared.js');
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+const sharedConfig = require('../shared/eslint.config.shared.js')
 
 export default [
   ...sharedConfig,
@@ -10,13 +10,16 @@ export default [
     rules: {
       // API-specific rules
       'no-console': 'off', // Allow console for server logging
-      '@typescript-eslint/no-unused-vars': ['error', { 
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_'
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
     },
   },
   {
     ignores: ['src/generated/**/*'],
   },
-];
+]

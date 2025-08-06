@@ -1,8 +1,10 @@
 # Epic 6: Advanced User Features (Post-MVP)
 
-**Epic Goal**: Enhance user experience with advanced features for power users and business expansion.
+**Epic Goal**: Enhance user experience with advanced features for power users
+and business expansion.
 
-**Post-MVP Timeline:** These features will be prioritized based on user feedback and business needs after MVP launch.
+**Post-MVP Timeline:** These features will be prioritized based on user feedback
+and business needs after MVP launch.
 
 ## Deferred Features Summary
 
@@ -54,10 +56,14 @@
 
 #### **Story 6.1: Enhanced Evaluation Management**
 
-- **Search & Filter**: Full-text search across idea descriptions, results, and tags
-- **Advanced Sorting**: By score, date, industry, recommendation, custom criteria
-- **Bulk Operations**: Select multiple evaluations for export, deletion, or comparison
-- **Custom Views**: Save filtered views for different use cases (e.g., "High Potential Ideas")
+- **Search & Filter**: Full-text search across idea descriptions, results, and
+  tags
+- **Advanced Sorting**: By score, date, industry, recommendation, custom
+  criteria
+- **Bulk Operations**: Select multiple evaluations for export, deletion, or
+  comparison
+- **Custom Views**: Save filtered views for different use cases (e.g., "High
+  Potential Ideas")
 
 #### **Story 6.2: Evaluation Analytics Dashboard**
 
@@ -86,7 +92,8 @@
 
 #### **Story 6.5: Advanced Idea Refinement**
 
-- **Side-by-Side Editor**: Original idea vs. refined version with real-time comparison
+- **Side-by-Side Editor**: Original idea vs. refined version with real-time
+  comparison
 - **Change Tracking**: Highlight what changed and potential impact
 - **AI-Assisted Refinement**: Specific suggestions based on weak areas
 - **Version History**: Complete audit trail of idea evolution
@@ -95,15 +102,17 @@
 
 - **Weakness-Specific Prompts**: Tailored questions based on low-scoring areas
 - **Market Research Integration**: Suggest specific research to address gaps
-- **Competitive Positioning**: Tools to differentiate from identified competitors
-- **Financial Model Builder**: Step-by-step financial planning based on evaluation
+- **Competitive Positioning**: Tools to differentiate from identified
+  competitors
+- **Financial Model Builder**: Step-by-step financial planning based on
+  evaluation
 
 ### Billing & Subscription Management
 
 #### **Story 6.7: Tiered Subscription System**
 
-**Free Tier (MVP)**: 5 evaluations/month, basic reports, email support
-**Pro Tier ($29/month)**: Unlimited evaluations, advanced analytics, priority support
+**Free Tier (MVP)**: 5 evaluations/month, basic reports, email support **Pro
+Tier ($29/month)**: Unlimited evaluations, advanced analytics, priority support
 **Enterprise Tier ($199/month)**: Team features, API access, custom integrations
 
 #### **Story 6.8: Advanced Billing Features**
@@ -125,8 +134,10 @@
 #### **Story 6.10: Personal Intelligence**
 
 - **User Pattern Analysis**: Identify user's strengths and blind spots
-- **Idea Archetype Recognition**: Classify user's tendency toward certain idea types
-- **Success Factor Analysis**: What characteristics correlate with user's highest-scoring ideas
+- **Idea Archetype Recognition**: Classify user's tendency toward certain idea
+  types
+- **Success Factor Analysis**: What characteristics correlate with user's
+  highest-scoring ideas
 - **Personalized Recommendations**: Suggest focus areas based on user history
 
 ---
@@ -188,7 +199,8 @@ Advanced features for power users and enterprise:
 
 ### Architecture Evolution
 
-- **Microservices Expansion**: Separate services for billing, analytics, notifications
+- **Microservices Expansion**: Separate services for billing, analytics,
+  notifications
 - **API-First Design**: Enable third-party integrations and mobile apps
 - **Data Pipeline**: ETL processes for advanced analytics and ML models
 - **Caching Strategy**: Redis for user preferences, computed analytics
@@ -213,10 +225,12 @@ Advanced features for power users and enterprise:
 
 ✅ **User retention improved** - 30% increase in monthly active users  
 ✅ **Revenue growth achieved** - 50% of active users convert to paid tiers  
-✅ **Feature adoption high** - 70% of paid users actively use advanced features  
+✅ **Feature adoption high** - 70% of paid users actively use advanced
+features  
 ✅ **User satisfaction maintained** - NPS score >50 despite added complexity  
 ✅ **Competitive differentiation** - Clear advantage over emerging competitors  
 ✅ **Enterprise readiness** - Team features and API access fully functional
 
-**Long-term Vision:**
-Transform from MVP validation tool to comprehensive entrepreneurial intelligence platform that guides users from idea conception through business launch and growth.
+**Long-term Vision:** Transform from MVP validation tool to comprehensive
+entrepreneurial intelligence platform that guides users from idea conception
+through business launch and growth.

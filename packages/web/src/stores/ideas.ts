@@ -28,7 +28,7 @@ export const useIdeasStore = defineStore('ideas', () => {
     total: 0,
     totalPages: 0,
     hasNext: false,
-    hasPrevious: false
+    hasPrevious: false,
   })
 
   // Getters
@@ -56,17 +56,17 @@ export const useIdeasStore = defineStore('ideas', () => {
       if (!validation.isValid) {
         return {
           success: false,
-          message: validation.errors.join('; ')
+          message: validation.errors.join('; '),
         }
       }
 
       // Submit idea
       const ideaResponse = await ideasService.submitIdea(data)
-      
+
       if (!ideaResponse.success) {
         return {
           success: false,
-          message: ideaResponse.message || 'Failed to submit idea'
+          message: ideaResponse.message || 'Failed to submit idea',
         }
       }
 
@@ -78,11 +78,11 @@ export const useIdeasStore = defineStore('ideas', () => {
 
       // Start evaluation if idea was created successfully
       let evaluationId: string | undefined
-      
+
       if (ideaResponse.data?.id) {
         try {
           const evaluationResponse = await evaluationService.submitEvaluation({
-            description: ideaResponse.data.description
+            description: ideaResponse.data.description,
           })
           if (evaluationResponse?.id) {
             evaluationId = evaluationResponse.id
@@ -97,18 +97,18 @@ export const useIdeasStore = defineStore('ideas', () => {
         success: true,
         message: 'Business idea submitted successfully!',
         ideaId: ideaResponse.data?.id,
-        evaluationId
+        evaluationId,
       }
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } }; message?: string };
+      const error = err as { response?: { data?: { message?: string } }; message?: string }
       console.error('Error submitting idea:', error)
-      
+
       const errorMessage = error.response?.data?.message || error.message || 'Failed to submit idea'
       error.value = errorMessage
-      
+
       return {
         success: false,
-        message: errorMessage
+        message: errorMessage,
       }
     } finally {
       isSubmitting.value = false
@@ -124,7 +124,7 @@ export const useIdeasStore = defineStore('ideas', () => {
       error.value = null
 
       const response = await ideasService.getUserIdeas(page, limit)
-      
+
       if (page === 1) {
         ideas.value = response.data
       } else {
@@ -133,7 +133,7 @@ export const useIdeasStore = defineStore('ideas', () => {
 
       pagination.value = response.pagination
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } }; message?: string };
+      const error = err as { response?: { data?: { message?: string } }; message?: string }
       console.error('Error fetching ideas:', error)
       error.value = error.message || 'Failed to fetch ideas'
     } finally {
@@ -154,7 +154,7 @@ export const useIdeasStore = defineStore('ideas', () => {
       error.value = null
 
       const idea = await ideasService.getIdeaById(id)
-      
+
       // Update local cache
       const existingIndex = ideas.value.findIndex(i => i.id === id)
       if (existingIndex >= 0) {
@@ -166,7 +166,7 @@ export const useIdeasStore = defineStore('ideas', () => {
       currentIdea.value = idea
       return idea
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } }; message?: string };
+      const error = err as { response?: { data?: { message?: string } }; message?: string }
       console.error('Error fetching idea:', error)
       error.value = error.message || 'Failed to fetch idea'
       throw error
@@ -201,7 +201,7 @@ export const useIdeasStore = defineStore('ideas', () => {
       total: 0,
       totalPages: 0,
       hasNext: false,
-      hasPrevious: false
+      hasPrevious: false,
     }
   }
 
@@ -213,12 +213,12 @@ export const useIdeasStore = defineStore('ideas', () => {
     isSubmitting,
     error,
     pagination,
-    
+
     // Getters
     getIdeaById,
     hasIdeas,
     recentIdeas,
-    
+
     // Actions
     submitIdea,
     fetchUserIdeas,
@@ -226,6 +226,6 @@ export const useIdeasStore = defineStore('ideas', () => {
     loadMoreIdeas,
     refreshIdeas,
     clearError,
-    reset
+    reset,
   }
 })

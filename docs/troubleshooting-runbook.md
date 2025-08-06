@@ -2,7 +2,9 @@
 
 ## Overview
 
-This runbook provides step-by-step troubleshooting procedures for common issues with external service integrations in the AI-Powered Business Idea Validation Platform.
+This runbook provides step-by-step troubleshooting procedures for common issues
+with external service integrations in the AI-Powered Business Idea Validation
+Platform.
 
 ## Quick Diagnostics
 
@@ -20,6 +22,7 @@ npm run test:integration     # Basic connectivity tests
 ### 1. Service Connection Failures
 
 #### Symptoms
+
 - ❌ API calls timing out
 - ❌ Connection refused errors
 - ❌ DNS resolution failures
@@ -44,12 +47,14 @@ ping api.anthropic.com
 #### Resolution
 
 **For Production Services:**
+
 1. Verify internet connectivity
 2. Check firewall/proxy settings
 3. Confirm service status on provider status pages
 4. Test from different network if possible
 
 **For Mock Services:**
+
 ```bash
 # Restart mock services
 npm run mock:restart
@@ -65,8 +70,9 @@ netstat -tulpn | grep :3002
 ### 2. Authentication Errors
 
 #### Symptoms
+
 - ❌ 401 Unauthorized responses
-- ❌ 403 Forbidden responses  
+- ❌ 403 Forbidden responses
 - ❌ Invalid API key messages
 
 #### Diagnostic Steps
@@ -91,11 +97,13 @@ curl -H "x-api-key: $ANTHROPIC_API_KEY" \
 #### Resolution
 
 **Check Credential Sources:**
+
 1. Environment variables (`.env` file)
 2. AWS Secrets Manager
 3. Command line environment
 
 **Common Fixes:**
+
 ```bash
 # Fix 1: Reload environment
 source .env
@@ -113,6 +121,7 @@ aws secretsmanager put-secret-value \
 ### 3. Rate Limiting Issues
 
 #### Symptoms
+
 - ❌ 429 Too Many Requests errors
 - ⚠️ Requests being delayed excessively
 - ⚠️ Quota alerts being triggered
@@ -133,14 +142,17 @@ grep "Retry-After" logs/application.log
 #### Resolution
 
 **Immediate Actions:**
+
 1. **Reduce Request Rate:**
+
    ```typescript
    // Increase delay between requests
-   const config = getServiceConfig('openai');
-   config.rateLimiting.baseDelayMs = 2000; // 2 seconds
+   const config = getServiceConfig('openai')
+   config.rateLimiting.baseDelayMs = 2000 // 2 seconds
    ```
 
 2. **Switch to Alternative Service:**
+
    ```bash
    # Enable fallback to Anthropic
    export ENABLE_FALLBACK=true
@@ -154,32 +166,36 @@ grep "Retry-After" logs/application.log
    ```
 
 **Long-term Solutions:**
+
 1. **Upgrade Service Tier:**
    - OpenAI: Spend $100+ and wait 7+ days for Tier 2
    - Anthropic: Contact support for tier upgrade
 
 2. **Implement Request Queuing:**
+
    ```typescript
    // Add to service configuration
    const queueConfig = {
      maxConcurrent: 5,
      queueSize: 100,
-     priorityLevels: 3
-   };
+     priorityLevels: 3,
+   }
    ```
 
 3. **Optimize Token Usage:**
+
    ```typescript
    // Reduce prompt size
-   const optimizedPrompt = truncatePrompt(prompt, maxTokens);
-   
+   const optimizedPrompt = truncatePrompt(prompt, maxTokens)
+
    // Use cheaper models for simple tasks
-   const model = complexity === 'simple' ? 'gpt-3.5-turbo' : 'gpt-4';
+   const model = complexity === 'simple' ? 'gpt-3.5-turbo' : 'gpt-4'
    ```
 
 ### 4. Quota Exhaustion
 
 #### Symptoms
+
 - 🚨 Cost alerts being triggered
 - 🚨 Monthly/daily limits reached
 - ❌ Service refusing requests due to quota
@@ -200,7 +216,9 @@ npm run monitor:quotas
 #### Resolution
 
 **Immediate Actions:**
+
 1. **Enable Mock Services:**
+
    ```bash
    export USE_MOCK_SERVICES=true
    npm run mock:start
@@ -208,24 +226,26 @@ npm run monitor:quotas
    ```
 
 2. **Implement Cost Controls:**
+
    ```typescript
    // Add stricter limits
    const emergencyConfig = {
-     dailyLimit: 500,  // Reduce by 50%
-     costLimit: 50,    // Reduce by 50%
-     alertThresholds: [25, 50, 75] // Earlier warnings
-   };
+     dailyLimit: 500, // Reduce by 50%
+     costLimit: 50, // Reduce by 50%
+     alertThresholds: [25, 50, 75], // Earlier warnings
+   }
    ```
 
 3. **Queue Non-Critical Requests:**
    ```typescript
    // Defer non-urgent requests
    if (priority === 'low' && quotaUsage > 80) {
-     return queueForLater(request);
+     return queueForLater(request)
    }
    ```
 
 **Long-term Solutions:**
+
 1. **Increase Budget Allocation**
 2. **Implement Better Caching**
 3. **Optimize Prompt Engineering**
@@ -234,6 +254,7 @@ npm run monitor:quotas
 ### 5. Mock Services Issues
 
 #### Symptoms
+
 - ❌ Mock services not starting
 - ❌ Port conflicts
 - ❌ Unrealistic responses from mocks
@@ -256,6 +277,7 @@ npm run mock:start  # Look for startup errors
 #### Resolution
 
 **Port Conflicts:**
+
 ```bash
 # Kill processes using required ports
 sudo lsof -t -i:3001 | xargs kill -9
@@ -267,6 +289,7 @@ npm run mock:restart
 ```
 
 **Service Configuration Issues:**
+
 ```bash
 # Reset mock service configuration
 rm -rf node_modules/@ai-validation/shared/dist
@@ -275,6 +298,7 @@ npm run mock:start
 ```
 
 **LocalStack Issues:**
+
 ```bash
 # Start LocalStack with Docker Compose
 docker-compose up localstack -d
@@ -286,6 +310,7 @@ curl http://localhost:4566/health
 ### 6. Integration Test Failures
 
 #### Symptoms
+
 - ❌ Integration tests failing
 - ❌ Inconsistent test results
 - ❌ Tests timing out
@@ -307,6 +332,7 @@ env | grep -E "(NODE_ENV|USE_MOCK|API_KEY)"
 #### Resolution
 
 **Test Environment Issues:**
+
 ```bash
 # Ensure proper test environment
 export NODE_ENV=test
@@ -318,6 +344,7 @@ npm run test:integration:full
 ```
 
 **Service Startup Issues:**
+
 ```bash
 # Manual service startup for debugging
 npm run mock:start
@@ -327,6 +354,7 @@ npm run mock:stop
 ```
 
 **Timeout Issues:**
+
 ```bash
 # Increase test timeout
 export TEST_TIMEOUT=60000
@@ -338,6 +366,7 @@ npm run test:integration
 ### Slow Response Times
 
 #### Symptoms
+
 - ⚠️ API calls taking >5 seconds
 - ⚠️ Health checks showing degraded status
 - ⚠️ User complaints about slow performance
@@ -359,32 +388,34 @@ grep "backoff" logs/application.log
 #### Resolution
 
 1. **Optimize API Calls:**
+
    ```typescript
    // Reduce token count
-   const maxTokens = 100; // Reduce for faster responses
-   
+   const maxTokens = 100 // Reduce for faster responses
+
    // Use streaming for long responses
    const stream = await openai.createChatCompletion({
-     model: "gpt-3.5-turbo",
+     model: 'gpt-3.5-turbo',
      messages: messages,
-     stream: true
-   });
+     stream: true,
+   })
    ```
 
 2. **Implement Caching:**
+
    ```typescript
    // Cache frequent requests
-   const cache = new Map();
-   const cacheKey = hashRequest(request);
+   const cache = new Map()
+   const cacheKey = hashRequest(request)
    if (cache.has(cacheKey)) {
-     return cache.get(cacheKey);
+     return cache.get(cacheKey)
    }
    ```
 
 3. **Use Faster Models:**
    ```typescript
    // Switch to faster, cheaper models
-   const model = urgency === 'high' ? 'gpt-3.5-turbo' : 'gpt-4';
+   const model = urgency === 'high' ? 'gpt-3.5-turbo' : 'gpt-4'
    ```
 
 ## Service-Specific Issues
@@ -392,12 +423,14 @@ grep "backoff" logs/application.log
 ### OpenAI Issues
 
 **Common Error Codes:**
+
 - `401`: Invalid API key
-- `429`: Rate limit exceeded  
+- `429`: Rate limit exceeded
 - `500`: OpenAI server error
 - `503`: OpenAI service unavailable
 
 **Specific Troubleshooting:**
+
 ```bash
 # Check OpenAI service status
 curl https://status.openai.com/api/v2/status.json
@@ -410,12 +443,14 @@ curl -H "Authorization: Bearer $OPENAI_API_KEY" \
 ### Anthropic Issues
 
 **Common Error Codes:**
+
 - `401`: Invalid API key
 - `429`: Rate limit exceeded
 - `400`: Invalid request format
 - `500`: Anthropic server error
 
 **Specific Troubleshooting:**
+
 ```bash
 # Test with minimal request
 curl -X POST https://api.anthropic.com/v1/messages \
@@ -432,11 +467,13 @@ curl -X POST https://api.anthropic.com/v1/messages \
 ### AWS Issues
 
 **Common Issues:**
+
 - IAM permission errors
 - Secrets Manager access denied
 - Region configuration issues
 
 **Specific Troubleshooting:**
+
 ```bash
 # Check AWS credentials
 aws sts get-caller-identity
@@ -455,30 +492,33 @@ aws iam list-attached-user-policies --user-name your-user
 ### Service Outage Response
 
 1. **Immediate Actions (< 5 minutes):**
+
    ```bash
    # Switch to mock services
    export USE_MOCK_SERVICES=true
    npm run mock:start
-   
+
    # Notify users of degraded service
    echo "Service temporarily degraded - using backup systems"
    ```
 
 2. **Short-term Actions (< 30 minutes):**
+
    ```bash
    # Enable alternative service
    export ENABLE_FALLBACK=true
    npm run validate:credentials
-   
+
    # Monitor service recovery
    watch -n 30 'curl -s https://status.openai.com/api/v2/status.json'
    ```
 
 3. **Recovery Actions:**
+
    ```bash
    # Test service recovery
    npm run test:integration -- --real-services
-   
+
    # Gradually switch back
    export USE_MOCK_SERVICES=false
    npm run validate:credentials
@@ -487,12 +527,13 @@ aws iam list-attached-user-policies --user-name your-user
 ### Data Loss Prevention
 
 1. **Enable Request Logging:**
+
    ```typescript
    const logger = new RequestLogger({
      logRequests: true,
      logResponses: true,
-     retentionDays: 7
-   });
+     retentionDays: 7,
+   })
    ```
 
 2. **Implement Backup Storage:**
@@ -502,8 +543,8 @@ aws iam list-attached-user-policies --user-name your-user
      timestamp: Date.now(),
      service: 'openai',
      request: sanitizeRequest(request),
-     response: sanitizeResponse(response)
-   });
+     response: sanitizeResponse(response),
+   })
    ```
 
 ## Escalation Procedures
@@ -528,16 +569,19 @@ aws iam list-attached-user-policies --user-name your-user
 ### External Escalation
 
 **OpenAI Support:**
+
 - Email: support@openai.com
 - Priority support for paid tiers
 - Status page: https://status.openai.com
 
 **Anthropic Support:**
-- Email: support@anthropic.com  
+
+- Email: support@anthropic.com
 - Enterprise support available
 - Status updates via Twitter: @AnthropicAI
 
 **AWS Support:**
+
 - Console: AWS Support Center
 - Phone support for paid tiers
 - Technical Account Manager (Enterprise)
@@ -551,8 +595,8 @@ const criticalMetrics = {
   responseTime: { threshold: 5000, unit: 'ms' },
   errorRate: { threshold: 5, unit: 'percent' },
   quotaUsage: { threshold: 90, unit: 'percent' },
-  costBurn: { threshold: 80, unit: 'percent' }
-};
+  costBurn: { threshold: 80, unit: 'percent' },
+}
 ```
 
 ### Alert Thresholds
@@ -561,15 +605,15 @@ const criticalMetrics = {
 const alertLevels = {
   warning: {
     responseTime: 2000, // 2 seconds
-    errorRate: 2,       // 2%
-    quotaUsage: 75      // 75%
+    errorRate: 2, // 2%
+    quotaUsage: 75, // 75%
   },
   critical: {
-    responseTime: 5000, // 5 seconds  
-    errorRate: 5,       // 5%
-    quotaUsage: 90      // 90%
-  }
-};
+    responseTime: 5000, // 5 seconds
+    errorRate: 5, // 5%
+    quotaUsage: 90, // 90%
+  },
+}
 ```
 
 ## Maintenance Procedures
@@ -577,16 +621,19 @@ const alertLevels = {
 ### Regular Maintenance Tasks
 
 **Daily:**
+
 - Review error logs
 - Check quota usage
 - Validate service health
 
 **Weekly:**
+
 - Review performance metrics
 - Update rate limit configurations
 - Test fallback procedures
 
 **Monthly:**
+
 - Rotate API credentials
 - Review cost optimization
 - Update service configurations
@@ -609,7 +656,7 @@ npm run validate:credentials
 
 ---
 
-*Last updated: January 2025*
-*Version: 1.0*
+_Last updated: January 2025_ _Version: 1.0_
 
-For additional support, contact the development team or refer to the [External Service Integration Guide](./external-service-integration-guide.md).
+For additional support, contact the development team or refer to the
+[External Service Integration Guide](./external-service-integration-guide.md).

@@ -1,6 +1,6 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import HomeView from '../views/HomeView.vue';
-import { globalGuard } from './guards';
+import { createRouter, createWebHistory } from 'vue-router'
+import HomeView from '../views/HomeView.vue'
+import { globalGuard } from './guards'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -10,8 +10,8 @@ const router = createRouter({
       name: 'home',
       component: HomeView,
       meta: {
-        title: 'Home'
-      }
+        title: 'Home',
+      },
     },
     {
       path: '/login',
@@ -19,8 +19,8 @@ const router = createRouter({
       component: () => import('../views/LoginView.vue'),
       meta: {
         requiresGuest: true,
-        title: 'Login'
-      }
+        title: 'Login',
+      },
     },
     {
       path: '/register',
@@ -28,8 +28,8 @@ const router = createRouter({
       component: () => import('../views/RegisterView.vue'),
       meta: {
         requiresGuest: true,
-        title: 'Register'
-      }
+        title: 'Register',
+      },
     },
     {
       path: '/dashboard',
@@ -37,8 +37,8 @@ const router = createRouter({
       component: () => import('../views/DashboardView.vue'),
       meta: {
         requiresAuth: true,
-        title: 'Dashboard'
-      }
+        title: 'Dashboard',
+      },
     },
     {
       path: '/evaluation',
@@ -46,8 +46,8 @@ const router = createRouter({
       component: () => import('../views/EvaluationView.vue'),
       meta: {
         requiresAuth: true,
-        title: 'Evaluation'
-      }
+        title: 'Evaluation',
+      },
     },
     {
       path: '/evaluation/:id',
@@ -55,13 +55,13 @@ const router = createRouter({
       component: () => import('../views/EvaluationView.vue'),
       meta: {
         requiresAuth: true,
-        title: 'Evaluation Results'
-      }
-    }
-  ]
-});
+        title: 'Evaluation Results',
+      },
+    },
+  ],
+})
 
 // Apply global guard
-router.beforeEach(globalGuard);
+router.beforeEach(globalGuard)
 
-export default router;
+export default router
