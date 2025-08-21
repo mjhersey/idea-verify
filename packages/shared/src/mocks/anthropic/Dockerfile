@@ -1,15 +1,13 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
 # Copy package files
-COPY packages/shared/package.json ./
-COPY packages/shared/package-lock.json* ./
+COPY packages/shared/src/mocks/anthropic/package.json ./
 
-# Install dependencies  
-RUN npm ci --only=production
+# No dependencies to install since the mock service uses pre-built JS
 
-# Copy source code
+# Copy pre-built source code
 COPY packages/shared/dist ./dist/
 
 # Create standalone server script

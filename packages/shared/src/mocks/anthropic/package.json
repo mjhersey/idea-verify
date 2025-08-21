@@ -1,0 +1,10 @@
+{
+  "name": "mock-anthropic-service",
+  "version": "1.0.0",
+  "description": "Mock Anthropic API service",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}

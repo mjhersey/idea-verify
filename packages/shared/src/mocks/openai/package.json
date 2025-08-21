@@ -1,0 +1,10 @@
+{
+  "name": "mock-openai-service",
+  "version": "1.0.0",
+  "description": "Mock OpenAI API service",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}

@@ -1,8 +1,8 @@
 import { Server as HttpServer } from 'http'
-import { Server as SocketIOServer, Socket } from 'socket.io'
-import { authMiddleware } from './middleware/auth-middleware.js'
+import { Socket, Server as SocketIOServer } from 'socket.io'
 import { ConnectionManager } from './connection-manager.js'
 import { EventEmitter } from './event-emitter.js'
+import { authMiddleware } from './middleware/auth-middleware.js'
 import { WebSocketRateLimiter } from './rate-limiter.js'
 
 export class WebSocketServer {
@@ -10,6 +10,7 @@ export class WebSocketServer {
   private connectionManager: ConnectionManager
   private eventEmitter: EventEmitter
   private rateLimiter: WebSocketRateLimiter
+  private cleanupInterval: ReturnType<typeof setInterval> | null = null
 
   constructor(httpServer: HttpServer) {
     this.io = new SocketIOServer(httpServer, {
@@ -250,7 +251,7 @@ export class WebSocketServer {
 
   private startCleanupTimer(): void {
     // Clean up rate limiter data every 5 minutes
-    setInterval(
+    this.cleanupInterval = setInterval(
       () => {
         this.rateLimiter.cleanup()
       },
@@ -261,7 +262,14 @@ export class WebSocketServer {
   public shutdown(): void {
     console.log('[WebSocket] Shutting down WebSocket server')
     this.connectionManager.disconnectAll()
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval)
+      this.cleanupInterval = null
+    }
     this.io.close()
+    // Reset singleton so new servers can be initialized in tests or after restarts
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    webSocketServer = null
   }
 }
 
